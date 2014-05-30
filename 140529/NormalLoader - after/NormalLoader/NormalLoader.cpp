@@ -22,10 +22,14 @@ Matrix44 g_matLocal1;
 Matrix44 g_matView;
 Matrix44 g_matProjection;
 Matrix44 g_matViewPort;
-Vector3 g_cameraPos(0,500,-500);
+Vector3 g_cameraPos(0,300,-500);
 Vector3 g_cameraLookat(0,0,0);
 
+Matrix44 g_matLocal2;
 Matrix44 g_matWorld2;
+vector<Vector3> g_vertices2;
+vector<Vector3> g_normals2;
+vector<int> g_indices2;
 
 // 콜백 프로시져 함수 프로토 타입
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
@@ -199,8 +203,7 @@ void Init()
 	ReadModelFile("../../media/plane.dat", g_vertices, g_indices, g_normals);
 
 	g_matWorld1.SetTranslate(Vector3(0,0,0));
-	g_matWorld2.SetTranslate(Vector3(0,0,150));
-
+	g_matWorld1.SetScale(Vector3(3,3,3));
 
 	Vector3 dir = g_cameraLookat - g_cameraPos;
 	dir.Normalize();
@@ -223,6 +226,10 @@ void	MainLoop(int elapse_time)
 	//Matrix44 mat;
 	//mat.SetRotationY(elapse_time*0.0002f);
 	//g_matLocal1 *= mat;
+
+//	Matrix44 mapMoving;
+//	mapMoving.SetTranslate(Vector3(0,0,-5));
+//	g_matWorld1 *= mapMoving;
 
 	// Render
 	Render(g_hWnd);
@@ -335,8 +342,10 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> 
 	}*/
 	
 	Vector3 ground[3];
+	Matrix44 mapLoop;
+	float loopCount = 0.f;
 
-	for(int j=0; j<2; ++j)
+	for(int j=0; j<10; ++j)
 	{
 		for(unsigned int i=0; i<indices.size(); i+=3)
 		{
@@ -344,20 +353,18 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> 
 			ground[1] = vertices[ indices[ i+1]];
 			ground[2] = vertices[ indices[ i+2]];
 
-			ground[0] *= tm * vpv;
-			ground[1] *= tm * vpv;
-			ground[2] *= tm * vpv;
-
-			if(
-			ground[0].z += 100.f;
-			ground[1].z += 100.f;
-			ground[2].z += 100.f;
-				
-			Rasterizer::Color c0(0,0,255,1);
-			Rasterizer::DrawLine(hdc, c0, ground[0].x, ground[0].y, c0, ground[1].x, ground[1].y);
-			Rasterizer::DrawLine(hdc, c0, ground[1].x, ground[1].y, c0, ground[2].x, ground[2].y);
-			Rasterizer::DrawLine(hdc, c0, ground[2].x, ground[2].y, c0, ground[0].x, ground[0].y);
+			ground[0] *= tm * mapLoop * vpv;
+			ground[1] *= tm * mapLoop * vpv;
+			ground[2] *= tm * mapLoop * vpv;
+			
+				Rasterizer::Color c0(0,0,255,1);
+				Rasterizer::DrawLine(hdc, c0, ground[0].x, ground[0].y, c0, ground[1].x, ground[1].y);
+				Rasterizer::DrawLine(hdc, c0, ground[1].x, ground[1].y, c0, ground[2].x, ground[2].y);
+				Rasterizer::DrawLine(hdc, c0, ground[2].x, ground[2].y, c0, ground[0].x, ground[0].y);
+			
 		}
+		loopCount += 150.f;
+		mapLoop.SetTranslate(Vector3(0,0,loopCount));
 	}
 }
 
@@ -415,7 +422,6 @@ void Paint(HWND hWnd, HDC hdc)
 	//RenderIndices(hdcMem, g_vertices, g_indices, g_normals, g_matLocal1 * g_matWorld1,  vpv);
 
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld1, vpv);
-//	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld2, vpv);
 
 	BitBlt(hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
 	SelectObject(hdcMem, hbmOld);
