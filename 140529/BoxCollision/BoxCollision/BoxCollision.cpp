@@ -3,7 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <fstream>
-#include "../../math/Math.h"
+#include "../math/Math.h"
 #include "DrawTriangle.h"
 
 using namespace std;
@@ -19,28 +19,20 @@ vector<Vector3> g_normals;
 vector<int> g_indices;
 Matrix44 g_matWorld1;
 Matrix44 g_matLocal1;
+
+Matrix44 g_matWorld2;
+Matrix44 g_matLocal2;
+
 Matrix44 g_matView;
 Matrix44 g_matProjection;
 Matrix44 g_matViewPort;
-Vector3 g_cameraPos(0,200,-300);
-Vector3 g_cameraLookat(0,0,100);
+Vector3 g_cameraPos(0,1000,-1000);
+Vector3 g_cameraLookat(0,0,0);
 
-//바닥 자료
-Matrix44 g_matWorld11;
+Box g_box1;
+Box g_box2;
+bool g_isCollision = false;
 
-//캐릭터 자료
-Matrix44 g_matLocal2;
-Matrix44 g_matWorld2;
-vector<Vector3> g_vertices2;
-vector<Vector3> g_normals2;
-vector<int> g_indices2;
-
-//장애물 자료
-vector<Vector3> g_vertices3;
-vector<Vector3> g_normals3;
-vector<int> g_indices3;
-Matrix44 g_matLocal3;
-Matrix44 g_matWorld3;
 
 // 콜백 프로시져 함수 프로토 타입
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
@@ -50,6 +42,8 @@ void	Render(HWND hWnd);
 void	Paint(HWND hWnd, HDC hdc);
 bool ReadModelFile( const string &fileName, vector<Vector3> &vertices, vector<int> &indices, 
 	vector<Vector3> &normals);
+void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT Vector3 &vMax);
+
 
 
 int APIENTRY WinMain(HINSTANCE hInstance, 
@@ -155,6 +149,7 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		Paint(hWnd, hdc);
 		EndPaint(hWnd, &ps);
 		break;
+
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -186,26 +181,17 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		case VK_DOWN:
 			{
 				Matrix44 mat;
-				mat.SetRotationX((wParam==VK_UP)? 0.1f : -0.1f);
-				g_matLocal1 *= mat;
+				mat.SetTranslate(Vector3(0, 0, (wParam==VK_UP)? 20.f : -20.f));
+				g_matWorld2  *= mat;
 			}
 			break;
 
 		case VK_LEFT:
-			{
-				Matrix44 control;
-				control.SetTranslate(Vector3(-3,0,0));
-				g_matWorld2 *= control;
-			}
-			break;
 		case VK_RIGHT:
 			{
-			/*	Matrix44 mat;
-				mat.SetRotationY((wParam==VK_LEFT)? 0.1f : -0.1f);
-				g_matLocal1 *= mat;*/
-				Matrix44 control;
-				control.SetTranslate(Vector3(3,0,0));
-				g_matWorld2 *= control;
+				Matrix44 mat;
+				mat.SetTranslate(Vector3((wParam==VK_LEFT)? -20.f : 20.f, 0, 0));
+				g_matWorld2  *= mat;
 			}
 			break;
 		}
@@ -220,21 +206,17 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
 void Init()
 {
-	ReadModelFile("../../media/plane.dat", g_vertices, g_indices, g_normals);  //바닥 불러오기
-	ReadModelFile("../../media/character.dat", g_vertices2, g_indices2, g_normals2);  //캐릭터 불러오기
-	ReadModelFile("../../media/obstacle.dat", g_vertices3, g_indices3, g_normals3);  //장애물 불러오기
+	ReadModelFile("../../media/cube_normal.dat", g_vertices, g_indices, g_normals);
 
-	//바닥 설정
-	g_matWorld1.SetTranslate(Vector3(0,0,0));
-	g_matWorld1.SetScale(Vector3(3,3,3));
-	g_matWorld11.SetTranslate(Vector3(0,0,700));
-	g_matWorld11.SetScale(Vector3(3,3,3));
+	
+	Vector3 vMin, vMax;
+	GetVerticesMinMax(g_vertices, vMin, vMax);
+	g_box1.SetBox(vMin, vMax);
+	g_box2.SetBox(vMin, vMax);
 
-	//캐릭터 설정
-	g_matWorld2.SetTranslate(Vector3(0,0,0));
+	g_matWorld1.SetTranslate(Vector3(-200,0,0));
+	g_matWorld2.SetTranslate(Vector3(200,0,0));
 
-	//장애물 설정
-	g_matWorld3.SetTranslate(Vector3(-100,0,1000));
 
 	Vector3 dir = g_cameraLookat - g_cameraPos;
 	dir.Normalize();
@@ -254,25 +236,13 @@ void Init()
  */
 void	MainLoop(int elapse_time)
 {
-	//Matrix44 mat;
-	//mat.SetRotationY(elapse_time*0.0002f);
-	//g_matLocal1 *= mat;
+	// collision Test
+	g_box1.SetWorldTM(g_matWorld1);
+	g_box1.Update();
+	g_box2.SetWorldTM(g_matWorld2);
+	g_box2.Update();
+	g_isCollision = g_box1.Collision(g_box2);
 
-//	Matrix44 mapMoving;
-//	mapMoving.SetTranslate(Vector3(0,0,-5));
-//	g_matWorld1 *= mapMoving;
-
-	//캐릭터 움직임
-	Matrix44 characterMoving;
-	characterMoving.SetTranslate(Vector3(0,0,10));
-	g_matWorld2 *= characterMoving;
-	
-	//카메라 움직임
-	g_cameraPos *= characterMoving;
-	g_cameraLookat *= characterMoving;
-	Vector3 direction = g_cameraLookat - g_cameraPos;
-	direction.Normalize();
-	g_matView.SetView(g_cameraPos, direction, Vector3(0,1,0));
 
 	// Render
 	Render(g_hWnd);
@@ -366,62 +336,87 @@ bool ReadModelFile( const string &fileName, vector<Vector3> &vertices, vector<in
 		}
 	}
 
-
 	return true;
 }
 
 
-void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices,
-	const Matrix44 &tm, const Matrix44 &vpv, Matrix44& matWorld)
+// vertices의 최대,최소 정점위치를 리턴한다.
+void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT Vector3 &vMax)
 {
-	/*for (unsigned int i=0; i < vertices.size(); ++i)
+	vMax = Vector3(FLT_MIN, FLT_MIN, FLT_MIN);
+	vMin = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+
+	for (int i=0; i < (int)vertices.size(); ++i)
 	{
-		Vector3 p = vertices[ i] * tm * vpv;
+		const Vector3 &v = vertices[i];
+
+		if (vMax.x < v.x)
+			vMax.x = v.x;
+		if (vMax.y < v.y)
+			vMax.y = v.y;
+		if (vMax.z < v.z)
+			vMax.z = v.z;
+
+		if (vMin.x > v.x)
+			vMin.x = v.x;
+		if (vMin.y > v.y)
+			vMin.y = v.y;
+		if (vMin.z > v.z)
+			vMin.z = v.z;
+	}
+}
+
+
+void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const Matrix44 &tm)
+{
+	for (unsigned int i=0; i < vertices.size(); ++i)
+	{
+		Vector3 p = vertices[ i] * tm;
 
 		if (0 == i)
 			MoveToEx(hdc, (int)p.x, (int)p.y, NULL);
 		else
 			LineTo(hdc, (int)p.x, (int)p.y);
-	}*/
-	
-	Vector3 ground[3];
-	Matrix44 mapLoop;
-	float loopCount = 0.f;
+	}
+}
 
-	for(int j=0; j<2; ++j)
+
+void RenderIndicesWireFrame(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices, 
+	vector<Vector3> &normals,
+	const Matrix44 &tm, const Matrix44 &vpv)
+{
+	Vector3 camDir = g_cameraLookat - g_cameraPos;
+	camDir.Normalize();
+
+	for (unsigned int i=0; i < indices.size(); i+=3)
 	{
-		for(unsigned int i=0; i<indices.size(); i+=3)
-		{
-			ground[0] = vertices[ indices[ i]];
-			ground[1] = vertices[ indices[ i+1]];
-			ground[2] = vertices[ indices[ i+2]];
+		Vector3 p1 = vertices[ indices[ i]];
+		Vector3 p2 = vertices[ indices[ i+1]];
+		Vector3 p3 = vertices[ indices[ i+2]];
 
-			ground[0] *= tm * mapLoop;
-			ground[1] *= tm * mapLoop;
-			ground[2] *= tm * mapLoop;
+		p1 = p1 * tm;
+		p2 = p2 * tm;
+		p3 = p3 * tm;
 
-			if(g_cameraPos.z + 200 < ground[2].z)
-			{
-				ground[0] *= vpv;
-				ground[1] *= vpv;
-				ground[2] *= vpv;
-			
-				Rasterizer::Color c0(0,0,255,1);
-				Rasterizer::DrawLine(hdc, c0, ground[0].x, ground[0].y, c0, ground[1].x, ground[1].y);
-				Rasterizer::DrawLine(hdc, c0, ground[1].x, ground[1].y, c0, ground[2].x, ground[2].y);
-				Rasterizer::DrawLine(hdc, c0, ground[2].x, ground[2].y, c0, ground[0].x, ground[0].y);
-			}
-			else if(i == 30 && j == 1 && g_cameraPos.z > ground[2].z)
-			{
-				Matrix44 Test;
-				Test.SetTranslate(Vector3(0,0,1400));
-				
-				matWorld = matWorld * Test;
-			}
-		}  //for
-		loopCount += 350.f;
-		mapLoop.SetTranslate(Vector3(0,0,loopCount));
-	}  //for
+		// culling
+		Vector3 n1 = normals[ indices[i]].MultiplyNormal( tm );
+		Vector3 n2 = normals[ indices[i+1]].MultiplyNormal( tm );
+		Vector3 n3 = normals[ indices[i+2]].MultiplyNormal( tm );
+		const float dot1 = n1.DotProduct(camDir);
+		const float dot2 = n2.DotProduct(camDir);
+		const float dot3 = n3.DotProduct(camDir);
+		if ((dot1 > 0) && (dot2 > 0) && (dot3 > 0))
+			continue;
+
+		p1 = p1 * vpv;
+		p2 = p2 * vpv;
+		p3 = p3 * vpv;
+
+		Rasterizer::Color color(0,0,255,1);
+		Rasterizer::DrawLine(hdc, color, p1.x, p1.y, color, p2.x, p2.y );
+		Rasterizer::DrawLine(hdc, color, p2.x, p2.y, color, p3.x, p3.y );
+		Rasterizer::DrawLine(hdc, color, p3.x, p3.y, color, p1.x, p1.y );
+	}
 }
 
 
@@ -443,29 +438,50 @@ void RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &
 		p3 = p3 * tm;
 
 		// culling
-		Vector3 n = normals[ indices[ i]];
-		n = n.MultiplyNormal(tm);
-		if (n.DotProduct(camDir) > 0)
+		Vector3 n1 = normals[ indices[i]].MultiplyNormal( tm );
+		Vector3 n2 = normals[ indices[i+1]].MultiplyNormal( tm );
+		Vector3 n3 = normals[ indices[i+2]].MultiplyNormal( tm );
+		const float dot1 = n1.DotProduct(camDir);
+		const float dot2 = n2.DotProduct(camDir);
+		const float dot3 = n3.DotProduct(camDir);
+		if ((dot1 > 0) && (dot2 > 0) && (dot3 > 0))
 			continue;
 
 		p1 = p1 * vpv;
 		p2 = p2 * vpv;
 		p3 = p3 * vpv;
 
-		Rasterizer::Color c0(255,0,0,1);
-//		Vector3 lightDir(0,-1,0);
-		Rasterizer::DrawLine(hdc, c0, p1.x, p1.y, c0, p2.x, p2.y);
-		Rasterizer::DrawLine(hdc, c0, p2.x, p2.y, c0, p3.x, p3.y);
-		Rasterizer::DrawLine(hdc, c0, p3.x, p3.y, c0, p1.x, p1.y);
-//		Rasterizer::Color color = c0 * max(0, n.DotProduct(-lightDir));
-//		Rasterizer::DrawTriangle(hdc, color, p1.x, p1.y, color, p2.x, p2.y, color, p3.x, p3.y);
+		Rasterizer::Color c0(0,0,255,1);
+		Rasterizer::Color c1(255,255,255,1);
+		Vector3 lightDir(0,-1,0);
+		Vector3 H = -(camDir + lightDir);
+		H.Normalize();
+		Rasterizer::Color ambient(0,20,0,1);
+
+		Rasterizer::Color color1, color2, color3;
+		{
+			Rasterizer::Color diffuse = c0 * max(0, n1.DotProduct(-lightDir));
+			Rasterizer::Color specular = c1*pow(n1.DotProduct(H), 16);
+			color1 = ambient + diffuse + specular;
+		}
+		{
+			Rasterizer::Color diffuse = c0 * max(0, n2.DotProduct(-lightDir));
+			Rasterizer::Color specular = c1*pow(n2.DotProduct(H), 16);
+			color2 = ambient + diffuse + specular;
+		}
+		{
+			Rasterizer::Color diffuse = c0 * max(0, n3.DotProduct(-lightDir));
+			Rasterizer::Color specular = c1*pow(n3.DotProduct(H), 16);
+			color3 = ambient + diffuse + specular;
+		}
+
+		Rasterizer::DrawTriangle(hdc, 
+			color1, p1.x, p1.y,
+			color2, p2.x, p2.y,
+			color3, p3.x, p3.y);
 	}
 }
 
-void RenderObstacle(HDC memoryHDC, const vector<Vector3>& vertices, const vector<int>& indices, const Matrix44& tm, const Matrix44& vpv)
-{
-
-}
 
 /**
  @brief 
@@ -482,16 +498,22 @@ void Paint(HWND hWnd, HDC hdc)
 	DeleteObject(hbrBkGnd);
 
 	Matrix44 vpv = g_matView * g_matProjection * g_matViewPort;
-	//RenderIndices(hdcMem, g_vertices, g_indices, g_normals, g_matLocal1 * g_matWorld1,  vpv);
 
-	//바닥 이어붙이기를 위함
-	Matrix44 Test;
-	Test.SetTranslate(Vector3(0,0,700));
+	RenderIndicesWireFrame(hdcMem, g_vertices, g_indices, g_normals,
+		g_matLocal1 * g_matWorld1, vpv);
+	RenderVertices(hdcMem, g_box1.m_box, g_matLocal1 * g_matWorld1 * vpv);
 
-	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld1, vpv, g_matWorld1);  //바닥1
-	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld11 * Test, vpv, g_matWorld11);  //바닥2
 
-	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matLocal2 * g_matWorld2,  vpv);
+	RenderIndicesWireFrame(hdcMem, g_vertices, g_indices, g_normals,
+		g_matLocal2 * g_matWorld2, vpv);
+	RenderVertices(hdcMem, g_box1.m_box, g_matLocal2 * g_matWorld2 * vpv);
+
+
+	if (g_isCollision)
+	{
+		TextOutA(hdcMem, 10, 10, "Collision", 9);
+	}
+
 
 	BitBlt(hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
 	SelectObject(hdcMem, hbmOld);
