@@ -74,6 +74,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\math\box.cpp" />
     <ClCompile Include="..\..\math\matrix44.cpp" />
     <ClCompile Include="..\..\math\vector3.cpp" />
     <ClCompile Include="..\..\math\vector4.cpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="NormalLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\math\box.h" />
     <ClInclude Include="..\..\math\Math.h" />
     <ClInclude Include="..\..\math\matrix44.h" />
     <ClInclude Include="..\..\math\vector3.h" />

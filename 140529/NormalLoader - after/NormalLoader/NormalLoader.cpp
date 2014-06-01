@@ -1,3 +1,7 @@
+//140530 과제 - 펭귄게임 만들기
+
+//※ define OUT에 대해 물어보기
+
 #include <windows.h>
 #include <string>
 #include <fstream>
@@ -5,6 +9,7 @@
 #include <fstream>
 #include "../../math/Math.h"
 #include "DrawTriangle.h"
+#include <tchar.h>
 
 using namespace std;
 
@@ -34,6 +39,7 @@ Matrix44 g_matWorld2;
 vector<Vector3> g_vertices2;
 vector<Vector3> g_normals2;
 vector<int> g_indices2;
+Box characterBox;
 
 //장애물 자료
 vector<Vector3> g_vertices3;
@@ -41,6 +47,11 @@ vector<Vector3> g_normals3;
 vector<int> g_indices3;
 Matrix44 g_matLocal3;
 Matrix44 g_matWorld3;
+Box obstacleBox;
+
+vector<Matrix44> obstacleQuantity;
+
+bool bcollision = false;
 
 // 콜백 프로시져 함수 프로토 타입
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
@@ -50,6 +61,8 @@ void	Render(HWND hWnd);
 void	Paint(HWND hWnd, HDC hdc);
 bool ReadModelFile( const string &fileName, vector<Vector3> &vertices, vector<int> &indices, 
 	vector<Vector3> &normals);
+
+void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT Vector3 &vMax);
 
 
 int APIENTRY WinMain(HINSTANCE hInstance, 
@@ -232,9 +245,20 @@ void Init()
 
 	//캐릭터 설정
 	g_matWorld2.SetTranslate(Vector3(0,0,0));
+	Vector3 vMin, vMax;
+	GetVerticesMinMax(g_vertices2, vMin, vMax);
+	characterBox.SetBox(vMin, vMax);
 
 	//장애물 설정
 	g_matWorld3.SetTranslate(Vector3(-100,0,1000));
+	obstacleQuantity.push_back(g_matWorld3);
+	g_matWorld3.SetTranslate(Vector3(0,0,1350));
+	obstacleQuantity.push_back(g_matWorld3);
+	g_matWorld3.SetTranslate(Vector3(100,0,1700));
+	obstacleQuantity.push_back(g_matWorld3);
+	vMin = vMax = Vector3();
+	GetVerticesMinMax(g_vertices3, vMin, vMax);
+	obstacleBox.SetBox(vMin, vMax);
 
 	Vector3 dir = g_cameraLookat - g_cameraPos;
 	dir.Normalize();
@@ -266,6 +290,17 @@ void	MainLoop(int elapse_time)
 	Matrix44 characterMoving;
 	characterMoving.SetTranslate(Vector3(0,0,10));
 	g_matWorld2 *= characterMoving;
+	characterBox.SetWorldTM(g_matWorld2);
+	characterBox.Update();
+
+	vector<Matrix44>::iterator it;
+	for(it = obstacleQuantity.begin(); it != obstacleQuantity.end(); ++it)
+	{
+		obstacleBox.SetWorldTM( (*it) );
+		obstacleBox.Update();
+
+		bcollision = characterBox.Collision(obstacleBox);
+	}
 	
 	//카메라 움직임
 	g_cameraPos *= characterMoving;
@@ -425,7 +460,7 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> 
 }
 
 
-void RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices, 
+bool RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &indices, 
 	vector<Vector3> &normals,
 	const Matrix44 &tm, const Matrix44 &vpv)
 {
@@ -441,6 +476,9 @@ void RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &
 		p1 = p1 * tm;
 		p2 = p2 * tm;
 		p3 = p3 * tm;
+
+		if(p3.z < g_cameraPos.z)
+			return true;
 
 		// culling
 		Vector3 n = normals[ indices[ i]];
@@ -460,11 +498,8 @@ void RenderIndices(HDC hdc, const vector<Vector3> &vertices, const vector<int> &
 //		Rasterizer::Color color = c0 * max(0, n.DotProduct(-lightDir));
 //		Rasterizer::DrawTriangle(hdc, color, p1.x, p1.y, color, p2.x, p2.y, color, p3.x, p3.y);
 	}
-}
 
-void RenderObstacle(HDC memoryHDC, const vector<Vector3>& vertices, const vector<int>& indices, const Matrix44& tm, const Matrix44& vpv)
-{
-
+	return false;
 }
 
 /**
@@ -492,9 +527,59 @@ void Paint(HWND hWnd, HDC hdc)
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld11 * Test, vpv, g_matWorld11);  //바닥2
 
 	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matLocal2 * g_matWorld2,  vpv);
+	
+	vector<Matrix44>::iterator it;
+	for(it = obstacleQuantity.begin(); it!=obstacleQuantity.end(); )
+	{
+		if( RenderIndices(hdcMem, g_vertices3, g_indices3, g_normals3, (*it),  vpv) )
+		{
+			it = obstacleQuantity.erase(it);
+			
+			g_matWorld3.SetTranslate(Vector3(0,0,1000));
+
+			g_matWorld3 *= g_matWorld2;
+
+			obstacleQuantity.push_back(g_matWorld3);
+		}
+		else
+			it++;
+			
+	} //for
+
+	if(bcollision)
+	{
+		LPCTSTR collisionCheck = _T("collide");
+		::DrawText(hdcMem, collisionCheck, -1, &rc, DT_LEFT | DT_SINGLELINE);
+	}
 
 	BitBlt(hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
 	SelectObject(hdcMem, hbmOld);
 	DeleteObject(hbmMem);
 	DeleteDC(hdcMem);
+}
+
+// vertices의 최대,최소 정점위치를 리턴한다.
+void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT Vector3 &vMax)
+{
+	vMax = Vector3(FLT_MIN, FLT_MIN, FLT_MIN);
+	vMin = Vector3(FLT_MAX, FLT_MAX, FLT_MAX);
+
+	for (int i=0; i < (int)vertices.size(); ++i)
+	{
+		const Vector3 &v = vertices[i];
+
+		if (vMax.x < v.x)
+			vMax.x = v.x;
+		if (vMax.y < v.y)
+			vMax.y = v.y;
+		if (vMax.z < v.z)
+			vMax.z = v.z;
+
+		if (vMin.x > v.x)
+			vMin.x = v.x;
+		if (vMin.y > v.y)
+			vMin.y = v.y;
+		if (vMin.z > v.z)
+			vMin.z = v.z;
+	}
 }

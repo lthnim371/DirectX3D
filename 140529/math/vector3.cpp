@@ -20,6 +20,11 @@ float Vector3::Length() const
 	return sqrt(x*x + y*y + z*z);
 }
 
+float Vector3::LengthRoughly(const Vector3 &v) const
+{
+	Vector3 tmp = *this - v;
+	return tmp.x*tmp.x + tmp.y*tmp.y + tmp.z*tmp.z;
+}
 
 Vector3 Vector3::Normal() const
 {
@@ -35,15 +40,6 @@ void Vector3::Normalize()
 	*this = Normal();
 }
 
-Vector3 Vector3::MultiplyNormal( const Matrix44& rhs ) const
-{
-	Vector3 v;
-	v.x = x * rhs._11 + y * rhs._21 + z * rhs._31;
-	v.y = x * rhs._12 + y * rhs._22 + z * rhs._32;
-	v.z = x * rhs._13 + y * rhs._23 + z * rhs._33;
-	v.Normalize();
-	return v;
-}
 
 Vector3 Vector3::operator + () const
 {
@@ -149,4 +145,15 @@ Vector3 Vector3::CrossProduct( const Vector3& v ) const
 		(y * v.z) - (z * v.y), 
 		(z * v.x) - (x * v.z), 
 		(x * v.y) - (y * v.x) );
+}
+
+
+Vector3 Vector3::MultiplyNormal( const Matrix44& rhs ) const
+{
+	Vector3 v;
+	v.x = x * rhs._11 + y * rhs._21 + z * rhs._31;
+	v.y = x * rhs._12 + y * rhs._22 + z * rhs._32;
+	v.z = x * rhs._13 + y * rhs._23 + z * rhs._33;
+	v.Normalize();
+	return v;
 }
