@@ -12,6 +12,7 @@
 #include "../../math/Math.h"
 #include "DrawTriangle.h"
 #include <tchar.h>
+#include <time.h>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ Matrix44 g_matLocal1;
 Matrix44 g_matView;
 Matrix44 g_matProjection;
 Matrix44 g_matViewPort;
-Vector3 g_cameraPos(0,200,-300);
+Vector3 g_cameraPos(0,250,-300);
 Vector3 g_cameraLookat(0,0,100);
 
 //바닥 자료
@@ -42,6 +43,7 @@ vector<Vector3> g_vertices2;
 vector<Vector3> g_normals2;
 vector<int> g_indices2;
 Box characterBox;
+bool bJump;
 
 //장애물 자료
 struct tagObstacle  //장애물 정보 모음
@@ -79,6 +81,9 @@ bool ReadModelFile( const string &fileName, vector<Vector3> &vertices, vector<in
 	vector<Vector3> &normals);
 
 void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT Vector3 &vMax);
+
+template<typename T>
+T getRandom();
 
 
 int APIENTRY WinMain(HINSTANCE hInstance, 
@@ -135,7 +140,6 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	ShowWindow( hWnd, nCmdShow );
 
 	Init();
-
 
 	//메시지 구조체
 	MSG msg;		
@@ -250,8 +254,8 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 void Init()
 {
 	ReadModelFile("../../media/plane.dat", g_vertices, g_indices, g_normals);  //바닥 불러오기
-	ReadModelFile("../../media/character.dat", g_vertices2, g_indices2, g_normals2);  //캐릭터 불러오기
-	ReadModelFile("../../media/obstacle.dat", g_vertices3, g_indices3, g_normals3);  //장애물 불러오기
+	ReadModelFile("../../media/character2.dat", g_vertices2, g_indices2, g_normals2);  //캐릭터 불러오기
+	ReadModelFile("../../media/obstacle2.dat", g_vertices3, g_indices3, g_normals3);  //장애물 불러오기
 
 	//바닥 설정
 	g_matWorld1.SetTranslate(Vector3(0,0,0));
@@ -264,25 +268,20 @@ void Init()
 	Vector3 vMin, vMax;
 	GetVerticesMinMax(g_vertices2, vMin, vMax);
 	characterBox.SetBox(vMin, vMax);
+	bJump = false;
 
 	//장애물 설정
-	tagObstacle* pObstacle1 = new tagObstacle(Vector3(-100,0,1000));
-	obstacleData.push_back(pObstacle1);
-	tagObstacle* pObstacle2 = new tagObstacle(Vector3(0,0,1350));
-	obstacleData.push_back(pObstacle2);
-	tagObstacle* pObstacle3 = new tagObstacle(Vector3(100,0,1700));
-	obstacleData.push_back(pObstacle3);
-
-	/*g_matWorld3.SetTranslate(Vector3(-100,0,1000));
-	obstacleQuantity.push_back(g_matWorld3);
-	g_matWorld3.SetTranslate(Vector3(0,0,1350));
-	obstacleQuantity.push_back(g_matWorld3);
-	g_matWorld3.SetTranslate(Vector3(100,0,1700));
-	obstacleQuantity.push_back(g_matWorld3);*/
+	srand( (unsigned int)time(NULL) );
 
 	vMin = vMax = Vector3();
 	GetVerticesMinMax(g_vertices3, vMin, vMax);
 	obstacleBox.SetBox(vMin, vMax);
+
+	for(int i = 1; i <= 10; ++i)
+	{
+		tagObstacle* pObstacle = new tagObstacle(Vector3(getRandom<float>(), 0, i * 300));
+		obstacleData.push_back(pObstacle);
+	}
 
 	Vector3 dir = g_cameraLookat - g_cameraPos;
 	dir.Normalize();
@@ -308,8 +307,28 @@ void	MainLoop(int elapse_time)
 
 	//캐릭터 움직임
 	Matrix44 characterMoving;
+
+	if( bJump == false && (::GetAsyncKeyState(VK_SPACE) & 0x8000) == 0x8000)
+		bJump = true;
+	else if( bJump )
+	{
+		static float count = 0.f;
+		count += 15.f;
+		Vector3 jumpPos(0, sin(count * (MATH_PI / 180) ) * 10.f, 0);
+		characterMoving.SetTranslate(jumpPos);
+		g_matWorld2 *= characterMoving;
+
+		if( count >= 360.f )
+		{
+			count = 0.f;
+			bJump = false;
+		}
+	}
+	
+	characterMoving.SetIdentity();
 	characterMoving.SetTranslate(Vector3(0,0,10));
 	g_matWorld2 *= characterMoving;
+
 	characterBox.SetWorldTM(g_matWorld2);
 	characterBox.Update();
 
@@ -459,7 +478,7 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> 
 	Matrix44 mapLoop;
 	float loopCount = 0.f;
 
-	for(int j=0; j<2; ++j)
+	for(int j=0; j<3; ++j)
 	{
 		for(unsigned int i=0; i<indices.size(); i+=3)
 		{
@@ -482,15 +501,15 @@ void RenderVertices(HDC hdc, const vector<Vector3> &vertices, const vector<int> 
 				Rasterizer::DrawLine(hdc, c0, ground[1].x, ground[1].y, c0, ground[2].x, ground[2].y);
 				Rasterizer::DrawLine(hdc, c0, ground[2].x, ground[2].y, c0, ground[0].x, ground[0].y);
 			}
-			else if(i == 30 && j == 1 && g_cameraPos.z > ground[2].z)
+			else if(i == 30 && j == 2 && g_cameraPos.z > ground[2].z)
 			{
 				Matrix44 Test;
-				Test.SetTranslate(Vector3(0,0,1400));
+				Test.SetTranslate(Vector3(0,0,1800));
 				
 				matWorld = matWorld * Test;
 			}
 		}  //for
-		loopCount += 350.f;
+		loopCount += 300.f;
 		mapLoop.SetTranslate(Vector3(0,0,loopCount));
 	}  //for
 }
@@ -557,12 +576,12 @@ void Paint(HWND hWnd, HDC hdc)
 
 	//바닥 이어붙이기를 위함
 	Matrix44 Test;
-	Test.SetTranslate(Vector3(0,0,700));
+	Test.SetTranslate(Vector3(0,0,900));
 
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld1, vpv, g_matWorld1);  //바닥1
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld11 * Test, vpv, g_matWorld11);  //바닥2
 	
-	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matLocal2 * g_matWorld2,  vpv);  //캐릭터
+	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matWorld2,  vpv);  //캐릭터
 	
 	vector<tagObstacle*>::iterator it;
 	for(it = obstacleData.begin(); it!=obstacleData.end(); )
@@ -579,9 +598,8 @@ void Paint(HWND hWnd, HDC hdc)
 			it = obstacleData.erase(it);
 
 			//캐릭터 위치만큼 더한 위치에서 장애물 생성
-			g_matWorld3.SetTranslate(Vector3(0,0,1000));
-			g_matWorld3 *= g_matWorld2;
-			
+			g_matWorld3.SetTranslate( Vector3( getRandom<float>(),	0,	2000 + g_matWorld2.GetPosition().z ) );
+									
 			tagObstacle* pObstacle = new tagObstacle(g_matWorld3);
 			obstacleData.push_back(pObstacle);
 		}
@@ -619,4 +637,10 @@ void GetVerticesMinMax( const vector<Vector3> &vertices, OUT Vector3 &vMin, OUT 
 		if (vMin.z > v.z)
 			vMin.z = v.z;
 	}
+}
+
+template<typename T>
+T getRandom()  //랜덤 수치 뽑기
+{
+	return (T)( rand() % 200 + (-100) );
 }
