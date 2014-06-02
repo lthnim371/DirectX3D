@@ -1,8 +1,6 @@
-//140530 과제 - 펭귄게임 만들기
+//140530 과제 - 남극탐험 만들기
 
 //※ define OUT에 대해 물어보기
-
-//bcoolition과 장애물 matWorld를 구조체로 사용해야 될듯 싶다
 
 #include <windows.h>
 #include <string>
