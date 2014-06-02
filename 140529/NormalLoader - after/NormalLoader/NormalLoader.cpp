@@ -44,16 +44,30 @@ vector<int> g_indices2;
 Box characterBox;
 
 //장애물 자료
+struct tagObstacle  //장애물 정보 모음
+{
+	tagObstacle(const Matrix44& Position)
+	{
+		this->position = Position;
+		bCollision = false;
+	}
+	tagObstacle(const Vector3& Position)
+	{
+		position.SetTranslate(Position);
+		bCollision = false;
+	}
+	
+	Matrix44 position;
+	Matrix44 rotation;
+	bool bCollision;
+};
 vector<Vector3> g_vertices3;
 vector<Vector3> g_normals3;
 vector<int> g_indices3;
 Matrix44 g_matLocal3;
 Matrix44 g_matWorld3;
 Box obstacleBox;
-
-vector<Matrix44> obstacleQuantity;
-
-bool bcollision = false;
+vector<tagObstacle*> obstacleData;
 
 // 콜백 프로시져 함수 프로토 타입
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
@@ -252,12 +266,20 @@ void Init()
 	characterBox.SetBox(vMin, vMax);
 
 	//장애물 설정
-	g_matWorld3.SetTranslate(Vector3(-100,0,1000));
+	tagObstacle* pObstacle1 = new tagObstacle(Vector3(-100,0,1000));
+	obstacleData.push_back(pObstacle1);
+	tagObstacle* pObstacle2 = new tagObstacle(Vector3(0,0,1350));
+	obstacleData.push_back(pObstacle2);
+	tagObstacle* pObstacle3 = new tagObstacle(Vector3(100,0,1700));
+	obstacleData.push_back(pObstacle3);
+
+	/*g_matWorld3.SetTranslate(Vector3(-100,0,1000));
 	obstacleQuantity.push_back(g_matWorld3);
 	g_matWorld3.SetTranslate(Vector3(0,0,1350));
 	obstacleQuantity.push_back(g_matWorld3);
 	g_matWorld3.SetTranslate(Vector3(100,0,1700));
-	obstacleQuantity.push_back(g_matWorld3);
+	obstacleQuantity.push_back(g_matWorld3);*/
+
 	vMin = vMax = Vector3();
 	GetVerticesMinMax(g_vertices3, vMin, vMax);
 	obstacleBox.SetBox(vMin, vMax);
@@ -284,10 +306,6 @@ void	MainLoop(int elapse_time)
 	//mat.SetRotationY(elapse_time*0.0002f);
 	//g_matLocal1 *= mat;
 
-//	Matrix44 mapMoving;
-//	mapMoving.SetTranslate(Vector3(0,0,-5));
-//	g_matWorld1 *= mapMoving;
-
 	//캐릭터 움직임
 	Matrix44 characterMoving;
 	characterMoving.SetTranslate(Vector3(0,0,10));
@@ -295,13 +313,29 @@ void	MainLoop(int elapse_time)
 	characterBox.SetWorldTM(g_matWorld2);
 	characterBox.Update();
 
-	vector<Matrix44>::iterator it;
-	for(it = obstacleQuantity.begin(); it != obstacleQuantity.end(); ++it)
+	vector<tagObstacle*>::iterator it;
+	for(it = obstacleData.begin(); it != obstacleData.end(); ++it)
 	{
-		obstacleBox.SetWorldTM( (*it) );
+		obstacleBox.SetWorldTM( (*it)->position );
 		obstacleBox.Update();
 
-		bcollision = characterBox.Collision(obstacleBox);
+		if( (*it)->bCollision == true)
+		{
+			Matrix44 rotate;
+
+			if( g_matWorld2.GetPosition().x <= (*it)->position.GetPosition().x )
+			{
+				rotate.SetRotationY(0.5f);
+				(*it)->rotation *= rotate;
+			}
+			else if( g_matWorld2.GetPosition().x >= (*it)->position.GetPosition().x )
+			{
+				rotate.SetRotationY(-0.5f);
+				(*it)->rotation *= rotate;
+			}
+		}
+		else if( (*it)->bCollision == false)
+			(*it)->bCollision = characterBox.Collision(obstacleBox);
 	}
 	
 	//카메라 움직임
@@ -527,32 +561,33 @@ void Paint(HWND hWnd, HDC hdc)
 
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld1, vpv, g_matWorld1);  //바닥1
 	RenderVertices(hdcMem, g_vertices, g_indices, g_matWorld11 * Test, vpv, g_matWorld11);  //바닥2
-
-	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matLocal2 * g_matWorld2,  vpv);
 	
-	vector<Matrix44>::iterator it;
-	for(it = obstacleQuantity.begin(); it!=obstacleQuantity.end(); )
+	RenderIndices(hdcMem, g_vertices2, g_indices2, g_normals2, g_matLocal2 * g_matWorld2,  vpv);  //캐릭터
+	
+	vector<tagObstacle*>::iterator it;
+	for(it = obstacleData.begin(); it!=obstacleData.end(); )
 	{
-		if( RenderIndices(hdcMem, g_vertices3, g_indices3, g_normals3, (*it),  vpv) )
+		if( (*it)->bCollision)
 		{
-			it = obstacleQuantity.erase(it);
-			
+			LPCTSTR collisionCheck = _T("collide");
+			::DrawText(hdcMem, collisionCheck, -1, &rc, DT_LEFT | DT_SINGLELINE);
+		} //if
+
+		if( RenderIndices(hdcMem, g_vertices3, g_indices3, g_normals3, (*it)->rotation * (*it)->position,  vpv) )
+		{
+			delete (*it);
+			it = obstacleData.erase(it);
+
+			//캐릭터 위치만큼 더한 위치에서 장애물 생성
 			g_matWorld3.SetTranslate(Vector3(0,0,1000));
-
 			g_matWorld3 *= g_matWorld2;
-
-			obstacleQuantity.push_back(g_matWorld3);
+			
+			tagObstacle* pObstacle = new tagObstacle(g_matWorld3);
+			obstacleData.push_back(pObstacle);
 		}
 		else
 			it++;
-			
 	} //for
-
-	if(bcollision)
-	{
-		LPCTSTR collisionCheck = _T("collide");
-		::DrawText(hdcMem, collisionCheck, -1, &rc, DT_LEFT | DT_SINGLELINE);
-	}
 
 	BitBlt(hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
 	SelectObject(hdcMem, hbmOld);
