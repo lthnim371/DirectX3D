@@ -11,8 +11,9 @@
 
 using namespace std;
 
-int mouseX[2] = {}, mouseY[2] = {};
-bool bRotate = false;
+int mousePt_1[2] = {};
+int mousePt_2[2] = {};
+bool bRotationDirection[2] = {};
 
 LPDIRECT3DDEVICE9	g_pDevice = NULL;
 const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
@@ -172,16 +173,24 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
 	case WM_LBUTTONDOWN:
 		{
-			mouseX[0] = LOWORD(lParam);
-			mouseY[0] = HIWORD(lParam);
-			bRotate = false;
+			mousePt_1[0] = LOWORD(lParam);
+			mousePt_1[1] = HIWORD(lParam);
+//			bRotate = false;
 		}
 		break;
 	case WM_LBUTTONUP:
 		{
-			mouseX[1] = LOWORD(lParam);
-			mouseY[1] = HIWORD(lParam);
-			bRotate = true;
+			mousePt_2[0] = LOWORD(lParam);
+			mousePt_2[1] = HIWORD(lParam);
+
+			//int tempValue[2];
+			//tempValue[0] = mousePt_2[0] - 
+			bRotationDirection[0] = bRotationDirection[1] = false;
+						
+			if( -10 >= (mousePt_2[0] - mousePt_1[0]) >= 10 )
+				bRotationDirection[0] = true;
+			if( -10 >= (mousePt_2[1] - mousePt_1[1]) >= 10 )
+				bRotationDirection[1] = true;
 		}
 		break;
 
@@ -279,6 +288,8 @@ void Render(int timeDelta)
 	{
 		//화면 청소가 성공적으로 이루어 졌다면... 랜더링 시작
 		g_pDevice->BeginScene();
+
+		if( mousePt_2[0] - mousePt_1[0] != 0 )
 
 		//6
 		//static float y = 0;
