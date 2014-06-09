@@ -98,7 +98,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	SetWindowPos( hWnd, NULL, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, 
 		SWP_NOZORDER | SWP_NOMOVE );
 
-	//4
+	//초기화4
 	if (!InitDirectX(hWnd))  //다이렉트 초기화 함수 호출
 	{
 		return 0;
@@ -132,10 +132,10 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 	}
 
-	// 2
+	//초기화2
 	if (g_pDevice)
 		g_pDevice->Release();  //폼???함수라서 릴리즈함수를 통해서 해제해야함
-	//
+	//2
 
 	return 0;
 }
@@ -159,10 +159,10 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 	return DefWindowProc( hWnd, msg, wParam, lParam );
 }
 
-//5
+//초기화5
 bool InitDirectX(HWND hWnd)  //다이렉트 초기화 시켜주는 함수
 {
-	//6
+	//초기화6
 	LPDIRECT3D9 d3d9;
 	d3d9 = Direct3DCreate9( D3D_SDK_VERSION );  //D3D_SDK_VERSION : sdk 버전 디파인
 
@@ -188,7 +188,7 @@ bool InitDirectX(HWND hWnd)  //다이렉트 초기화 시켜주는 함수
 	//6
 
 	
-	//7 - ※책 참고
+	//초기화7 - ※책 참고
 	//3. D3DPRESENT_PARAMETERS 구조체 정보를 생성
 	//내가 이러한 Device 를 만들겟다라는 정보
 
@@ -218,7 +218,7 @@ bool InitDirectX(HWND hWnd)  //다이렉트 초기화 시켜주는 함수
 		&g_pDevice							//얻어올 디바이스 더블포인터  //리턴해준다(포인터할당받음)
 		)))
 	{
-		//디바이스 생성 실패
+		//디바이스 생성 실패  <- ????뭐징???? else 말하는건가???
 		d3d9->Release(); // Deivce 를 만들기 위해 생성된 Direct3D9 객체를 해제
 		d3d9 = NULL;  //d3d9의 역할은 g_pDevice를 만들기 위한 것뿐
 

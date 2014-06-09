@@ -1,4 +1,5 @@
-//과제 : 마우스로 회전 돌게 하시오
+//3-13일차(140603)과제
+//마우스 드래그로 모델을 해당 방향으로 회전하게 만들기
 
 #include <windows.h>
 #include <string>
@@ -11,9 +12,11 @@
 
 using namespace std;
 
+//start 마우스로 회전 조작을 위해 필요한 변수들
 int mousePt_1[2] = {};
 int mousePt_2[2] = {};
 bool bRotationDirection[2] = {};
+//end
 
 LPDIRECT3DDEVICE9	g_pDevice = NULL;
 const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
@@ -170,30 +173,34 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 			flag = !flag;
 		}
 		break;
-
-	case WM_LBUTTONDOWN:
+//start
+	case WM_LBUTTONDOWN:  //마우스를 누르면
 		{
+			//처음의 마우스 위치 보관
 			mousePt_1[0] = LOWORD(lParam);
 			mousePt_1[1] = HIWORD(lParam);
-//			bRotate = false;
 		}
 		break;
-	case WM_LBUTTONUP:
+	case WM_LBUTTONUP:  //마우스를 떼면
 		{
+			//드래그한 마지막 마우스의 위치 보관
 			mousePt_2[0] = LOWORD(lParam);
 			mousePt_2[1] = HIWORD(lParam);
 
 			//int tempValue[2];
-			//tempValue[0] = mousePt_2[0] - 
-			bRotationDirection[0] = bRotationDirection[1] = false;
-						
-			if( -10 >= (mousePt_2[0] - mousePt_1[0]) >= 10 )
+			//tempValue[0] = mousePt_2[0] - mousePt_1[0]);
+			//tempValue[1] = mousePt_2[1] - mousePt_1[1]);
+			bRotationDirection[0] = bRotationDirection[1] = false;  //드래그할때마다 초기화
+			
+			//x축으로 드래그 하였는지 판단
+			if( -50 >= (mousePt_2[0] - mousePt_1[0]) ||	(mousePt_2[0] - mousePt_1[0]) >= 50 )
 				bRotationDirection[0] = true;
-			if( -10 >= (mousePt_2[1] - mousePt_1[1]) >= 10 )
+			//y축으로 드래그 하였는지 판단
+			if( -50 >= (mousePt_2[1] - mousePt_1[1]) ||	(mousePt_2[1] - mousePt_1[1]) >= 50 )
 				bRotationDirection[1] = true;
 		}
 		break;
-
+//end
 		break;
 	case WM_DESTROY: //윈도우가 파괴된다면..
 		PostQuitMessage(0);	//프로그램 종료 요청 ( 메시지 루프를 빠져나가게 된다 )
@@ -289,8 +296,34 @@ void Render(int timeDelta)
 		//화면 청소가 성공적으로 이루어 졌다면... 랜더링 시작
 		g_pDevice->BeginScene();
 
-		if( mousePt_2[0] - mousePt_1[0] != 0 )
+//stat	//회전 연산에 필요한 변수들 선언
+		static float rotateX = 0.f, rotateY = 0.f;
+		Matrix44 finalR, operationX, operationY;
 
+		if( bRotationDirection[0] )  //x축으로 드래그 하였다면
+		{
+			//x축 회전시키기
+			rotateX += timeDelta / 1000.f;
+			operationX.SetRotationX(rotateX);
+
+			if( rotateX >= 6.28f )  //SetRotation 함수내에서 cos, sin함수를 사용하므로 라디안값을 필요로 하는 거 같다...그래서 360˚에 해당하는 2π마다 초기화하는듯...
+				rotateX = 0.f;
+		}
+		if( bRotationDirection[1] )  //y축으로 드래그 하였다면
+		{
+			//y축 회전시키기
+			rotateY += timeDelta / 1000.f;
+			operationY.SetRotationY(rotateY);
+
+			if( rotateY >= 6.28f )
+				rotateY = 0.f;
+		}
+//end
+		finalR = operationX * operationY;  //x축, y축 회전 합침
+		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&finalR);  //변환된 행렬로 지정해주는 함수 호출(행렬을 전달할 수 있다)
+	
+
+//코드 봉인
 		//6
 		//static float y = 0;
 		//y += timeDelta / 1000.f;
@@ -320,7 +353,7 @@ void Render(int timeDelta)
 bool InitVertexBuffer()
 {
 	//5
-	ReadModelFile("vase.dat", g_pVB, g_VtxSize, g_pIB, g_FaceSize);
+	ReadModelFile("cube.dat", g_pVB, g_VtxSize, g_pIB, g_FaceSize);   //항아리 모델의 중심점이 이상한거였다니....!!
 	//5
 
 	Matrix44 V;
