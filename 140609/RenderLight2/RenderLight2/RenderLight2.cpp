@@ -1,4 +1,4 @@
-#include <windows.h>
+ï»¿#include <windows.h>
 #include <string>
 #include <fstream>
 #include <d3d9.h>
@@ -13,28 +13,27 @@ MEMORYMONITOR_INNER_PROCESS();
 using namespace std;
 
 LPDIRECT3DDEVICE9	g_pDevice = NULL;
-const int WINSIZE_X = 1024;		//ÃÊ±â À©µµ¿ì °¡·Î Å©±â
-const int WINSIZE_Y = 768;	//ÃÊ±â À©µµ¿ì ¼¼·Î Å©±â
-const int WINPOS_X = 0; //ÃÊ±â À©µµ¿ì ½ÃÀÛ À§Ä¡ X
-const int WINPOS_Y = 0; //ÃÊ±â À©µµ¿ì ½ÃÀÛ À§Ä¡ Y
+const int WINSIZE_X = 1024;		//ì´ˆê¸° ìœˆë„ìš° ê°€ë¡œ í¬ê¸°
+const int WINSIZE_Y = 768;	//ì´ˆê¸° ìœˆë„ìš° ì„¸ë¡œ í¬ê¸°
+const int WINPOS_X = 0; //ì´ˆê¸° ìœˆë„ìš° ì‹œì‘ ìœ„ì¹˜ X
+const int WINPOS_Y = 0; //ì´ˆê¸° ìœˆë„ìš° ì‹œì‘ ìœ„ì¹˜ Y
 
 
 DECLARE_TYPE_NAME(sGlobal)
 struct sGlobal : public memmonitor::Monitor<sGlobal, TYPE_NAME(sGlobal)>
 {
-	LPDIRECT3DVERTEXBUFFER9 vb; // ¹öÅØ½º ¹öÆÛ
-	LPDIRECT3DINDEXBUFFER9 ib; // ÀÎµ¦½º ¹öÆÛ
+	LPDIRECT3DVERTEXBUFFER9 vb; // ë²„í…ìŠ¤ ë²„í¼
+	LPDIRECT3DINDEXBUFFER9 ib; // ì¸ë±ìŠ¤ ë²„í¼
 	int vtxSize;
 	int faceSize;
-	
-	//ÀçÁú1
+	//ì¬ì§ˆ1
 	D3DMATERIAL9 mtrl;
+	//ê´‘ì›1
+	D3DLIGHT9 light;
 };
 sGlobal *global;
 
-
-
-// ¹öÅØ½º ±¸Á¶Ã¼
+// ë²„í…ìŠ¤ êµ¬ì¡°ì²´
 struct Vertex
 {
 	Vertex() {}
@@ -43,12 +42,12 @@ struct Vertex
 	Vector3 n;
 	static const DWORD FVF;
 };
-//¹öÅØ½º ±¸Á¶Ã¼ Æ÷¸Ë.
+//ë²„í…ìŠ¤ êµ¬ì¡°ì²´ í¬ë§·.
 const DWORD Vertex::FVF  = D3DFVF_XYZ | D3DFVF_NORMAL;
 
 
 
-// Äİ¹é ÇÁ·Î½ÃÁ® ÇÔ¼ö ÇÁ·ÎÅä Å¸ÀÔ
+// ì½œë°± í”„ë¡œì‹œì ¸ í•¨ìˆ˜ í”„ë¡œí†  íƒ€ì…
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
 bool InitDirectX(HWND hWnd);
 bool InitVertexBuffer();
@@ -65,44 +64,44 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	wchar_t className[32] = L"Sample";
 	wchar_t windowName[32] = L"Sample";
 
-	//À©µµ¿ì Å¬·¹½º Á¤º¸ »ı¼º
-	//³»°¡ ÀÌ·¯ÇÑ À©µµ¸¦ ¸¸µé°Ú´Ù ¶ó´Â Á¤º¸
+	//ìœˆë„ìš° í´ë ˆìŠ¤ ì •ë³´ ìƒì„±
+	//ë‚´ê°€ ì´ëŸ¬í•œ ìœˆë„ë¥¼ ë§Œë“¤ê² ë‹¤ ë¼ëŠ” ì •ë³´
 	WNDCLASS WndClass;
-	WndClass.cbClsExtra = 0;			//À©µµ¿ì¿¡¼­ »ç¿ëÇÏ´Â ¿©ºĞÀÇ ¸Ş¸ğ¸®¼³Á¤( ±×³É 0 ÀÌ´Ù  ½Å°æ¾²Áö¸»ÀÚ )
-	WndClass.cbWndExtra = 0;			//À©µµ¿ì¿¡¼­ »ç¿ëÇÏ´Â ¿©ºĞÀÇ ¸Ş¸ğ¸®¼³Á¤( ±×³É 0 ÀÌ´Ù  ½Å°æ¾²Áö¸»ÀÚ )
-	WndClass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);		//À©µµ¿ì ¹è°æ»ö»ó
-	WndClass.hCursor = LoadCursor( NULL, IDC_ARROW );			//À©µµ¿ìÀÇ Ä¿¼­¸ğ¾ç °áÁ¤
-	WndClass.hIcon = LoadIcon( NULL, IDI_APPLICATION );		//À©µµ¿ì¾ÆÀÌÄÜ¸ğ¾ç °áÁ¤
-	WndClass.hInstance = hInstance;				//ÇÁ·Î±×·¥ÀÎ½ºÅÏ½ºÇÚµé 
-	WndClass.lpfnWndProc = (WNDPROC)WndProc;			//À©µµ¿ì ÇÁ·Î½ÃÁ® ÇÔ¼ö Æ÷ÀÎÅÍ
-	WndClass.lpszMenuName = NULL;						//¸Ş´ºÀÌ¸§ ¾øÀ¸¸é NULL
-	WndClass.lpszClassName = className;				//Áö±İ ÀÛ¼ºÇÏ°í ÀÖ´Â À©µµ¿ì Å¬·¹½ºÀÇ ÀÌ¸§
-	WndClass.style	 = CS_HREDRAW | CS_VREDRAW;	//À©µµ¿ì ±×¸®±â ¹æ½Ä ¼³Á¤ ( »çÀÌÁî°¡ º¯°æµÉ¶§ È­¸é°»½Å CS_HREDRAW | CS_VREDRAW )
+	WndClass.cbClsExtra = 0;			//ìœˆë„ìš°ì—ì„œ ì‚¬ìš©í•˜ëŠ” ì—¬ë¶„ì˜ ë©”ëª¨ë¦¬ì„¤ì •( ê·¸ëƒ¥ 0 ì´ë‹¤  ì‹ ê²½ì“°ì§€ë§ì )
+	WndClass.cbWndExtra = 0;			//ìœˆë„ìš°ì—ì„œ ì‚¬ìš©í•˜ëŠ” ì—¬ë¶„ì˜ ë©”ëª¨ë¦¬ì„¤ì •( ê·¸ëƒ¥ 0 ì´ë‹¤  ì‹ ê²½ì“°ì§€ë§ì )
+	WndClass.hbrBackground = (HBRUSH)GetStockObject(GRAY_BRUSH);		//ìœˆë„ìš° ë°°ê²½ìƒ‰ìƒ
+	WndClass.hCursor = LoadCursor( NULL, IDC_ARROW );			//ìœˆë„ìš°ì˜ ì»¤ì„œëª¨ì–‘ ê²°ì •
+	WndClass.hIcon = LoadIcon( NULL, IDI_APPLICATION );		//ìœˆë„ìš°ì•„ì´ì½˜ëª¨ì–‘ ê²°ì •
+	WndClass.hInstance = hInstance;				//í”„ë¡œê·¸ë¨ì¸ìŠ¤í„´ìŠ¤í•¸ë“¤ 
+	WndClass.lpfnWndProc = (WNDPROC)WndProc;			//ìœˆë„ìš° í”„ë¡œì‹œì ¸ í•¨ìˆ˜ í¬ì¸í„°
+	WndClass.lpszMenuName = NULL;						//ë©”ë‰´ì´ë¦„ ì—†ìœ¼ë©´ NULL
+	WndClass.lpszClassName = className;				//ì§€ê¸ˆ ì‘ì„±í•˜ê³  ìˆëŠ” ìœˆë„ìš° í´ë ˆìŠ¤ì˜ ì´ë¦„
+	WndClass.style	 = CS_HREDRAW | CS_VREDRAW;	//ìœˆë„ìš° ê·¸ë¦¬ê¸° ë°©ì‹ ì„¤ì • ( ì‚¬ì´ì¦ˆê°€ ë³€ê²½ë ë•Œ í™”ë©´ê°±ì‹  CS_HREDRAW | CS_VREDRAW )
 
-	//À§¿¡¼­ ÀÛ¼ºÇÑ À©µµ¿ì Å¬·¹½ºÁ¤º¸ µî·Ï
+	//ìœ„ì—ì„œ ì‘ì„±í•œ ìœˆë„ìš° í´ë ˆìŠ¤ì •ë³´ ë“±ë¡
 	RegisterClass( &WndClass );
 
-	//À©µµ¿ì »ı¼º
-	//»ı¼ºµÈ À©µµ¿ì ÇÚµéÀ» Àü¿ªº¯¼ö g_hWnd °¡ ¹Ş´Â´Ù.
+	//ìœˆë„ìš° ìƒì„±
+	//ìƒì„±ëœ ìœˆë„ìš° í•¸ë“¤ì„ ì „ì—­ë³€ìˆ˜ g_hWnd ê°€ ë°›ëŠ”ë‹¤.
 	HWND hWnd = CreateWindow(
-		className,				//»ı¼ºµÇ´Â À©µµ¿ìÀÇ Å¬·¡½ºÀÌ¸§
-		windowName,				//À©µµ¿ì Å¸ÀÌÆ²¹Ù¿¡ Ãâ·ÂµÇ´Â ÀÌ¸§
-		WS_OVERLAPPEDWINDOW,	//À©µµ¿ì ½ºÅ¸ÀÏ WS_OVERLAPPEDWINDOW
-		WINPOS_X,				//À©µµ¿ì ½ÃÀÛ À§Ä¡ X 
-		WINPOS_Y,				//À©µµ¿ì ½ÃÀÛ À§Ä¡ Y
-		WINSIZE_X,				//À©µµ¿ì °¡·Î Å©±â ( ÀÛ¾÷¿µ¿ªÀÇ Å©±â°¡ ¾Æ´Ô )
-		WINSIZE_Y,				//À©µµ¿ì ¼¼·Î Å©±â ( ÀÛ¾÷¿µ¿ªÀÇ Å©±â°¡ ¾Æ´Ô )
-		GetDesktopWindow(),		//ºÎ¸ğ À©µµ¿ì ÇÚµé ( ÇÁ·Î±×·¥¿¡¼­ ÃÖ»óÀ§ À©µµ¿ì¸é NULL ¶Ç´Â GetDesktopWindow() )
-		NULL,					//¸Ş´º ID ( ÀÚ½ÅÀÇ ÄÁÆ®·Ñ °´Ã¼ÀÇ À©µµ¿ìÀÎ°æ¿ì ÄÁÆ®·Ñ ID °¡ µÈ	
-		hInstance,				//ÀÌ À©µµ¿ì°¡ ¹°¸± ÇÁ·Î±×·¥ ÀÎ½ºÅÏ½º ÇÚµé
-		NULL					//Ãß°¡ Á¤º¸ NULL ( ½Å°æ²ôÀÚ )
+		className,				//ìƒì„±ë˜ëŠ” ìœˆë„ìš°ì˜ í´ë˜ìŠ¤ì´ë¦„
+		windowName,				//ìœˆë„ìš° íƒ€ì´í‹€ë°”ì— ì¶œë ¥ë˜ëŠ” ì´ë¦„
+		WS_OVERLAPPEDWINDOW,	//ìœˆë„ìš° ìŠ¤íƒ€ì¼ WS_OVERLAPPEDWINDOW
+		WINPOS_X,				//ìœˆë„ìš° ì‹œì‘ ìœ„ì¹˜ X 
+		WINPOS_Y,				//ìœˆë„ìš° ì‹œì‘ ìœ„ì¹˜ Y
+		WINSIZE_X,				//ìœˆë„ìš° ê°€ë¡œ í¬ê¸° ( ì‘ì—…ì˜ì—­ì˜ í¬ê¸°ê°€ ì•„ë‹˜ )
+		WINSIZE_Y,				//ìœˆë„ìš° ì„¸ë¡œ í¬ê¸° ( ì‘ì—…ì˜ì—­ì˜ í¬ê¸°ê°€ ì•„ë‹˜ )
+		GetDesktopWindow(),		//ë¶€ëª¨ ìœˆë„ìš° í•¸ë“¤ ( í”„ë¡œê·¸ë¨ì—ì„œ ìµœìƒìœ„ ìœˆë„ìš°ë©´ NULL ë˜ëŠ” GetDesktopWindow() )
+		NULL,					//ë©”ë‰´ ID ( ìì‹ ì˜ ì»¨íŠ¸ë¡¤ ê°ì²´ì˜ ìœˆë„ìš°ì¸ê²½ìš° ì»¨íŠ¸ë¡¤ ID ê°€ ëœ	
+		hInstance,				//ì´ ìœˆë„ìš°ê°€ ë¬¼ë¦´ í”„ë¡œê·¸ë¨ ì¸ìŠ¤í„´ìŠ¤ í•¸ë“¤
+		NULL					//ì¶”ê°€ ì •ë³´ NULL ( ì‹ ê²½ë„ì )
 		);
 
-	//À©µµ¿ì¸¦ Á¤È®ÇÑ ÀÛ¾÷¿µ¿ª Å©±â·Î ¸ÂÃá´Ù
+	//ìœˆë„ìš°ë¥¼ ì •í™•í•œ ì‘ì—…ì˜ì—­ í¬ê¸°ë¡œ ë§ì¶˜ë‹¤
 	RECT rcClient = { 0, 0, WINSIZE_X, WINSIZE_Y };
-	AdjustWindowRect( &rcClient, WS_OVERLAPPEDWINDOW, FALSE );	//rcClient Å©±â¸¦ ÀÛ¾÷ ¿µ¿µÀ¸·Î ÇÒ À©µµ¿ì Å©±â¸¦ rcClient ¿¡ ´ëÀÔµÇ¾î ³ª¿Â´Ù.
+	AdjustWindowRect( &rcClient, WS_OVERLAPPEDWINDOW, FALSE );	//rcClient í¬ê¸°ë¥¼ ì‘ì—… ì˜ì˜ìœ¼ë¡œ í•  ìœˆë„ìš° í¬ê¸°ë¥¼ rcClient ì— ëŒ€ì…ë˜ì–´ ë‚˜ì˜¨ë‹¤.
 
-	//À©µµ¿ì Å©±â¿Í À©µµ¿ì À§Ä¡¸¦ ¹Ù²Ù¾îÁØ´Ù.
+	//ìœˆë„ìš° í¬ê¸°ì™€ ìœˆë„ìš° ìœ„ì¹˜ë¥¼ ë°”ê¾¸ì–´ì¤€ë‹¤.
 	SetWindowPos( hWnd, NULL, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, 
 		SWP_NOZORDER | SWP_NOMOVE );
 
@@ -122,19 +121,19 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 	ShowWindow( hWnd, nCmdShow );
 
-	//¸Ş½ÃÁö ±¸Á¶Ã¼
+	//ë©”ì‹œì§€ êµ¬ì¡°ì²´
 	MSG msg;		
 	ZeroMemory( &msg, sizeof( MSG ) );
 
 	int oldT = GetTickCount();
 	while (msg.message != WM_QUIT)
 	{
-		//PeekMessage ´Â ¸Ş½ÃÁö Å¥¿¡ ¸Ş½ÃÁö°¡ ¾ø¾îµµ ÇÁ·Î±×·¥ÀÌ ¸ØÃß±â ¾Ê°í ÁøÇàÀÌ µÈ´Ù.
-		//ÀÌ¶§ ¸Ş½ÃÁöÅ¥¿¡ ¸Ş½ÃÁö°¡ ¾øÀ¸¸é false °¡ ¸®ÅÏµÇ°í ¸Ş½ÃÁö°¡ ÀÖÀ¸¸é true °¡ ¸®ÅÏÀÌµÈ´Ù.
+		//PeekMessage ëŠ” ë©”ì‹œì§€ íì— ë©”ì‹œì§€ê°€ ì—†ì–´ë„ í”„ë¡œê·¸ë¨ì´ ë©ˆì¶”ê¸° ì•Šê³  ì§„í–‰ì´ ëœë‹¤.
+		//ì´ë•Œ ë©”ì‹œì§€íì— ë©”ì‹œì§€ê°€ ì—†ìœ¼ë©´ false ê°€ ë¦¬í„´ë˜ê³  ë©”ì‹œì§€ê°€ ìˆìœ¼ë©´ true ê°€ ë¦¬í„´ì´ëœë‹¤.
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage( &msg ); //´­¸° Å°º¸µå ÀÇ ¹®ÀÚ¸¦ ¹ø¿ªÇÏ¿© WM_CHAR ¸Ş½ÃÁö¸¦ ¹ß»ı½ÃÅ²´Ù.
-			DispatchMessage( &msg );  //¹Ş¾Æ¿Â ¸Ş½ÃÁö Á¤º¸·Î À©µµ¿ì ÇÁ·Î½ÃÁ® ÇÔ¼ö¸¦ ½ÇÇà½ÃÅ²´Ù.
+			TranslateMessage( &msg ); //ëˆŒë¦° í‚¤ë³´ë“œ ì˜ ë¬¸ìë¥¼ ë²ˆì—­í•˜ì—¬ WM_CHAR ë©”ì‹œì§€ë¥¼ ë°œìƒì‹œí‚¨ë‹¤.
+			DispatchMessage( &msg );  //ë°›ì•„ì˜¨ ë©”ì‹œì§€ ì •ë³´ë¡œ ìœˆë„ìš° í”„ë¡œì‹œì ¸ í•¨ìˆ˜ë¥¼ ì‹¤í–‰ì‹œí‚¨ë‹¤.
 		}
 		else
 		{
@@ -161,7 +160,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 
 //
-// À©µµ¿ì ÇÁ·Î½ÃÁ® ÇÔ¼ö ( ¸Ş½ÃÁö Å¥¿¡¼­ ¹Ş¾Æ¿Â ¸Ş½ÃÁö¸¦ Ã³¸®ÇÑ´Ù )
+// ìœˆë„ìš° í”„ë¡œì‹œì ¸ í•¨ìˆ˜ ( ë©”ì‹œì§€ íì—ì„œ ë°›ì•„ì˜¨ ë©”ì‹œì§€ë¥¼ ì²˜ë¦¬í•œë‹¤ )
 //
 LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 {
@@ -177,9 +176,18 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 			g_pDevice->SetRenderState(D3DRS_FILLMODE, flag? D3DFILL_SOLID : D3DFILL_WIREFRAME);
 			flag = !flag;
 		}
+		//ê´‘ì›3 (ìŠ¤ë‚˜ì´í¼ì—ì„œëŠ” 2ë¡œ ë˜ì–´ìˆë‹¤!)
+		else if (VK_SPACE == wParam)
+		{
+			static bool flag = false;
+			g_pDevice->SetLight(0, &global->light); // ê´‘ì› ì„¤ì •.
+			g_pDevice->LightEnable(0, flag);
+			flag = !flag;
+		}
+
 		break;	
-	case WM_DESTROY: //À©µµ¿ì°¡ ÆÄ±«µÈ´Ù¸é..
-		PostQuitMessage(0);	//ÇÁ·Î±×·¥ Á¾·á ¿äÃ» ( ¸Ş½ÃÁö ·çÇÁ¸¦ ºüÁ®³ª°¡°Ô µÈ´Ù )
+	case WM_DESTROY: //ìœˆë„ìš°ê°€ íŒŒê´´ëœë‹¤ë©´..
+		PostQuitMessage(0);	//í”„ë¡œê·¸ë¨ ì¢…ë£Œ ìš”ì²­ ( ë©”ì‹œì§€ ë£¨í”„ë¥¼ ë¹ ì ¸ë‚˜ê°€ê²Œ ëœë‹¤ )
 		break;
 	}
 	return DefWindowProc( hWnd, msg, wParam, lParam );
@@ -191,99 +199,99 @@ bool InitDirectX(HWND hWnd)
 	LPDIRECT3D9 d3d9;
 	d3d9 = Direct3DCreate9( D3D_SDK_VERSION );
 
-	// ÇÏµå¿ş¾î Á¤º¸¸¦ °¡Áö°í ¿Í¼­ ÀÚ½ÅÀÇ Á¤Á¡ ÇÁ·Î¼¼½º Å¸ÀÔÀ» Á¤ÇÏÀÚ
+	// í•˜ë“œì›¨ì–´ ì •ë³´ë¥¼ ê°€ì§€ê³  ì™€ì„œ ìì‹ ì˜ ì •ì  í”„ë¡œì„¸ìŠ¤ íƒ€ì…ì„ ì •í•˜ì
 	D3DCAPS9 caps;
 
-	//Direct3D9 °´Ã¼ ÅëÇØ ºñµğ¿À Ä«µåÀÇ ÇÏµå¿ş¾î Á¤º¸¸¦ °¡Áö°í ¿Â´Ù.
+	//Direct3D9 ê°ì²´ í†µí•´ ë¹„ë””ì˜¤ ì¹´ë“œì˜ í•˜ë“œì›¨ì–´ ì •ë³´ë¥¼ ê°€ì§€ê³  ì˜¨ë‹¤.
 	d3d9->GetDeviceCaps(
-		D3DADAPTER_DEFAULT,			//ÁÖ µğ½ºÇÃ·¹ÀÌ ±×·¡ÇÈ Ä«µå ±×³É D3DADAPTER_DEFAULT
-		D3DDEVTYPE_HAL,				//µğ¹ÙÀÌ½ºÅ¸ÀÔ ¼³Á¤ ±×³É D3DDEVTYPE_HAL
-		&caps						//µğ¹ÙÀÌ½º Á¤º¸¸¦ ¹Ş¾Æ¿Ã D3DCAPS9 Æ÷ÀÎÅÍ
+		D3DADAPTER_DEFAULT,			//ì£¼ ë””ìŠ¤í”Œë ˆì´ ê·¸ë˜í”½ ì¹´ë“œ ê·¸ëƒ¥ D3DADAPTER_DEFAULT
+		D3DDEVTYPE_HAL,				//ë””ë°”ì´ìŠ¤íƒ€ì… ì„¤ì • ê·¸ëƒ¥ D3DDEVTYPE_HAL
+		&caps						//ë””ë°”ì´ìŠ¤ ì •ë³´ë¥¼ ë°›ì•„ì˜¬ D3DCAPS9 í¬ì¸í„°
 		);
 
-	//Á¤Á¡°è»ê Ã³¸®¹æ½ÄÀ» ÁöÁ¤ÇÒ ÇÃ·¹±× °ª
+	//ì •ì ê³„ì‚° ì²˜ë¦¬ë°©ì‹ì„ ì§€ì •í•  í”Œë ˆê·¸ ê°’
 	int vertexProcessing = 0;
 
-	//Á¤Á¡ À§Ä¡¿Í ±¤¿ø °è»ê½Ã ÇÏµå¿ş¾î »ç¿ëÀÌ °¡´ÉÇÑ°¡
+	//ì •ì  ìœ„ì¹˜ì™€ ê´‘ì› ê³„ì‚°ì‹œ í•˜ë“œì›¨ì–´ ì‚¬ìš©ì´ ê°€ëŠ¥í•œê°€
 	if (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
 		vertexProcessing = D3DCREATE_HARDWARE_VERTEXPROCESSING;
 	else
 		vertexProcessing = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 
 
-	//3. D3DPRESENT_PARAMETERS ±¸Á¶Ã¼ Á¤º¸¸¦ »ı¼º
-	//³»°¡ ÀÌ·¯ÇÑ Device ¸¦ ¸¸µé°Ù´Ù¶ó´Â Á¤º¸
+	//3. D3DPRESENT_PARAMETERS êµ¬ì¡°ì²´ ì •ë³´ë¥¼ ìƒì„±
+	//ë‚´ê°€ ì´ëŸ¬í•œ Device ë¥¼ ë§Œë“¤ê²Ÿë‹¤ë¼ëŠ” ì •ë³´
 
 	D3DPRESENT_PARAMETERS d3dpp;		
-	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;				//µª½º ¹öÆÛ¿Í ½ºÅ×½Ç ¹öÆÛ Å©±â µª½º 24bit ½ºÅÙ½Ç ¹öÆÛ 8 ºñÆ®
-	d3dpp.BackBufferCount = 1;						//¹é¹öÆÛ °¹¼ö ±×³É 1°³
-	d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;			//¹é¹öÆÛ »ö»ó Æ÷¸Ë ¾ËÆÄ8ºñÆ®,·¹µå8ºñÆ®,±×¸°8ºñÆ®,ºí·ç8ºñÆ®
-	d3dpp.BackBufferHeight = WINSIZE_Y;				//¹é¹öÆÛ ÇÈ¼¿ Å©±â
-	d3dpp.BackBufferWidth = WINSIZE_X;				//¹é¹öÆÛ ÇÈ¼¿ Å©±â
-	d3dpp.EnableAutoDepthStencil = true;						//ÀÚµ¿ ±íÀÌ¹öÆÛ »ç¿ë ¿©ºÎ ( ±×³É true )
-	d3dpp.Flags = 0;						//Ãß±â ÇÃ·¡±× ( ÀÏ´Ü 0 )
-	d3dpp.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;	//È­¸é ÁÖ»çÀ² ( ±×³É D3DPRESENT_RATE_DEFAULT ¸ğ´ÏÅÍ ÁÖ»çÀ²°ú µ¿ÀÏ½Ã )
-	d3dpp.hDeviceWindow = hWnd;					//Device °¡ Ãâ·ÂµÉ À©µµ¿ì ÇÚµé
-	d3dpp.MultiSampleQuality = 0;						//¸ÖÆ¼ »ùÇÃ¸µ Áú
-	d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;		//¸ÖÆ¼ »ùÇÃ¸µ Å¸ÀÔ 
-	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;	//È­¸é Àü¼Û °£°İ ( ±×³É D3DPRESENT_INTERVAL_ONE ¸ğ´ÏÅÍ ÁÖ»çÀ²°ú µ¿ÀÏ½Ã )
-	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;	//È­¸é ½º¿Ò Ã¼ÀÎ ¹æ½Ä
-	d3dpp.Windowed = true;						//À©µµ¿ì ¸ğµå³Ä? ( ÀÌ°Ô false ¸é Ç®½ºÅ©¸° µÈ´Ù! )
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;				//ëìŠ¤ ë²„í¼ì™€ ìŠ¤í…Œì‹¤ ë²„í¼ í¬ê¸° ëìŠ¤ 24bit ìŠ¤í…ì‹¤ ë²„í¼ 8 ë¹„íŠ¸
+	d3dpp.BackBufferCount = 1;						//ë°±ë²„í¼ ê°¯ìˆ˜ ê·¸ëƒ¥ 1ê°œ
+	d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;			//ë°±ë²„í¼ ìƒ‰ìƒ í¬ë§· ì•ŒíŒŒ8ë¹„íŠ¸,ë ˆë“œ8ë¹„íŠ¸,ê·¸ë¦°8ë¹„íŠ¸,ë¸”ë£¨8ë¹„íŠ¸
+	d3dpp.BackBufferHeight = WINSIZE_Y;				//ë°±ë²„í¼ í”½ì…€ í¬ê¸°
+	d3dpp.BackBufferWidth = WINSIZE_X;				//ë°±ë²„í¼ í”½ì…€ í¬ê¸°
+	d3dpp.EnableAutoDepthStencil = true;						//ìë™ ê¹Šì´ë²„í¼ ì‚¬ìš© ì—¬ë¶€ ( ê·¸ëƒ¥ true )
+	d3dpp.Flags = 0;						//ì¶”ê¸° í”Œë˜ê·¸ ( ì¼ë‹¨ 0 )
+	d3dpp.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;	//í™”ë©´ ì£¼ì‚¬ìœ¨ ( ê·¸ëƒ¥ D3DPRESENT_RATE_DEFAULT ëª¨ë‹ˆí„° ì£¼ì‚¬ìœ¨ê³¼ ë™ì¼ì‹œ )
+	d3dpp.hDeviceWindow = hWnd;					//Device ê°€ ì¶œë ¥ë  ìœˆë„ìš° í•¸ë“¤
+	d3dpp.MultiSampleQuality = 0;						//ë©€í‹° ìƒ˜í”Œë§ ì§ˆ
+	d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;		//ë©€í‹° ìƒ˜í”Œë§ íƒ€ì… 
+	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_ONE;	//í™”ë©´ ì „ì†¡ ê°„ê²© ( ê·¸ëƒ¥ D3DPRESENT_INTERVAL_ONE ëª¨ë‹ˆí„° ì£¼ì‚¬ìœ¨ê³¼ ë™ì¼ì‹œ )
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;	//í™”ë©´ ìŠ¤ì™‘ ì²´ì¸ ë°©ì‹
+	d3dpp.Windowed = true;						//ìœˆë„ìš° ëª¨ë“œëƒ? ( ì´ê²Œ false ë©´ í’€ìŠ¤í¬ë¦° ëœë‹¤! )
 
-	//4. Device »ı¼º
+	//4. Device ìƒì„±
 	if (FAILED(d3d9->CreateDevice(
-		D3DADAPTER_DEFAULT,					//ÁÖ µğ½ºÇÃ·¹ÀÌ ±×·¡ÇÈ Ä«µå ±×³É D3DADAPTER_DEFAULT
-		D3DDEVTYPE_HAL,						//µğ¹ÙÀÌ½ºÅ¸ÀÔ ¼³Á¤ ±×³É D3DDEVTYPE_HAL
-		hWnd,								//µğ¹ÙÀÌ½º¸¦ »ç¿ëÇÒ À©µµ¿ì ÇÚµé
-		vertexProcessing,					//Á¤Á¡ Ã³¸® ¹æ½Ä¿¡ ´ëÇÑ ÇÃ·¹±×
-		&d3dpp,								//¾Õ¿¡¼­ Á¤ÀÇÇÑ D3DPRESENT_PARAMETERS ±¸Á¶Ã¼ Æ÷ÀÎÅÍ
-		&g_pDevice							//¾ò¾î¿Ã µğ¹ÙÀÌ½º ´õºíÆ÷ÀÎÅÍ
+		D3DADAPTER_DEFAULT,					//ì£¼ ë””ìŠ¤í”Œë ˆì´ ê·¸ë˜í”½ ì¹´ë“œ ê·¸ëƒ¥ D3DADAPTER_DEFAULT
+		D3DDEVTYPE_HAL,						//ë””ë°”ì´ìŠ¤íƒ€ì… ì„¤ì • ê·¸ëƒ¥ D3DDEVTYPE_HAL
+		hWnd,								//ë””ë°”ì´ìŠ¤ë¥¼ ì‚¬ìš©í•  ìœˆë„ìš° í•¸ë“¤
+		vertexProcessing,					//ì •ì  ì²˜ë¦¬ ë°©ì‹ì— ëŒ€í•œ í”Œë ˆê·¸
+		&d3dpp,								//ì•ì—ì„œ ì •ì˜í•œ D3DPRESENT_PARAMETERS êµ¬ì¡°ì²´ í¬ì¸í„°
+		&g_pDevice							//ì–»ì–´ì˜¬ ë””ë°”ì´ìŠ¤ ë”ë¸”í¬ì¸í„°
 		)))
 	{
-		//µğ¹ÙÀÌ½º »ı¼º ½ÇÆĞ
-		d3d9->Release(); // Deivce ¸¦ ¸¸µé±â À§ÇØ »ı¼ºµÈ Direct3D9 °´Ã¼¸¦ ÇØÁ¦
+		//ë””ë°”ì´ìŠ¤ ìƒì„± ì‹¤íŒ¨
+		d3d9->Release(); // Deivce ë¥¼ ë§Œë“¤ê¸° ìœ„í•´ ìƒì„±ëœ Direct3D9 ê°ì²´ë¥¼ í•´ì œ
 		d3d9 = NULL;
 
 		MessageBoxA( hWnd, "CreateDevice() - FAILED", "FAILED", MB_OK );
 		return false;
 	}
 
-	//µğ¹ÙÀÌ½º »ı¼º ¼º°ø
-	d3d9->Release(); // Deivce ¸¦ ¸¸µé¾úÀ¸´Ï ³Í ´õÀÌ»ó ÇÊ¿ä¾ø´Ù ( »ç¶óÁ®¶ó! )
+	//ë””ë°”ì´ìŠ¤ ìƒì„± ì„±ê³µ
+	d3d9->Release(); // Deivce ë¥¼ ë§Œë“¤ì—ˆìœ¼ë‹ˆ ë„Œ ë”ì´ìƒ í•„ìš”ì—†ë‹¤ ( ì‚¬ë¼ì ¸ë¼! )
 	d3d9 = NULL;
 	return true;
 }
 
 
-//·£´õ
+//ëœë”
 void Render(int timeDelta)
 {
-	//È­¸é Ã»¼Ò
+	//í™”ë©´ ì²­ì†Œ
 	if (SUCCEEDED(g_pDevice->Clear( 
-		0,			//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ °¹¼ö		( ÀüÃ¼ Å¬¸®¾î 0 )
-		NULL,		//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ Æ÷ÀÎÅÍ		( ÀüÃ¼ Å¬¸®¾î NULL )
-		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//Ã»¼ÒµÉ ¹öÆÛ ÇÃ·¹±× ( D3DCLEAR_TARGET ÄÃ·¯¹öÆÛ, D3DCLEAR_ZBUFFER ±íÀÌ¹öÆÛ, D3DCLEAR_STENCIL ½ºÅÙ½Ç¹öÆÛ
-		D3DCOLOR_XRGB(255, 255, 255),			//ÄÃ·¯¹öÆÛ¸¦ Ã»¼ÒÇÏ°í Ã¤¿öÁú »ö»ó( 0xAARRGGBB )
-		1.0f,				//±íÀÌ¹öÆÛ¸¦ Ã»¼ÒÇÒ°ª ( 0 ~ 1 0 ÀÌ Ä«¸Ş¶ó¿¡¼­ Á¦ÀÏ°¡±î¿î 1 ÀÌ Ä«¸Ş¶ó¿¡¼­ Á¦ÀÏ ¸Õ )
-		0					//½ºÅÙ½Ç ¹öÆÛ¸¦ Ã¤¿ï°ª
+		0,			//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ ê°¯ìˆ˜		( ì „ì²´ í´ë¦¬ì–´ 0 )
+		NULL,		//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ í¬ì¸í„°		( ì „ì²´ í´ë¦¬ì–´ NULL )
+		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//ì²­ì†Œë  ë²„í¼ í”Œë ˆê·¸ ( D3DCLEAR_TARGET ì»¬ëŸ¬ë²„í¼, D3DCLEAR_ZBUFFER ê¹Šì´ë²„í¼, D3DCLEAR_STENCIL ìŠ¤í…ì‹¤ë²„í¼
+		D3DCOLOR_XRGB(255, 255, 255),			//ì»¬ëŸ¬ë²„í¼ë¥¼ ì²­ì†Œí•˜ê³  ì±„ì›Œì§ˆ ìƒ‰ìƒ( 0xAARRGGBB )
+		1.0f,				//ê¹Šì´ë²„í¼ë¥¼ ì²­ì†Œí• ê°’ ( 0 ~ 1 0 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ê°€ê¹Œìš´ 1 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ ë¨¼ )
+		0					//ìŠ¤í…ì‹¤ ë²„í¼ë¥¼ ì±„ìš¸ê°’
 		)))
 	{
-		//È­¸é Ã»¼Ò°¡ ¼º°øÀûÀ¸·Î ÀÌ·ç¾î Á³´Ù¸é... ·£´õ¸µ ½ÃÀÛ
+		//í™”ë©´ ì²­ì†Œê°€ ì„±ê³µì ìœ¼ë¡œ ì´ë£¨ì–´ ì¡Œë‹¤ë©´... ëœë”ë§ ì‹œì‘
 		g_pDevice->BeginScene();
 
 		static float y = 0;
 		y += timeDelta / 1000.f;
-		// °¢µµ°¡ 2*PI ¿¡ ÀÌ¸£¸é 0À¸·Î ÃÊ±âÈ­ÇÑ´Ù.
+		// ê°ë„ê°€ 2*PI ì— ì´ë¥´ë©´ 0ìœ¼ë¡œ ì´ˆê¸°í™”í•œë‹¤.
 		if (y >= 6.28f)
 			y = 0;
 
 		Matrix44 rx, ry, r;
-		rx.SetRotationX(MATH_PI/4.f); 	// xÃàÀ¸·Î 45µµ È¸Àü½ÃÅ²´Ù.
-		ry.SetRotationY(y); // yÃàÀ¸·Î È¸Àü
+		rx.SetRotationX(MATH_PI/4.f); 	// xì¶•ìœ¼ë¡œ 45ë„ íšŒì „ì‹œí‚¨ë‹¤.
+		ry.SetRotationY(y); // yì¶•ìœ¼ë¡œ íšŒì „
 		r = rx*ry;
 		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&r);
 
-		//ÀçÁú3
+		//ì¬ì§ˆ3
 		g_pDevice->SetMaterial(&global->mtrl);
 		
 		g_pDevice->SetStreamSource( 0, global->vb, 0, sizeof(Vertex) );
@@ -291,9 +299,9 @@ void Render(int timeDelta)
 		g_pDevice->SetFVF( Vertex::FVF );
 		g_pDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, global->vtxSize, 0, global->faceSize);
 
-		//·£´õ¸µ ³¡
+		//ëœë”ë§ ë
 		g_pDevice->EndScene();
-		//·£´õ¸µÀÌ ³¡³µÀ¸¸é ·£´õ¸µµÈ ³»¿ë È­¸éÀ¸·Î Àü¼Û
+		//ëœë”ë§ì´ ëë‚¬ìœ¼ë©´ ëœë”ë§ëœ ë‚´ìš© í™”ë©´ìœ¼ë¡œ ì „ì†¡
 		g_pDevice->Present( NULL, NULL, NULL, NULL );
 	}
 }
@@ -303,7 +311,7 @@ bool InitVertexBuffer()
 {
 	ReadModelFile("../../media/vase.dat", global->vb, global->vtxSize, global->ib, global->faceSize);
 
-	//ÀçÁú2
+	//ì¬ì§ˆ2
 	ZeroMemory(&global->mtrl, sizeof(global->mtrl));
 	global->mtrl.Ambient = D3DXCOLOR(1,0,0,1);
 	global->mtrl.Diffuse = D3DXCOLOR(1,0,0,1);
@@ -311,6 +319,17 @@ bool InitVertexBuffer()
 	global->mtrl.Emissive = D3DXCOLOR(0,0,0,1);
 	global->mtrl.Power = 0.f;
 
+	//ê´‘ì›2 (ìŠ¤ë‚˜ì´í”„ì—ì„œ 3ìœ¼ë¡œ ë˜ì–´ìˆë‹¤!)
+	D3DXCOLOR color(1,1,1,1);  //ê´‘ì›ì´ë‹ˆê¹ ì¼ë°˜ì ìœ¼ë¡œ í°ìƒ‰
+	ZeroMemory(&global->light, sizeof(global->light));
+	global->light.Type = D3DLIGHT_DIRECTIONAL;
+	global->light.Ambient = color * 0.4f;
+	global->light.Diffuse = color;
+	global->light.Specular = color * 0.6f;
+	global->light.Direction = *(D3DXVECTOR3*)&Vector3(1,0,0);
+	//ê´‘ì›4
+	g_pDevice->SetLight(0, &global->light); // ê´‘ì› ì„¤ì •.
+	
 	Matrix44 V;
 	Vector3 dir = Vector3(0,0,0)-Vector3(0,0,-500);
 	dir.Normalize();
@@ -322,8 +341,8 @@ bool InitVertexBuffer()
 	g_pDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
 
 	g_pDevice->LightEnable (
-		0, // È°¼ºÈ­/ ºñÈ°¼ºÈ­ ÇÏ·Á´Â ±¤¿ø ¸®½ºÆ® ³»ÀÇ ¿ä¼Ò
-		true); // true = È°¼ºÈ­ £¬ false = ºñÈ°¼ºÈ­
+		0, // í™œì„±í™”/ ë¹„í™œì„±í™” í•˜ë ¤ëŠ” ê´‘ì› ë¦¬ìŠ¤íŠ¸ ë‚´ì˜ ìš”ì†Œ
+		true); // true = í™œì„±í™” ï¼Œ false = ë¹„í™œì„±í™”
 
 	return true;
 }
@@ -345,7 +364,7 @@ bool ReadModelFile( const string &fileName, LPDIRECT3DVERTEXBUFFER9 &vtxBuff, in
 
 	vtxSize = numVertices;
 
-	// ¹öÅØ½º ¹öÆÛ »ı¼º.
+	// ë²„í…ìŠ¤ ë²„í¼ ìƒì„±.
 	if (FAILED(g_pDevice->CreateVertexBuffer( numVertices * sizeof(Vertex),
 		D3DUSAGE_WRITEONLY, Vertex::FVF,
 		D3DPOOL_MANAGED, &vtxBuff, NULL)))
@@ -353,7 +372,7 @@ bool ReadModelFile( const string &fileName, LPDIRECT3DVERTEXBUFFER9 &vtxBuff, in
 		return false;
 	}
 
-	// ¹öÅØ½º ¹öÆÛ ÃÊ±âÈ­.
+	// ë²„í…ìŠ¤ ë²„í¼ ì´ˆê¸°í™”.
 	Vertex* vertices;
 	if (FAILED(vtxBuff->Lock( 0, sizeof(Vertex), (void**)&vertices, 0)))
 		return false;
