@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="gamemain\GameMain.h">
+      <Filter>gamemain</Filter>
+    </ClInclude>
+    <ClInclude Include="window\utility.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="gamemain\GameMain.cpp">
+      <Filter>gamemain</Filter>
+    </ClCompile>
+    <ClCompile Include="window\utility.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="window">
+      <UniqueIdentifier>{c66db293-605d-4dac-8db1-6597183ddfb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gamemain">
+      <UniqueIdentifier>{2dea001f-e076-44fc-8b2f-c3983af048b3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
