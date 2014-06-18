@@ -8,7 +8,18 @@
     </ClInclude>
     <ClInclude Include="graphic.h" />
     <ClInclude Include="texture.h" />
-    <ClInclude Include="vertexbuffer.h" />
+    <ClInclude Include="Graphic\vertexbuffer.h">
+      <Filter>graphic</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic\indexbuffer.h">
+      <Filter>graphic</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic\material.h">
+      <Filter>graphic</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic\light.h">
+      <Filter>graphic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -16,7 +27,18 @@
       <Filter>graphic</Filter>
     </ClCompile>
     <ClCompile Include="texture.cpp" />
-    <ClCompile Include="vertexbuffer.cpp" />
+    <ClCompile Include="Graphic\vertexbuffer.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic\indexbuffer.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic\material.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic\light.cpp">
+      <Filter>graphic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="graphic">
