@@ -83,16 +83,16 @@
     <ClCompile Include="RenderTexture.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj">
-      <Project>{937b4bdb-2bc4-43de-9e32-ba36aee888eb}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\math\box.h" />
     <ClInclude Include="..\..\math\Math.h" />
     <ClInclude Include="..\..\math\matrix44.h" />
     <ClInclude Include="..\..\math\vector3.h" />
     <ClInclude Include="..\..\math\vector4.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj">
+      <Project>{937b4bdb-2bc4-43de-9e32-ba36aee888eb}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
