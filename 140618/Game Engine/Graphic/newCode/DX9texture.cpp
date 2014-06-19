@@ -1,6 +1,6 @@
 ﻿//140619 작성
 
-#include "..\stdafx.h"
+#include "stdafx.h"
 #include "DX9texture.h"
 
 using namespace graphic;

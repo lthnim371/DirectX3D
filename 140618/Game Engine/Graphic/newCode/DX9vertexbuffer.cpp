@@ -1,6 +1,6 @@
 //140618 작성 //140619 수정
 
-#include "..\stdafx.h"
+#include "stdafx.h"
 #include "DX9vertexbuffer.h"
 
 using namespace graphic;
@@ -10,7 +10,7 @@ cDX9VertexBuffer::cDX9VertexBuffer()
 	: m_pVtxBuff(NULL), m_vertexCount(0), m_sizeOfVertex(0), m_fvf(0)
 {}
 cDX9VertexBuffer::cDX9VertexBuffer(int vertexCount, int sizeofVertex,
-			DWORD fvf, DWORD flag = D3DUSAGE_WRITEONLY)
+			DWORD fvf, DWORD flag)
 {
 	Create(vertexCount, sizeofVertex, fvf);
 }
@@ -21,7 +21,7 @@ cDX9VertexBuffer::~cDX9VertexBuffer()
 
 //메인 함수
 bool cDX9VertexBuffer::Create(int vertexCount, int sizeofVertex,
-			DWORD fvf, DWORD flag = D3DUSAGE_WRITEONLY)
+			DWORD fvf, DWORD flag)
 {
 	m_vertexCount = vertexCount;
 	m_sizeOfVertex = sizeofVertex;
@@ -35,7 +35,7 @@ bool cDX9VertexBuffer::Create(int vertexCount, int sizeofVertex,
 
 	return true;
 }
-void* cDX9VertexBuffer::Lock(DWORD flag = 0)
+void* cDX9VertexBuffer::Lock(DWORD flag)
 {
 	if (!m_pVtxBuff)
 		return NULL;

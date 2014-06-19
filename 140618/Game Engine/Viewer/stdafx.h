@@ -56,3 +56,8 @@
 #endif
 
 
+#include "..\Common\common.h"
+#include "..\Graphic\graphic.h"
+#include "ModelView.h"
+
+using namespace common;

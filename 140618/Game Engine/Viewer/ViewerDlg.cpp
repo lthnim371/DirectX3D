@@ -6,6 +6,7 @@
 #include "Viewer.h"
 #include "ViewerDlg.h"
 #include "afxdialogex.h"
+#include "ModelView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -18,6 +19,7 @@ class CAboutDlg : public CDialogEx
 {
 public:
 	CAboutDlg();
+	
 
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_ABOUTBOX };
@@ -49,8 +51,9 @@ END_MESSAGE_MAP()
 
 
 CViewerDlg::CViewerDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(CViewerDlg::IDD, pParent)
-	, M_stlOK(_T(""))
+	: CDialogEx(CViewerDlg::IDD, pParent),
+	m_bLoop(true) ,p(NULL)
+//	, m_strOK(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -58,14 +61,16 @@ CViewerDlg::CViewerDlg(CWnd* pParent /*=NULL*/)
 void CViewerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Text(pDX, IDC_EDIT1_OK, M_stlOK);
 }
 
 BEGIN_MESSAGE_MAP(CViewerDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(IDC_BUTTON_A, &CViewerDlg::OnBnClickedButtonA)
+//	ON_BN_CLICKED(IDC_BUTTON_A, &CViewerDlg::OnBnClickedButtonA)
+//	ON_WM_LBUTTONDOWN()
+ON_BN_CLICKED(IDOK, &CViewerDlg::OnBnClickedOk)
+ON_BN_CLICKED(IDCANCEL, &CViewerDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -100,7 +105,17 @@ BOOL CViewerDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
+	MoveWindow(0, 0, 800, 600);
+
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+	p = new CModelView();
+	p->Create(NULL, L"CView", WS_CHILDWINDOW, 
+		CRect(0,0,500,500), this, 0);
+
+	graphic::cRenderer::Get()->CreateDirectX(p->GetSafeHwnd(), 500, 500);
+	
+	p->ShowWindow(SW_SHOW);
+
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -156,9 +171,80 @@ HCURSOR CViewerDlg::OnQueryDragIcon()
 
 
 
-void CViewerDlg::OnBnClickedButtonA()
+//void CViewerDlg::OnBnClickedButtonA()
+//{
+//	m_strOK = "asdjklf";
+//	UpdateData(FALSE);  //UI??의 데이터를 받거나 보낼때 사용 
+//	//AfxMessageBox(m_strOK);  //메시지 출력
+//}
+
+
+LRESULT CViewerDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	M_stlOK = "asdjklf";
-	UpdateData(FALSE);  //UI??의 데이터를 받거나 보낼때 사용 
-	//AfxMessageBox(M_stlOK);  //메시지 출력
+	//API함수 구조...그러나 MFC에서는 이렇게 하지 않을거임ㅋ
+	/*switch(message)
+	{
+		case WM_LBUTTONDOWN:
+		{
+			int i = 10;
+		}
+		break;
+	}*/
+
+	return CDialogEx::WindowProc(message, wParam, lParam);
+}
+
+//BOOL CViewerDlg::PreTranslateMessage(MSG* pMsg)  //메시지를 전부 다 받는 함수(프로시저함수보다도)
+//{
+//	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+//
+//	return CDialogEx::PreTranslateMessage(pMsg);
+//}
+
+
+//void CViewerDlg::OnLButtonDown(UINT nFlags, CPoint point)
+//{
+//	CString str; 
+//	ClientToScreen(&point);
+//	str.Format(L"%d, %d", point.x, point.y);
+////	AfxMessageBox(str);  //인자에 해당하는 내용을 출력하는 박스
+//
+//	CDialogEx::OnLButtonDown(nFlags, point);
+//}
+
+
+void CViewerDlg::MainProc()
+{	
+	while( m_bLoop )
+	{
+		MSG msg;
+		if(::PeekMessageA(&msg, NULL, 0, 0, PM_NOREMOVE))
+		{
+			if(!GetMessage(&msg, NULL, 0, 0))
+			{
+				break;
+			}
+			::TranslateMessage(&msg);
+			::DispatchMessageA(&msg);
+		}
+
+		::Sleep(0);
+	}
+}
+
+void CViewerDlg::OnBnClickedOk()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	m_bLoop = false;
+	CDialogEx::OnOK();
+}
+
+
+
+void CViewerDlg::OnBnClickedCancel()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_bLoop = false;
+	CDialogEx::OnCancel();
 }

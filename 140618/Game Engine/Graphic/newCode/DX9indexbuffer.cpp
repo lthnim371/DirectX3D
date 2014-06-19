@@ -1,6 +1,6 @@
 //140618 작성 //140619 수정
 
-#include "..\stdafx.h"
+#include "stdafx.h"
 #include "DX9indexbuffer.h"
 
 using namespace graphic;
