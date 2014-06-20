@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "afxcmn.h"
 
 
 // CViewerDlg 대화 상자
@@ -40,6 +41,8 @@ public:
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 //	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	afx_msg void OnBnClickedOk();
+	CListCtrl m_fileList;
+	afx_msg void OnItemchangedFileList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedCancel();
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 };

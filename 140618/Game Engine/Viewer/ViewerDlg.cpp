@@ -15,7 +15,7 @@
 
 CViewerDlg::CViewerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CViewerDlg::IDD, pParent),
-	m_bLoop(true) ,p(NULL)
+	m_bLoop(true) ,m_pModelView(NULL)
 //	, m_strOK(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -24,6 +24,7 @@ CViewerDlg::CViewerDlg(CWnd* pParent /*=NULL*/)
 void CViewerDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_FILE_LIST, m_fileList);
 }
 
 BEGIN_MESSAGE_MAP(CViewerDlg, CDialogEx)
@@ -32,8 +33,9 @@ BEGIN_MESSAGE_MAP(CViewerDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 //	ON_BN_CLICKED(IDC_BUTTON_A, &CViewerDlg::OnBnClickedButtonA)
 //	ON_WM_LBUTTONDOWN()
-	ON_BN_CLICKED(IDOK, &CViewerDlg::OnBnClickedOk)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_FILE_LIST, &CViewerDlg::OnItemchangedFileList)
 	ON_BN_CLICKED(IDCANCEL, &CViewerDlg::OnBnClickedCancel)
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
 
@@ -68,16 +70,27 @@ BOOL CViewerDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
-	MoveWindow(0, 0, 800, 600);
+	MoveWindow(0, 0, 1024, 768);
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	m_pModelView = new CModelView();
 	m_pModelView->Create(NULL, L"CView", WS_CHILDWINDOW, 
-		CRect(0,0,500,500), this, 0);
+		CRect(0,0,800,600), this, 0);
 
-	graphic::cRenderer::Get()->CreateDirectX(m_pModelView->GetSafeHwnd(), 500, 500);
+	
+	graphic::cRenderer::Get()->CreateDirectX(m_pModelView->GetSafeHwnd(), 800, 600);
+	m_pModelView->Init();
 	
 	m_pModelView->ShowWindow(SW_SHOW);
+
+	m_fileList.InsertColumn(0, L"Path");  //헤더 추가
+	m_fileList.SetColumnWidth(0, 300);
+	m_fileList.InsertItem(0, L"Test1");  //아이템 추가
+	m_fileList.InsertItem(1, L"Test2");
+	m_fileList.InsertItem(2, L"Test3");
+	m_fileList.InsertItem(3, L"Test4");
+
+	DragAcceptFiles(TRUE);
 
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -155,12 +168,12 @@ LRESULT CViewerDlg::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 	return CDialogEx::WindowProc(message, wParam, lParam);
 }
 
-//BOOL CViewerDlg::PreTranslateMessage(MSG* pMsg)  //메시지를 전부 다 받는 함수(프로시저함수보다도)
-//{
-//	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-//
-//	return CDialogEx::PreTranslateMessage(pMsg);
-//}
+BOOL CViewerDlg::PreTranslateMessage(MSG* pMsg)  //메시지를 전부 다 받는 함수(프로시저함수보다도)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+
+	return CDialogEx::PreTranslateMessage(pMsg);
+}
 
 
 //void CViewerDlg::OnLButtonDown(UINT nFlags, CPoint point)
@@ -196,19 +209,34 @@ void CViewerDlg::MainProc()
 	}
 }
 
-void CViewerDlg::OnBnClickedOk()
+void CViewerDlg::OnItemchangedFileList(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 
-	m_bLoop = false;
-	CDialogEx::OnOK();
+//	CString str = m_fileList.GetItemText(pNMLV->iItem, 0);
+//	AfxMessageBox(str);
 }
-
 
 
 void CViewerDlg::OnBnClickedCancel()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_bLoop = false;
 	CDialogEx::OnCancel();
+}
+
+
+void CViewerDlg::OnDropFiles(HDROP hDropInfo)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	HDROP hdrop = hDropInfo;
+	WCHAR filePath[MAX_PATH];
+	const UINT size = DragQueryFile(hdrop, 0, filePath, MAX_PATH);  //가져온 파일의 정보 얻어오기
+	if(size == 0)
+		return;
+
+	m_fileList.InsertItem(m_fileList.GetItemCount(), filePath);
+
+	CDialogEx::OnDropFiles(hDropInfo);  //파일을 가져다 놓으면 그 파일의 경로가 저장됨
 }
