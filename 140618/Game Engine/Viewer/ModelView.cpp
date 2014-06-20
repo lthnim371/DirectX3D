@@ -1,4 +1,4 @@
-// ModelView.cpp : ±¸Çö ÆÄÀÏÀÔ´Ï´Ù.
+ï»¿// ModelView.cpp : êµ¬í˜„ íŒŒì¼ìž…ë‹ˆë‹¤.
 //
 
 #include "stdafx.h"
@@ -24,20 +24,20 @@ BEGIN_MESSAGE_MAP(CModelView, CView)
 END_MESSAGE_MAP()
 
 
-// CModelView ±×¸®±âÀÔ´Ï´Ù.
+// CModelView ê·¸ë¦¬ê¸°ìž…ë‹ˆë‹¤.
 
 void CModelView::OnDraw(CDC* pDC)
 {
 //	CDocument* pDoc = GetDocument();
-	// TODO: ¿©±â¿¡ ±×¸®±â ÄÚµå¸¦ Ãß°¡ÇÕ´Ï´Ù.
+	// TODO: ì—¬ê¸°ì— ê·¸ë¦¬ê¸° ì½”ë“œë¥¼ ì¶”ê°€í•©ë‹ˆë‹¤.
 //	pDC->TextOutW(10,10, m_str);
 
-	Render();
+//	Render();
 
 }
 
 
-// CModelView Áø´ÜÀÔ´Ï´Ù.
+// CModelView ì§„ë‹¨ìž…ë‹ˆë‹¤.
 
 #ifdef _DEBUG
 void CModelView::AssertValid() const
@@ -54,12 +54,12 @@ void CModelView::Dump(CDumpContext& dc) const
 #endif //_DEBUG
 
 
-// CModelView ¸Þ½ÃÁö Ã³¸®±âÀÔ´Ï´Ù.
+// CModelView ë©”ì‹œì§€ ì²˜ë¦¬ê¸°ìž…ë‹ˆë‹¤.
 
 
 void CModelView::OnMouseMove(UINT nFlags, CPoint point)
 {
-	// TODO: ¿©±â¿¡ ¸Þ½ÃÁö Ã³¸®±â ÄÚµå¸¦ Ãß°¡ ¹×/¶Ç´Â ±âº»°ªÀ» È£ÃâÇÕ´Ï´Ù.
+	// TODO: ì—¬ê¸°ì— ë©”ì‹œì§€ ì²˜ë¦¬ê¸° ì½”ë“œë¥¼ ì¶”ê°€ ë°/ë˜ëŠ” ê¸°ë³¸ê°’ì„ í˜¸ì¶œí•©ë‹ˆë‹¤.
 //	m_str.Format(L"%d, %d", point.x, point.y);
 //	CWnd::Invalidate(true);
 		
@@ -71,7 +71,7 @@ void CModelView::OnInitialUpdate()
 {
 	CView::OnInitialUpdate();
 
-	// TODO: ¿©±â¿¡ Æ¯¼öÈ­µÈ ÄÚµå¸¦ Ãß°¡ ¹×/¶Ç´Â ±âº» Å¬·¡½º¸¦ È£ÃâÇÕ´Ï´Ù.
+	// TODO: ì—¬ê¸°ì— íŠ¹ìˆ˜í™”ëœ ì½”ë“œë¥¼ ì¶”ê°€ ë°/ë˜ëŠ” ê¸°ë³¸ í´ëž˜ìŠ¤ë¥¼ í˜¸ì¶œí•©ë‹ˆë‹¤.
 
 //	graphic::cRenderer::Get()->CreateDirectX(m_hWnd, 500, 500);
 }
@@ -79,20 +79,20 @@ void CModelView::OnInitialUpdate()
 void CModelView::Render()
 {
 	if (SUCCEEDED(graphic::GetDevice()->Clear( 
-		0,			//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ °¹¼ö		( ÀüÃ¼ Å¬¸®¾î 0 )
-		NULL,		//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ Æ÷ÀÎÅÍ		( ÀüÃ¼ Å¬¸®¾î NULL )
-		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//Ã»¼ÒµÉ ¹öÆÛ ÇÃ·¹±× ( D3DCLEAR_TARGET ÄÃ·¯¹öÆÛ, D3DCLEAR_ZBUFFER ±íÀÌ¹öÆÛ, D3DCLEAR_STENCIL ½ºÅÙ½Ç¹öÆÛ
-		D3DCOLOR_XRGB(150, 150, 150),			//ÄÃ·¯¹öÆÛ¸¦ Ã»¼ÒÇÏ°í Ã¤¿öÁú »ö»ó( 0xAARRGGBB )
-		1.0f,				//±íÀÌ¹öÆÛ¸¦ Ã»¼ÒÇÒ°ª ( 0 ~ 1 0 ÀÌ Ä«¸Þ¶ó¿¡¼­ Á¦ÀÏ°¡±î¿î 1 ÀÌ Ä«¸Þ¶ó¿¡¼­ Á¦ÀÏ ¸Õ )
-		0					//½ºÅÙ½Ç ¹öÆÛ¸¦ Ã¤¿ï°ª
+		0,			//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ ê°¯ìˆ˜		( ì „ì²´ í´ë¦¬ì–´ 0 )
+		NULL,		//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ í¬ì¸í„°		( ì „ì²´ í´ë¦¬ì–´ NULL )
+		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//ì²­ì†Œë  ë²„í¼ í”Œë ˆê·¸ ( D3DCLEAR_TARGET ì»¬ëŸ¬ë²„í¼, D3DCLEAR_ZBUFFER ê¹Šì´ë²„í¼, D3DCLEAR_STENCIL ìŠ¤í…ì‹¤ë²„í¼
+		D3DCOLOR_XRGB(150, 150, 150),			//ì»¬ëŸ¬ë²„í¼ë¥¼ ì²­ì†Œí•˜ê³  ì±„ì›Œì§ˆ ìƒ‰ìƒ( 0xAARRGGBB )
+		1.0f,				//ê¹Šì´ë²„í¼ë¥¼ ì²­ì†Œí• ê°’ ( 0 ~ 1 0 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ê°€ê¹Œìš´ 1 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ ë¨¼ )
+		0					//ìŠ¤í…ì‹¤ ë²„í¼ë¥¼ ì±„ìš¸ê°’
 		)))
 	{
-		//È­¸é Ã»¼Ò°¡ ¼º°øÀûÀ¸·Î ÀÌ·ç¾î Á³´Ù¸é... ·£´õ¸µ ½ÃÀÛ
+		//í™”ë©´ ì²­ì†Œê°€ ì„±ê³µì ìœ¼ë¡œ ì´ë£¨ì–´ ì¡Œë‹¤ë©´... ëžœë”ë§ ì‹œìž‘
 		graphic::GetDevice()->BeginScene();
 
-		//·£´õ¸µ ³¡
+		//ëžœë”ë§ ë
 		graphic::GetDevice()->EndScene();
-		//·£´õ¸µÀÌ ³¡³µÀ¸¸é ·£´õ¸µµÈ ³»¿ë È­¸éÀ¸·Î Àü¼Û
+		//ëžœë”ë§ì´ ëë‚¬ìœ¼ë©´ ëžœë”ë§ëœ ë‚´ìš© í™”ë©´ìœ¼ë¡œ ì „ì†¡
 		graphic::GetDevice()->Present( NULL, NULL, NULL, NULL );
 	}
 }

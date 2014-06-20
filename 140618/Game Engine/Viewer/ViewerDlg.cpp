@@ -13,43 +13,6 @@
 #endif
 
 
-// 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
-
-class CAboutDlg : public CDialogEx
-{
-public:
-	CAboutDlg();
-	
-
-// 대화 상자 데이터입니다.
-	enum { IDD = IDD_ABOUTBOX };
-
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
-
-// 구현입니다.
-protected:
-	DECLARE_MESSAGE_MAP()
-};
-
-CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
-{
-}
-
-void CAboutDlg::DoDataExchange(CDataExchange* pDX)
-{
-	CDialogEx::DoDataExchange(pDX);
-}
-
-BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
-END_MESSAGE_MAP()
-
-
-// CViewerDlg 대화 상자
-
-
-
-
 CViewerDlg::CViewerDlg(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CViewerDlg::IDD, pParent),
 	m_bLoop(true) ,p(NULL)
@@ -69,8 +32,8 @@ BEGIN_MESSAGE_MAP(CViewerDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 //	ON_BN_CLICKED(IDC_BUTTON_A, &CViewerDlg::OnBnClickedButtonA)
 //	ON_WM_LBUTTONDOWN()
-ON_BN_CLICKED(IDOK, &CViewerDlg::OnBnClickedOk)
-ON_BN_CLICKED(IDCANCEL, &CViewerDlg::OnBnClickedCancel)
+	ON_BN_CLICKED(IDOK, &CViewerDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDCANCEL, &CViewerDlg::OnBnClickedCancel)
 END_MESSAGE_MAP()
 
 
@@ -108,13 +71,13 @@ BOOL CViewerDlg::OnInitDialog()
 	MoveWindow(0, 0, 800, 600);
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	p = new CModelView();
-	p->Create(NULL, L"CView", WS_CHILDWINDOW, 
+	m_pModelView = new CModelView();
+	m_pModelView->Create(NULL, L"CView", WS_CHILDWINDOW, 
 		CRect(0,0,500,500), this, 0);
 
-	graphic::cRenderer::Get()->CreateDirectX(p->GetSafeHwnd(), 500, 500);
+	graphic::cRenderer::Get()->CreateDirectX(m_pModelView->GetSafeHwnd(), 500, 500);
 	
-	p->ShowWindow(SW_SHOW);
+	m_pModelView->ShowWindow(SW_SHOW);
 
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -124,8 +87,6 @@ void CViewerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
 	{
-		CAboutDlg dlgAbout;
-		dlgAbout.DoModal();
 	}
 	else
 	{
@@ -227,6 +188,9 @@ void CViewerDlg::MainProc()
 			::TranslateMessage(&msg);
 			::DispatchMessageA(&msg);
 		}
+
+		if( m_pModelView )
+			m_pModelView->Render();
 
 		::Sleep(0);
 	}

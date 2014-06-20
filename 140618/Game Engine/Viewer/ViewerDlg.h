@@ -26,7 +26,7 @@ protected:
 	HICON m_hIcon;
 
 	bool m_bLoop;
-	CModelView *p;
+	CModelView *m_pModelView;
 
 	// 생성된 메시지 맵 함수
 	virtual BOOL OnInitDialog();
@@ -39,7 +39,7 @@ public:
 //	CString m_strOK;
 	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 //	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-//	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
 };
