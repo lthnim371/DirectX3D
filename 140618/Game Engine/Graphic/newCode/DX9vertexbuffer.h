@@ -30,6 +30,10 @@ namespace graphic
 		//버퍼 해제
 		void Clear();
 
+		//객체 저장
+		inline void SetVertexCount(int vtxCnt) { m_vertexCount = vtxCnt; };
+		inline void SetSizeOfVertex(int sizeOfVertex) { m_sizeOfVertex = sizeOfVertex; };
+		inline void SetFVF(DWORD fvf) { m_fvf = fvf; };
 		//객체 반환
 		inline LPDIRECT3DVERTEXBUFFER9 GetVtxbuff() const { return m_pVtxBuff; };
 		inline int GetVertexCount() const { return m_vertexCount; };

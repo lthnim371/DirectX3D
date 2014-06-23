@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fileload.h"
 
 // CModelView 뷰입니다.
 
@@ -16,12 +17,18 @@ public:
 	void UpdateCamera();
 	void Render();
 
+	void FileLoad(const string& fileName);
+
 private:  //멤버변수
-	Vector3 test;
-	Matrix44 m_camPos;
+	Vector3 m_camPos;
 	bool m_bmouseRButton;
 	POINT m_ptMousePrev;
 	CString m_str;
+	
+	graphic::cDX9VertexBuffer m_testVtxBuff;
+	graphic::cDX9IndexBuffer m_testIdxBuff;
+	vector<graphic::cDX9VertexBuffer> m_vtxBuff;
+	vector<graphic::cDX9IndexBuffer> m_idxBuff;
 
 public:
 	virtual void OnDraw(CDC* pDC);      // 이 뷰를 그리기 위해 재정의되었습니다.  //hdc 추상화시켜줌

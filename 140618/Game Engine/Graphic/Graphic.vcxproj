@@ -77,6 +77,11 @@
     <ClInclude Include="base\vertexformat.h" />
     <ClInclude Include="graphic.h" />
     <ClInclude Include="manager\Renderer.h" />
+    <ClInclude Include="newcode\DX9indexbuffer.h" />
+    <ClInclude Include="newcode\DX9light.h" />
+    <ClInclude Include="newcode\DX9material.h" />
+    <ClInclude Include="newcode\DX9texture.h" />
+    <ClInclude Include="newcode\DX9vertexbuffer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -88,6 +93,11 @@
     <ClCompile Include="base\texture.cpp" />
     <ClCompile Include="base\vertexbuffer.cpp" />
     <ClCompile Include="manager\Renderer.cpp" />
+    <ClCompile Include="newcode\DX9indexbuffer.cpp" />
+    <ClCompile Include="newcode\DX9Light.cpp" />
+    <ClCompile Include="newcode\DX9material.cpp" />
+    <ClCompile Include="newcode\DX9texture.cpp" />
+    <ClCompile Include="newcode\DX9vertexbuffer.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

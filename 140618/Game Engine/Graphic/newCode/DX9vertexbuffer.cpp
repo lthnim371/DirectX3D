@@ -40,7 +40,7 @@ void* cDX9VertexBuffer::Lock(DWORD flag)
 	if (!m_pVtxBuff)
 		return NULL;
 
-	void* vertices;
+	void* vertices = NULL;
 	m_pVtxBuff->Lock( 0, 0, (void**)&vertices, flag );
 	
 	return vertices;

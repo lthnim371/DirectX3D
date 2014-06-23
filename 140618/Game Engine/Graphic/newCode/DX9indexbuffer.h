@@ -25,6 +25,8 @@ namespace graphic
 		//버퍼 해제
 		void Clear();
 		
+		//객체 저장
+		inline void SetFaceCount(int faceCount) { m_faceCount = faceCount; };
 		//객체 반환
 		inline LPDIRECT3DINDEXBUFFER9 GetIndexbuff() const { return m_pIdxBuff; };
 		inline int GetFaceCount() const { return m_faceCount; };

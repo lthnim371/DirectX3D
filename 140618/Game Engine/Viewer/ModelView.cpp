@@ -8,13 +8,12 @@
 #include "Viewer.h"
 #include "ModelView.h"
 
-
 // CModelView
 
 //IMPLEMENT_DYNCREATE(CModelView, CView)
 
 CModelView::CModelView()
-	: m_bmouseRButton(false)
+	: m_bmouseRButton(false), m_camPos(100,200,-300)
 {
 }
 
@@ -96,21 +95,20 @@ void CModelView::Render()
 
 void CModelView::Init()
 {
-//	m_camPos.SetTranslate(Vector3(100,100,-500));
-	test = Vector3(100, 200, -300);
 	UpdateCamera();
 
 	Matrix44 proj;
-	proj.SetProjection(D3DX_PI * 0.5f, (float)800 / (float) 600, 1.f, 1000.0f) ;
+	proj.SetProjection(D3DX_PI * 0.5f, (float)800 / (float)600, 1.f, 1000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
 }
 
 void CModelView::UpdateCamera()
 {
-	Vector3 dir = Vector3(0,0,0) - m_camPos.GetPosition();//Vector3(100,250,-250);
+	Matrix44 V;
+	Vector3 dir = Vector3(0,0,0) - m_camPos;//Vector3(100,250,-250);
 	dir.Normalize();
-	m_camPos.SetView(m_camPos.GetPosition(), dir, Vector3(0,1,0));
-	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_camPos);
+	V.SetView(m_camPos, dir, Vector3(0,1,0));
+	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&V);
 }
 
 void CModelView::OnRButtonDown(UINT nFlags, CPoint point)
@@ -133,25 +131,17 @@ void CModelView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		CPoint ptMouseCurr = point - m_ptMousePrev;
 		m_ptMousePrev = point;
-		Matrix44 temp;
+		Matrix44 tempPos;
 
-		if(ptMouseCurr.x != 0)
-		{
-			Matrix44 rotateX;
-			float testX = -ptMouseCurr.x * 0.005f;
-			rotateX.SetRotationX(testX);
-			m_camPos *= rotateX;
-		}
-		else if(ptMouseCurr.y != 0)
-		{
-			Matrix44 rotateY;
-			float testY = -ptMouseCurr.x * 0.005f;
-			rotateY.SetRotationY(testY);		
-			m_camPos *= rotateY;
-		}
-
-//		m_camPos *= temp;
-//		test *= m_camPos;
+		Matrix44 rotateX;
+		rotateX.SetRotationX(ptMouseCurr.y * 0.005f);
+		//tempPos *= rotateX;
+		
+		Matrix44 rotateY;
+		rotateY.SetRotationY(ptMouseCurr.x * 0.005f);		
+		
+		tempPos = rotateX * rotateY;
+		m_camPos *= tempPos;
 
 		UpdateCamera();
 	}
@@ -167,4 +157,9 @@ void CModelView::OnRButtonUp(UINT nFlags, CPoint point)
 	m_bmouseRButton = false;
 
 	CView::OnRButtonUp(nFlags, point);
+}
+
+void CModelView::FileLoad(const string& fileName)
+{
+	cFileLoad::Get()->ReadModelFile(fileName, m_testVtxBuff, m_testIdxBuff);
 }

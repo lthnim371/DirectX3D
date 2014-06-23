@@ -85,10 +85,10 @@ BOOL CViewerDlg::OnInitDialog()
 
 	m_fileList.InsertColumn(0, L"Path");  //헤더 추가
 	m_fileList.SetColumnWidth(0, 300);
-	m_fileList.InsertItem(0, L"Test1");  //아이템 추가
-	m_fileList.InsertItem(1, L"Test2");
-	m_fileList.InsertItem(2, L"Test3");
-	m_fileList.InsertItem(3, L"Test4");
+	//m_fileList.InsertItem(0, L"Test1");  //아이템 추가
+	//m_fileList.InsertItem(1, L"Test2");
+	//m_fileList.InsertItem(2, L"Test3");
+	//m_fileList.InsertItem(3, L"Test4");
 
 	DragAcceptFiles(TRUE);
 
@@ -237,6 +237,16 @@ void CViewerDlg::OnDropFiles(HDROP hDropInfo)
 		return;
 
 	m_fileList.InsertItem(m_fileList.GetItemCount(), filePath);
+
+	int AnsiStrSize = WideCharToMultiByte(CP_ACP, 0, filePath, -1, NULL, 0, NULL, NULL); 
+	//해당 사이즈 만큼 할당 해주고
+	char *AnsiStr = new char[AnsiStrSize];
+	//변환하세요
+	WideCharToMultiByte(CP_ACP, 0, filePath, -1, AnsiStr, AnsiStrSize, 0, 0);
+		
+	m_pModelView->FileLoad( format(AnsiStr) );
+
+	delete []AnsiStr;
 
 	CDialogEx::OnDropFiles(hDropInfo);  //파일을 가져다 놓으면 그 파일의 경로가 저장됨
 }

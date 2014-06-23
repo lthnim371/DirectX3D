@@ -28,6 +28,21 @@
     <ClInclude Include="base\vertexformat.h">
       <Filter>base</Filter>
     </ClInclude>
+    <ClInclude Include="newcode\DX9indexbuffer.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
+    <ClInclude Include="newcode\DX9light.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
+    <ClInclude Include="newcode\DX9material.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
+    <ClInclude Include="newcode\DX9texture.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
+    <ClInclude Include="newcode\DX9vertexbuffer.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -52,6 +67,21 @@
     <ClCompile Include="manager\Renderer.cpp">
       <Filter>manager</Filter>
     </ClCompile>
+    <ClCompile Include="newcode\DX9indexbuffer.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
+    <ClCompile Include="newcode\DX9Light.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
+    <ClCompile Include="newcode\DX9material.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
+    <ClCompile Include="newcode\DX9texture.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
+    <ClCompile Include="newcode\DX9vertexbuffer.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="base">
@@ -59,6 +89,9 @@
     </Filter>
     <Filter Include="manager">
       <UniqueIdentifier>{804bc56f-36fa-4643-8c34-4d4bc353e013}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="newcode">
+      <UniqueIdentifier>{82fa91b5-cfb3-4452-b648-862b3912bf9d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
