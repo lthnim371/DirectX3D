@@ -6,7 +6,9 @@ class cFileLoad : public cSingleton<cFileLoad>
 {
 public:
 	bool ReadModelFile( const string &fileName, graphic::cVertexBuffer& vtxBuff, graphic::cIndexBuffer& idxBuff );
-}
+protected:
+	void ComputeNormals( graphic::cVertexBuffer& vtxBuff, graphic::cIndexBuffer& idxBuff );
+};
 
 bool cFileLoad::ReadModelFile(const string &fileName, graphic::cVertexBuffer& vtxBuff, graphic::cIndexBuffer& idxBuff )
 {
@@ -25,7 +27,7 @@ bool cFileLoad::ReadModelFile(const string &fileName, graphic::cVertexBuffer& vt
 	fin >> vtx >> eq >> tempVtxCnt; 
 //	vtxBuff.SetVertexCount(tempCnt);
 
-	if (vtxBuff.GetVertexCount() <= 0)
+	if (tempVtxCnt <= 0)
 		return  false;
 
 	vector<graphic::sVertexNormTex> tempVtxBuff;
@@ -191,7 +193,7 @@ bool cFileLoad::ReadModelFile(const string &fileName, graphic::cVertexBuffer& vt
 //	vtxBuff.SetVertexCount( tempVtxBuff.size() );  //해당 버텍스마다 추가된 u,v좌표로 인해 버텍스 갯수가 늘어났으므로 버텍스 사이즈(갯수) 재설정
 
 	// 버텍스 버퍼 생성.
-	if( vtxBuff.Create( tempVtxBuff.size(), sizeof(graphic::sVertexNormTex), graphic::sVertexNormTex::FVF ))
+	if( !vtxBuff.Create( tempVtxBuff.size(), sizeof(graphic::sVertexNormTex), graphic::sVertexNormTex::FVF ))
 		return false;
 		
 	// 버텍스 버퍼 초기화.
@@ -201,7 +203,7 @@ bool cFileLoad::ReadModelFile(const string &fileName, graphic::cVertexBuffer& vt
 	vtxBuff.Unlock();
 
 	// 인덱스 버퍼 생성.
-	if( idxBuff.Create( tempIdxCnt ))
+	if( !idxBuff.Create( tempIdxCnt ))
 		return false;
 		
 	WORD *indices = (WORD*)idxBuff.Lock();
@@ -209,6 +211,36 @@ bool cFileLoad::ReadModelFile(const string &fileName, graphic::cVertexBuffer& vt
 		indices[ i] = tempIdxBuff[ i];
 	idxBuff.Unlock();
 
-//	ComputeNormals(vtxBuff, vtxSize, idxBuff, faceSize);
+	ComputeNormals(vtxBuff, idxBuff);
 	return true;
+}
+
+void cFileLoad::ComputeNormals( graphic::cVertexBuffer& vtxBuff, graphic::cIndexBuffer& idxBuff )
+{
+	graphic::sVertexNormTex* vertices = (graphic::sVertexNormTex*)vtxBuff.Lock();//( 0, sizeof(Vertex), (void**)&vertices, 0);
+	WORD *indices = (WORD*)idxBuff.Lock();//(0, 0, (void**)&indices, 0);
+
+	for (int i=0; i < idxBuff.GetFaceCount()*3; i+=3)
+	{
+		Vector3 p1 = vertices[ indices[ i]].p;
+		Vector3 p2 = vertices[ indices[ i+1]].p;
+		Vector3 p3 = vertices[ indices[ i+2]].p;
+
+		Vector3 v1 = p2 - p1;
+		Vector3 v2 = p3 - p1;
+		v1.Normalize();
+		v2.Normalize();
+		Vector3 n = v1.CrossProduct(v2);
+		n.Normalize();
+
+		vertices[ indices[ i]].n += n;
+		vertices[ indices[ i+1]].n += n;
+		vertices[ indices[ i+2]].n += n;
+	}
+
+	for (int i=0; i < vtxBuff.GetVertexCount(); ++i)
+		vertices[ i].n.Normalize();
+
+	vtxBuff.Unlock();
+	idxBuff.Unlock();
 }

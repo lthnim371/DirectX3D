@@ -15,6 +15,7 @@ using namespace common;
 #include "base\vertexbuffer.h"
 #include "base\indexbuffer.h"
 #include "base\vertexformat.h"
+#include "base\texture.h"
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )

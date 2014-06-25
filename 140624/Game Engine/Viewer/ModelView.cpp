@@ -5,16 +5,31 @@
 #include "Viewer.h"
 #include "ModelView.h"
 
+#include "fileload.h"
 
 // CModelView
 CModelView::CModelView() : 
-	m_RButtonDown(false), m_LButtonDown(false)
+	m_RButtonDown(false), m_LButtonDown(false), m_sfileIndex(0)
 {
 
 }
 
 CModelView::~CModelView()
 {
+	//버텍스, 인덱스버퍼 모음 해제
+	vector<graphic::cVertexBuffer*>::iterator itVertex;
+	for(itVertex = m_vtxBuffGroup.begin(); itVertex != m_vtxBuffGroup.end(); ++itVertex)
+	{
+		/*delete (*itVertex);
+		itVertex = m_vtxBuffGroup.erase(itVertex);*/
+		SAFE_DELETE(*itVertex);
+	}
+	for(auto itIndex = m_idxBuffGroup.begin(); itIndex != m_idxBuffGroup.end(); ++itIndex)
+	{
+		/*delete (*itIndex);
+		itIndex = m_idxBuffGroup.erase(itIndex);*/
+		SAFE_DELETE(*itIndex);
+	}
 	SAFE_RELEASE(m_Mesh);
 	SAFE_RELEASE(m_CloneMesh);
 }
@@ -85,14 +100,23 @@ void CModelView::Render()
 		
 		m_Mtrl.Bind();
 		graphic::GetDevice()->SetTransform( D3DTS_WORLD, (D3DXMATRIX*)&m_rotateTm );
-		m_Mesh->DrawSubset(0);
+		//m_Mesh->DrawSubset(0);
 
-		Matrix44 clonePos;
-		clonePos.SetTranslate(Vector3(250,0,0));
-		graphic::GetDevice()->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&(m_rotateTm * clonePos) );
-		m_CloneMesh->DrawSubset(0);
+		//Matrix44 clonePos;
+		//clonePos.SetTranslate(Vector3(250,0,0));
+		//graphic::GetDevice()->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&(m_rotateTm * clonePos) );
+		//m_CloneMesh->DrawSubset(0);
 
-
+		if(m_vtxBuffGroup.size() > 0)
+		{
+			m_vtxBuffGroup[m_sfileIndex]->Bind();
+			m_idxBuffGroup[m_sfileIndex]->Bind();
+			graphic::GetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0,
+				m_vtxBuffGroup[m_sfileIndex]->GetVertexCount(),
+				0,
+				m_idxBuffGroup[m_sfileIndex]->GetFaceCount() );
+		}
+		
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
 		//랜더링이 끝났으면 랜더링된 내용 화면으로 전송
@@ -158,10 +182,8 @@ void CModelView::Init()
 		);
 
 
-
-
-
-	m_Mtrl.InitBlue();
+//	m_Mtrl.InitBlue();
+	m_Mtrl.InitWhite();
 
 	Vector4 color(1,1,1,1);
 	m_Light.Init(graphic::cLight::LIGHT_DIRECTIONAL,
@@ -193,9 +215,28 @@ void CModelView::UpdateCamera()
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&V);
 }
 
-void CModelView::FileLoad()
+void CModelView::FileLoad(short type, const string& fileName)
 {
-	
+	switch(type)
+	{
+		case DAT:
+			{
+				graphic::cVertexBuffer* pvertexBuffer = new graphic::cVertexBuffer;
+				graphic::cIndexBuffer* pindexBuffer = new graphic::cIndexBuffer;
+
+				cFileLoad::Get()->ReadModelFile(fileName, *pvertexBuffer, *pindexBuffer);
+
+				m_vtxBuffGroup.push_back(pvertexBuffer);
+				m_idxBuffGroup.push_back(pindexBuffer);		
+			}
+			break;
+		case JPG:
+			{
+				m_texture.Create(fileName);
+				m_texture.Bind(0);
+			}
+			break;
+	}
 }
 
 void CModelView::OnRButtonDown(UINT nFlags, CPoint point)

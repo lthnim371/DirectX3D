@@ -2,12 +2,12 @@
 
 namespace graphic
 {
-	//struct sVertexDiffuse
-	//{
-	//	Vector3 p;
-	//	DWORD c;
-	//	enum {FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE};
-	//};
+	struct sVertexDiffuse
+	{
+		Vector3 p;
+		DWORD c;
+		enum {FVF = D3DFVF_XYZ | D3DFVF_DIFFUSE};
+	};
 
 
 	class cRenderer : public common::cSingleton<cRenderer>

@@ -1,5 +1,9 @@
 #pragma once
 
+enum FILETYPE
+{
+	DAT = 1, JPG,
+};
 
 // CModelView ∫‰¿‘¥œ¥Ÿ.
 
@@ -12,10 +16,11 @@ public:
 	void Init();
 	void Render();
 	void UpdateCamera();
-	void FileLoad();
+	
+	void FileLoad(short type, const string& fileName);
 
 	CPoint m_mousePos;
-
+	short m_sfileIndex;
 
 protected:
 	Matrix44 m_rotateTm;
@@ -25,7 +30,10 @@ protected:
 	bool m_LButtonDown;
 	bool m_RButtonDown;
 	CPoint m_curPos;
-
+		
+	vector<graphic::cVertexBuffer*> m_vtxBuffGroup;
+	vector<graphic::cIndexBuffer*> m_idxBuffGroup;
+	graphic::cTexture m_texture;
 
 	graphic::cLight m_Light;
 	graphic::cMaterial m_Mtrl;

@@ -409,7 +409,7 @@ void Render(int timeDelta)
 		g_pDevice->SetSamplerState(0, D3DSAMP_ADDRESSU, global->addressMode) ;
 		g_pDevice->SetSamplerState(0, D3DSAMP_ADDRESSV, global->addressMode) ;
 
-		g_pDevice->SetMaterial(&global->mtrl);
+//		g_pDevice->SetMaterial(&global->mtrl);
 
 		g_pDevice->SetTexture(0, global->texture);
 		g_pDevice->SetStreamSource( 0, global->vb, 0, sizeof(Vertex) );
