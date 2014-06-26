@@ -1,5 +1,9 @@
 #pragma once
 
+enum FILETYPE
+{
+	DAT = 1, JPG,
+};
 
 // CModelView ∫‰¿‘¥œ¥Ÿ.
 
@@ -13,8 +17,11 @@ public:
 	void Render();
 	void UpdateCamera();
 
+	void FileLoad(short type, const string& fileName);
+
 	CPoint m_mousePos;
 
+	short m_sfileIndex;
 
 protected:
 	Matrix44 m_rotateTm;
@@ -31,6 +38,8 @@ protected:
 	LPD3DXMESH m_Mesh;
 	vector< graphic::cMaterial > m_Mtrls;
 	vector< graphic::cTexture > m_Textures;
+
+	graphic::cDX9Mesh m_mesh;
 
 
 public:

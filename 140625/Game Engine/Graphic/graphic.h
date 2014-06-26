@@ -13,5 +13,15 @@ using namespace common;
 #include "base/material.h"
 #include "base/texture.h"
 
+
+#include "newcode\DX9vertexbuffer.h"
+#include "newcode\DX9indexbuffer.h"
+#include "newcode\DX9material.h"
+#include "newcode\DX9light.h"
+#include "newcode\DX9texture.h"
+#include "base\vertexformat.h"
+#include "newcode\DX9mesh.h"
+
+
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )

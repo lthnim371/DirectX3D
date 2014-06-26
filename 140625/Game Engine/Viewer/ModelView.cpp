@@ -81,14 +81,27 @@ void CModelView::Render()
 		graphic::GetRenderer()->RenderAxis();
 
 
-		m_Mtrl.Bind();
+		//m_Mtrl.Bind();
 
-		for( int i = 0; i < (int)m_Mtrls.size(); ++i )
-		{
-			m_Mtrls[ i].Bind();
-			m_Textures[ i].Bind(0);
-			m_Mesh->DrawSubset( i );
-		}
+		//for( int i = 0; i < (int)m_Mtrls.size(); ++i )
+		//{
+		//	m_Mtrls[ i].Bind();
+		//	m_Textures[ i].Bind(0);
+		//	m_Mesh->DrawSubset( i );
+		//}
+		
+		/*m_mesh.Bind();  //에러 발생 : get을 두번이나 걸쳐서 얻어오니 에러가 난다
+		graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+			0, 0,
+			m_mesh.GetVertexBuffer().GetVertexCount(),
+			0,
+			m_mesh.GetIndexBuffer().GetFaceCount() );*/
+		m_mesh.Bind();
+		graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+			0, 0,
+			28,
+			0,
+			12 );
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
@@ -100,45 +113,45 @@ void CModelView::Render()
 
 void CModelView::Init()
 {
-	HRESULT hr;
-	ID3DXBuffer *adjBuff = NULL;
-	ID3DXBuffer *mtrlBuff = NULL;
-	DWORD numMtrls = 0;
+	//HRESULT hr;
+	//ID3DXBuffer *adjBuff = NULL;
+	//ID3DXBuffer *mtrlBuff = NULL;
+	//DWORD numMtrls = 0;
 
-	hr = D3DXLoadMeshFromXA( "../media/seat woman.x", D3DXMESH_MANAGED, 
-		graphic::GetDevice(), &adjBuff, &mtrlBuff, 0, &numMtrls, &m_Mesh );
-	if (FAILED(hr))
-		return;
+	//hr = D3DXLoadMeshFromXA( "../media/seat woman.x", D3DXMESH_MANAGED, 
+	//	graphic::GetDevice(), &adjBuff, &mtrlBuff, 0, &numMtrls, &m_Mesh );
+	//if (FAILED(hr))
+	//	return;
 
-	/////////////////////////////////////////////////////////////////////////////
-	if (mtrlBuff && numMtrls > 0)
-	{
-		D3DXMATERIAL *mtrls = (D3DXMATERIAL*)mtrlBuff->GetBufferPointer();
-		m_Textures.reserve( numMtrls );
+	///////////////////////////////////////////////////////////////////////////////
+	//if (mtrlBuff && numMtrls > 0)
+	//{
+	//	D3DXMATERIAL *mtrls = (D3DXMATERIAL*)mtrlBuff->GetBufferPointer();
+	//	m_Textures.reserve( numMtrls );
 
-		for (int i=0; i < (int)numMtrls; ++i)
-		{
-			mtrls[ i].MatD3D.Ambient = mtrls[ i].MatD3D.Diffuse;
-			graphic::cMaterial material;
-			material.Init(mtrls[ i].MatD3D);
-			m_Mtrls.push_back( material );
+	//	for (int i=0; i < (int)numMtrls; ++i)
+	//	{
+	//		mtrls[ i].MatD3D.Ambient = mtrls[ i].MatD3D.Diffuse;
+	//		graphic::cMaterial material;
+	//		material.Init(mtrls[ i].MatD3D);
+	//		m_Mtrls.push_back( material );
 
-			if (mtrls[ i].pTextureFilename)
-			{
-				string filePath = "../media/";
-				filePath += mtrls[ i].pTextureFilename;
+	//		if (mtrls[ i].pTextureFilename)
+	//		{
+	//			string filePath = "../media/";
+	//			filePath += mtrls[ i].pTextureFilename;
 
-				m_Textures.push_back(graphic::cTexture());
-				m_Textures.back().Create( filePath );
-			}
-			else
-			{
-				m_Textures.push_back(graphic::cTexture());
-			}
-		}
-	}
-	mtrlBuff->Release();
-	adjBuff->Release();
+	//			m_Textures.push_back(graphic::cTexture());
+	//			m_Textures.back().Create( filePath );
+	//		}
+	//		else
+	//		{
+	//			m_Textures.push_back(graphic::cTexture());
+	//		}
+	//	}
+	//}
+	//mtrlBuff->Release();
+	//adjBuff->Release();
 
 
 
@@ -172,6 +185,24 @@ void CModelView::UpdateCamera()
 	dir.Normalize();
 	V.SetView(m_camPos, dir, Vector3(0,1,0));
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&V);
+}
+
+void CModelView::FileLoad(short type, const string& fileName)
+{
+	switch(type)
+	{
+		case DAT:
+			{
+				m_mesh.ReadModelFile(fileName);
+			}
+			break;
+		case JPG:
+			{
+				//m_texture.Create(fileName);
+				//m_texture.Bind(0);
+			}
+			break;
+	}
 }
 
 void CModelView::OnRButtonDown(UINT nFlags, CPoint point)

@@ -84,10 +84,10 @@ BOOL CViewerDlg::OnInitDialog()
 
 	m_FileList.InsertColumn(0, L"Path");
 	m_FileList.SetColumnWidth(0, 300);
-	m_FileList.InsertItem(0, L"Test1");
-	m_FileList.InsertItem(1, L"Test2");
-	m_FileList.InsertItem(2, L"Test3");
-	m_FileList.InsertItem(3, L"Test4");
+	//m_FileList.InsertItem(0, L"Test1");
+	//m_FileList.InsertItem(1, L"Test2");
+	//m_FileList.InsertItem(2, L"Test3");
+	//m_FileList.InsertItem(3, L"Test4");
 
 	DragAcceptFiles(TRUE);
 
@@ -232,7 +232,21 @@ void CViewerDlg::OnDropFiles(HDROP hDropInfo)
 	if (size == 0) 
 		return;// handle error...
 
-	m_FileList.InsertItem(m_FileList.GetItemCount(), filePath);
+//	m_FileList.InsertItem(m_FileList.GetItemCount(), filePath);
+
+	string fileName = wstr2str(filePath);
+//	string::size_type
+	if( fileName.rfind(".dat") != string::npos )  //작동원리 모름...구글링하였음...
+	{
+		m_pModelView->m_sfileIndex = m_FileList.GetItemCount();  //어떤 파일이었는지 보관하여 기억
+		m_FileList.InsertItem(m_FileList.GetItemCount(), filePath);
+	//	m_pModelView->m_sfileIndex = m_FileList.GetItemCount() - 1;
+		m_pModelView->FileLoad( DAT, fileName );
+	}
+	else if( fileName.rfind(".jpg") != string::npos )
+	{
+		m_pModelView->FileLoad( JPG, fileName );
+	}
 
 	CDialogEx::OnDropFiles(hDropInfo);
 }
