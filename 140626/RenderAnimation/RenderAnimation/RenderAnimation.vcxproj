@@ -11,18 +11,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3A91E3AA-18DF-4733-9F41-ED09A61F97E3}</ProjectGuid>
+    <ProjectGuid>{FA3ED6EF-54B4-4086-B450-CAA8394CBBBC}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Graphic</RootNamespace>
+    <RootNamespace>RenderAnimation</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -37,13 +37,19 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -53,11 +59,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -67,47 +74,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="base\DxInit.h" />
-    <ClInclude Include="base\indexbuffer.h" />
-    <ClInclude Include="base\light.h" />
-    <ClInclude Include="base\material.h" />
-    <ClInclude Include="base\texture.h" />
-    <ClInclude Include="base\vertexbuffer.h" />
-    <ClInclude Include="base\vertexformat.h" />
-    <ClInclude Include="graphic.h" />
-    <ClInclude Include="manager\Renderer.h" />
-    <ClInclude Include="newcode\DX9indexbuffer.h" />
-    <ClInclude Include="newcode\DX9material.h" />
-    <ClInclude Include="newcode\DX9mesh.h" />
-    <ClInclude Include="newcode\DX9rawani.h" />
-    <ClInclude Include="newcode\DX9texture.h" />
-    <ClInclude Include="newcode\DX9vertexbuffer.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
+    <ClCompile Include="..\..\base\DxInit.cpp" />
+    <ClCompile Include="..\..\base\indexbuffer.cpp" />
+    <ClCompile Include="..\..\base\light.cpp" />
+    <ClCompile Include="..\..\base\material.cpp" />
+    <ClCompile Include="..\..\base\mesh.cpp" />
+    <ClCompile Include="..\..\base\rawani.cpp" />
+    <ClCompile Include="..\..\base\texture.cpp" />
+    <ClCompile Include="..\..\base\vertexbuffer.cpp" />
+    <ClCompile Include="..\..\math\matrix44.cpp" />
+    <ClCompile Include="..\..\math\quaternion.cpp" />
+    <ClCompile Include="..\..\math\vector3.cpp" />
+    <ClCompile Include="..\..\math\vector4.cpp" />
+    <ClCompile Include="RenderAnimation.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="base\DxInit.cpp" />
-    <ClCompile Include="base\indexbuffer.cpp" />
-    <ClCompile Include="base\light.cpp" />
-    <ClCompile Include="base\material.cpp" />
-    <ClCompile Include="base\texture.cpp" />
-    <ClCompile Include="base\vertexbuffer.cpp" />
-    <ClCompile Include="manager\Renderer.cpp" />
-    <ClCompile Include="newcode\DX9indexbuffer.cpp" />
-    <ClCompile Include="newcode\DX9material.cpp" />
-    <ClCompile Include="newcode\DX9mesh.cpp" />
-    <ClCompile Include="newcode\DX9rawani.cpp" />
-    <ClCompile Include="newcode\DX9texture.cpp" />
-    <ClCompile Include="newcode\DX9vertexbuffer.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.vcxproj">
-      <Project>{ef9ca22d-0c8f-42e9-ab66-98bc1a640f10}</Project>
-    </ProjectReference>
+    <ClInclude Include="..\..\base\base.h" />
+    <ClInclude Include="..\..\base\DxInit.h" />
+    <ClInclude Include="..\..\base\indexbuffer.h" />
+    <ClInclude Include="..\..\base\light.h" />
+    <ClInclude Include="..\..\base\material.h" />
+    <ClInclude Include="..\..\base\mesh.h" />
+    <ClInclude Include="..\..\base\rawani.h" />
+    <ClInclude Include="..\..\base\texture.h" />
+    <ClInclude Include="..\..\base\vertexbuffer.h" />
+    <ClInclude Include="..\..\base\vertexformat.h" />
+    <ClInclude Include="..\..\math\Math.h" />
+    <ClInclude Include="..\..\math\matrix44.h" />
+    <ClInclude Include="..\..\math\quaternion.h" />
+    <ClInclude Include="..\..\math\vector3.h" />
+    <ClInclude Include="..\..\math\vector4.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

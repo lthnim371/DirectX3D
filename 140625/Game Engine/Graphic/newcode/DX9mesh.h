@@ -12,7 +12,9 @@ namespace graphic
 		bool ReadModelFile( const string &fileName );
 		void Bind();
 
+		inline int GetVertexCount() const { return m_vertexBuffer.GetVertexCount(); };
 		inline cDX9VertexBuffer GetVertexBuffer() const { return m_vertexBuffer; };
+		inline int GetFaceCount() const { return m_indexBuffer.GetFaceCount(); };
 		inline cDX9IndexBuffer GetIndexBuffer() const { return m_indexBuffer; };
 		inline cDX9Material GetMaterialBuffer() const { return m_material; };
 		inline cDX9Texture GetTextureBuffer() const { return m_texture; };
@@ -23,5 +25,6 @@ namespace graphic
 		cDX9IndexBuffer m_indexBuffer;
 		cDX9Material m_material;
 		cDX9Texture m_texture;
+		tagRawAni m_rawani;
 	};
 }

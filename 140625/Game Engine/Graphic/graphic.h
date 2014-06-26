@@ -21,6 +21,7 @@ using namespace common;
 #include "newcode\DX9texture.h"
 #include "base\vertexformat.h"
 #include "newcode\DX9mesh.h"
+#include "newcode\DX9rawani.h"
 
 
 #pragma comment( lib, "d3d9.lib" )

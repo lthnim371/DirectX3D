@@ -213,6 +213,40 @@ bool cDX9Mesh::ReadModelFile( const string &fileName )
 	}
 //	vtxBuff.SetVertexCount( tempVtxBuff.size() );  //해당 버텍스마다 추가된 u,v좌표로 인해 버텍스 갯수가 늘어났으므로 버텍스 사이즈(갯수) 재설정
 
+
+//키프레임 저장
+	getline(fin, buffer);
+	string keyframe1, keyframe2;
+	short numframe;
+	float num4; 
+	fin >> buffer >> eq >> keyframe1 >> keyframe2;
+	m_rawani.start = (float)::atoi( keyframe1.c_str() );
+	m_rawani.end = (float)::atoi( keyframe2.c_str() );
+
+	//위치 저장
+	fin >> buffer >> eq >> numframe;
+	for(int i=0; i<numframe; ++i)
+	{
+		fin >> keyframe1 >> keyframe2 >> num1 >> num2 >> num3;
+		tagKeyPos temp;
+		temp.t = (float)::atoi( keyframe2.c_str() );
+		temp.p = Vector3(num1, num2, num3);
+		m_rawani.pos.push_back(temp);
+	}
+
+	//회전 저장
+	fin >> buffer >> eq >> numframe;
+	for(int i=0; i<numframe; ++i)
+	{
+		fin >> keyframe1 >> keyframe2 >> num1 >> num2 >> num3 >> num4;
+		tagKeyRot temp;
+		temp.t = (float)::atoi( keyframe2.c_str() );
+		temp.q = Quaternion(num1, num2, num3, num4);
+		m_rawani.rot.push_back(temp);
+	}
+
+
+
 	// 버텍스 버퍼 생성.
 	if( !m_vertexBuffer.Create( tempVtxBuff.size(), sizeof(graphic::sVertexNormTex), graphic::sVertexNormTex::FVF ))
 		return false;

@@ -43,6 +43,9 @@
     <ClInclude Include="newcode\DX9mesh.h">
       <Filter>newcode</Filter>
     </ClInclude>
+    <ClInclude Include="newcode\DX9rawani.h">
+      <Filter>newcode</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -80,6 +83,9 @@
       <Filter>newcode</Filter>
     </ClCompile>
     <ClCompile Include="newcode\DX9mesh.cpp">
+      <Filter>newcode</Filter>
+    </ClCompile>
+    <ClCompile Include="newcode\DX9rawani.cpp">
       <Filter>newcode</Filter>
     </ClCompile>
   </ItemGroup>

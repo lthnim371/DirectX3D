@@ -90,18 +90,23 @@ void CModelView::Render()
 		//	m_Mesh->DrawSubset( i );
 		//}
 		
-		/*m_mesh.Bind();  //에러 발생 : get을 두번이나 걸쳐서 얻어오니 에러가 난다
-		graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+		m_mesh.Bind();  //에러 발생 : get을 두번이나 걸쳐서 얻어오니 에러가 난다
+		/*graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 			0, 0,
 			m_mesh.GetVertexBuffer().GetVertexCount(),
 			0,
 			m_mesh.GetIndexBuffer().GetFaceCount() );*/
-		m_mesh.Bind();
 		graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 			0, 0,
-			28,
+			m_mesh.GetVertexCount(),
 			0,
-			12 );
+			m_mesh.GetFaceCount() );
+		//m_mesh.Bind();
+		//graphic::GetDevice()->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
+		//	0, 0,
+		//	28,
+		//	0,
+		//	12 );
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
