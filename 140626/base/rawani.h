@@ -24,19 +24,11 @@ namespace graphic
 
 	struct tagRawAni
 	{
-		tagRawAni();
-		~tagRawAni();
-
 		string name;
 		float start;
 		float end;
 		std::vector<tagKeyPos> pos;
 		std::vector<tagKeyRot> rot;
 		std::vector<tagKeyScale> scale;
-
-//		short keyNumber;
-//		float proportion;
-	public:
-//		Matrix44 AnimationMove();
 	};
 }

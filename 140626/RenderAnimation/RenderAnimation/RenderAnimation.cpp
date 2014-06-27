@@ -340,7 +340,7 @@ void Render(int timeDelta)
 		/*g_Mesh.Render( g_Mesh.Rotation(timeDelta) *
 			g_Mesh.Move(timeDelta) *
 			g_Mesh.Scale(timeDelta));*/
-		g_Mesh.Render( g_Mesh.Move(timeDelta) );
+//		g_Mesh.Render( g_Mesh.Move(timeDelta) );
 
 		//랜더링 끝
 		g_pDevice->EndScene();

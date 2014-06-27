@@ -31,5 +31,6 @@ namespace graphic {
 #include "vertexformat.h"
 
 #include "rawani.h"
+#include "track.h"
 
 #include "mesh.h"

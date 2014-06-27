@@ -35,7 +35,7 @@
     <ClCompile Include="..\..\base\mesh.cpp">
       <Filter>base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\base\rawani.cpp">
+    <ClCompile Include="..\..\base\track.cpp">
       <Filter>base</Filter>
     </ClCompile>
   </ItemGroup>
@@ -91,6 +91,9 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\base\rawani.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\base\track.h">
       <Filter>base</Filter>
     </ClInclude>
   </ItemGroup>

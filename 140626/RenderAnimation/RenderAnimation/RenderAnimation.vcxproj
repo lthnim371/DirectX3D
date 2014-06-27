@@ -79,8 +79,8 @@
     <ClCompile Include="..\..\base\light.cpp" />
     <ClCompile Include="..\..\base\material.cpp" />
     <ClCompile Include="..\..\base\mesh.cpp" />
-    <ClCompile Include="..\..\base\rawani.cpp" />
     <ClCompile Include="..\..\base\texture.cpp" />
+    <ClCompile Include="..\..\base\track.cpp" />
     <ClCompile Include="..\..\base\vertexbuffer.cpp" />
     <ClCompile Include="..\..\math\matrix44.cpp" />
     <ClCompile Include="..\..\math\quaternion.cpp" />
@@ -97,6 +97,7 @@
     <ClInclude Include="..\..\base\mesh.h" />
     <ClInclude Include="..\..\base\rawani.h" />
     <ClInclude Include="..\..\base\texture.h" />
+    <ClInclude Include="..\..\base\track.h" />
     <ClInclude Include="..\..\base\vertexbuffer.h" />
     <ClInclude Include="..\..\base\vertexformat.h" />
     <ClInclude Include="..\..\math\Math.h" />
