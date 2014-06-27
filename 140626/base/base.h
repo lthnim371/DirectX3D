@@ -29,6 +29,7 @@ namespace graphic {
 #include "texture.h"
 #include "vertexbuffer.h"
 #include "vertexformat.h"
-#include "mesh.h"
 
 #include "rawani.h"
+
+#include "mesh.h"

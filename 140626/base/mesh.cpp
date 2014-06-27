@@ -30,7 +30,7 @@ bool cMesh::Create(const string &fileName)
 
 	string exporterVersion;
 	fin >>exporterVersion;
-	if (exporterVersion != "EXPORTER_V1")
+	if (exporterVersion != "EXPORTER_V4")
 		return false;
 
 	int vtxSize;
@@ -205,6 +205,49 @@ bool cMesh::Create(const string &fileName)
 	for (int i = 0; i < (int)tempIdxBuff.size(); ++i)
 		indices[ i] = tempIdxBuff[ i];
 	m_idxBuff.Unlock();
+
+	//키프레임 저장
+	string buffer, keyframe1, keyframe2;
+	short numframe;
+	float num4; 
+	getline(fin, buffer);
+	getline(fin, buffer);
+	fin >> buffer >> eq >> keyframe1 >> keyframe2;
+	m_rawani.start = (float)::atoi( keyframe1.c_str() );
+	m_rawani.end = (float)::atoi( keyframe2.c_str() );
+
+	//위치 저장
+	fin >> buffer >> eq >> numframe;
+	for(int i=0; i<numframe; ++i)
+	{
+		fin >> keyframe1 >> keyframe2 >> num1 >> num2 >> num3;
+		tagKeyPos temp;
+		temp.t = (float)::atoi( keyframe2.c_str() );
+		temp.p = Vector3(num1, num2, num3);
+		m_rawani.pos.push_back(temp);
+	}
+
+	//회전 저장
+	fin >> buffer >> eq >> numframe;
+	for(int i=0; i<numframe; ++i)
+	{
+		fin >> keyframe1 >> keyframe2 >> num1 >> num2 >> num3 >> num4;
+		tagKeyRot temp;
+		temp.t = (float)::atoi( keyframe2.c_str() );
+		temp.q = Quaternion(num1, num2, num3, num4);
+		m_rawani.rot.push_back(temp);
+	}
+
+	//크기 저장
+	fin >> buffer >> eq >> numframe;
+	for(int i=0; i<numframe; ++i)
+	{
+		fin >> keyframe1 >> keyframe2 >> num1 >> num2 >> num3;
+		tagKeyScale temp;
+		temp.t = (float)::atoi( keyframe2.c_str() );
+		temp.s = Vector3(num1, num2, num3);
+		m_rawani.scale.push_back(temp);
+	}
 	
 	return true;
 }
@@ -224,7 +267,82 @@ void cMesh::Render(const Matrix44 &tm)
 }
 
 
-void cMesh::Move(const float elapseT)
+Matrix44 cMesh::Rotation(const float elapseT)
 {
+	Quaternion frame;
+	static float frameR = 0.f;
+	static short keyNumberR = 0;
+	
+	if(frameR >= 1.f)
+	{
+		frameR = 0.f;
+		keyNumberR++;
+		if( keyNumberR >= (int)m_rawani.rot.size() - 1 )
+			keyNumberR = 0;
+	}
+	
+	frameR = frameR +
+	(float)(( m_rawani.rot[keyNumberR + 1].t
+	- m_rawani.rot[keyNumberR].t )
+	/ 2 ) * 0.01f;
+	
+	frame = m_rawani.rot[keyNumberR].q.Interpolate(
+		m_rawani.rot[keyNumberR + 1].q,
+		frameR);
+	
+	return frame.GetMatrix();
+}
 
+Matrix44 cMesh::Move(const float elapseT)
+{
+	Matrix44 frame;
+	static float frameM = 0.f;
+	static short keyNumberM = 0;
+	
+	if(frameM >= 1.f)
+	{
+		frameM = 0.f;
+		keyNumberM++;
+		if( keyNumberM >= (int)m_rawani.pos.size() - 1 )
+			keyNumberM = 0;
+	}
+	
+	frameM = frameM +
+	(float)(( m_rawani.pos[keyNumberM + 1].t
+	- m_rawani.pos[keyNumberM].t )
+	/ 2 ) * 0.01f;
+	
+
+	frame.SetTranslate( m_rawani.pos[keyNumberM].p.Interpolate(
+		m_rawani.pos[keyNumberM + 1].p,
+		frameM) );
+
+	return frame;
+}
+
+Matrix44 cMesh::Scale(const float elapseT)
+{
+	Matrix44 frame;
+	static float frameS = 0.f;
+	static short keyNumberS = 0;
+	
+	if(frameS >= 1.f)
+	{
+		frameS = 0.f;
+		keyNumberS++;
+		if( keyNumberS >= (int)m_rawani.scale.size() - 1 )
+			keyNumberS = 0;
+	}
+	
+	frameS = frameS +
+	(float)(( m_rawani.scale[keyNumberS + 1].t
+	- m_rawani.scale[keyNumberS].t )
+	/ 2 ) * 0.01f;
+	
+
+	frame.SetScale( m_rawani.scale[keyNumberS].s.Interpolate(
+		m_rawani.scale[keyNumberS + 1].s,
+		frameS) );
+
+	return frame;
 }

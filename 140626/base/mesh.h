@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace graphic
 {
 
@@ -12,9 +11,12 @@ namespace graphic
 
 		bool Create(const string &fileName);
 		void Render(const Matrix44 &tm);
-		void Move(const float elapseT);
-
-
+		
+		Matrix44 Rotation(const float elapseT);
+		Matrix44 Move(const float elapseT);
+		Matrix44 Scale(const float elapseT);
+		
+//		inline Matrix44 GetFrameMove() { return m_rawani.AnimationMove(); };
 	private:
 		cVertexBuffer m_vtxBuff;
 		cIndexBuffer m_idxBuff;
@@ -22,6 +24,7 @@ namespace graphic
 		cTexture m_tex;
 
 		Matrix44 m_tm;
+
+		tagRawAni m_rawani;
 	};
-	
 }

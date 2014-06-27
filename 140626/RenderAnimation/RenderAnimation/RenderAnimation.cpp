@@ -333,9 +333,14 @@ void Render(int timeDelta)
 			0, g_IdxBuff.GetFaceCount());
 
 
-		Matrix44 tm = g_LocalTm;
-		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&tm);
-		g_Mesh.Render(tm);
+//		Matrix44 tm = g_LocalTm;
+//		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&tm);
+//		g_Mesh.Render(tm);
+
+		/*g_Mesh.Render( g_Mesh.Rotation(timeDelta) *
+			g_Mesh.Move(timeDelta) *
+			g_Mesh.Scale(timeDelta));*/
+		g_Mesh.Render( g_Mesh.Move(timeDelta) );
 
 		//랜더링 끝
 		g_pDevice->EndScene();
@@ -347,7 +352,8 @@ void Render(int timeDelta)
 
 bool InitVertexBuffer()
 {
-	g_Mesh.Create( "../../media/cube.dat");
+//	g_Mesh.Create( "../../media/cube.dat");
+	g_Mesh.Create( "../../media/test3.dat" );
 
 	// Init Grid
 	const int rowVtxCnt  = 65;

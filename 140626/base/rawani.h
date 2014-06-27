@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace graphic
 {
 	struct tagKeyPos
@@ -22,13 +24,19 @@ namespace graphic
 
 	struct tagRawAni
 	{
+		tagRawAni();
+		~tagRawAni();
+
 		string name;
 		float start;
 		float end;
-		vector<tagKeyPos> pos;
-		vector<tagKeyRot> rot;
-		vector<tagKeyScale> scale;
-	public:
+		std::vector<tagKeyPos> pos;
+		std::vector<tagKeyRot> rot;
+		std::vector<tagKeyScale> scale;
 
+//		short keyNumber;
+//		float proportion;
+	public:
+//		Matrix44 AnimationMove();
 	};
 }
