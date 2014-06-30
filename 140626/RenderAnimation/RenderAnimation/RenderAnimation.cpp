@@ -332,7 +332,9 @@ void Render(int timeDelta)
 		g_pDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, g_VtxBuff.GetVertexCount(), 
 			0, g_IdxBuff.GetFaceCount());
 
-
+		g_Mesh.Move(timeDelta);
+		Matrix44 temp;
+		g_Mesh.Render(temp);
 //		Matrix44 tm = g_LocalTm;
 //		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&tm);
 //		g_Mesh.Render(tm);
@@ -353,7 +355,7 @@ void Render(int timeDelta)
 bool InitVertexBuffer()
 {
 //	g_Mesh.Create( "../../media/cube.dat");
-	g_Mesh.Create( "../../media/test3.dat" );
+	g_Mesh.Create( "../../media/test1.dat" );
 
 	// Init Grid
 	const int rowVtxCnt  = 65;

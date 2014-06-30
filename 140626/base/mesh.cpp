@@ -18,7 +18,11 @@ cMesh::cMesh()
 
 cMesh::~cMesh()
 {
-
+	if(m_track)
+	{
+		delete m_track;
+		m_track = NULL;
+	}
 }
 
 
@@ -230,7 +234,7 @@ bool cMesh::Create(const string &fileName)
 		temp.p = Vector3(num1, num2, num3);
 		tempRawAni->pos.push_back(temp);
 	}
-
+	
 	//회전 저장
 	fin >> buffer >> eq >> numframe[1];
 	for(int i=0; i<numframe[1]; ++i)
@@ -253,18 +257,9 @@ bool cMesh::Create(const string &fileName)
 		tempRawAni->scale.push_back(temp);
 	}
 
-	//애니메이션 없으면 패스
-	if( numframe[0] + numframe[1] + numframe[2] <= 0 )
-		return true;
-	else  //있으면 주소 저장
-	{
-		cTrack* tempTrack = new cTrack( *tempRawAni );
-		m_track = tempTrack;
-	}
-	
-	//임시로 사용한 동적할당은 해제
-	delete tempRawAni;
-	tempRawAni = NULL;
+	cTrack* tempTrack = new cTrack( *tempRawAni );
+	m_track = tempTrack;
+
 	
 	return true;
 }
@@ -285,8 +280,12 @@ void cMesh::Render(const Matrix44 &tm)
 
 void cMesh::Move(const float elapseT)
 {
+	static int ncount = 0;
 
-	m_track->Move( elapseT, m_tm );
+	if( ncount >= 50 )
+		return;
+
+	m_track->Move( ++ncount , m_tm );
 }
 //Matrix44 cMesh::Rotation(const float elapseT)
 //{

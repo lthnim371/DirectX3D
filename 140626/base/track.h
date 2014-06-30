@@ -9,9 +9,12 @@ namespace graphic
 		~cTrack();
 	public:  //¸ÞÀÎÇÔ¼ö
 		void Move( const int currFrame, OUT Matrix44& out );
+		void KeyPos( const int currFrame, OUT Matrix44& out );
+		void KeyRot( const int currFrame, OUT Matrix44& out );
 	private:  //¸â¹ö°´Ã¼
 		const tagRawAni& m_rawAni;
-		WORD m_IndexMove;
-		float alpha;
+		WORD m_keyIndexPos;
+		WORD m_keyIndexRot;
+//		float alpha;
 	};
 }
