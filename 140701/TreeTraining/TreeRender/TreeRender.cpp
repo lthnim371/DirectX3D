@@ -1,3 +1,5 @@
+//140701 과제 : 트리에 응용되는 재귀함수에 대해 이해하기
+
 // TreeRender.cpp : 응용 프로그램에 대한 진입점을 정의합니다.
 //
 
@@ -34,7 +36,8 @@ BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 //void				print(HDC hdc, sNode *node, int x, int y);
-POINT print(HDC hdc, sNode *node, int x, int y);
+int print(HDC hdc, sNode *node, int x, int y, int original);
+int print(HDC hdc, sNode *node, int x, int y);
 
 int APIENTRY _tWinMain(HINSTANCE hInstance,
                      HINSTANCE hPrevInstance,
@@ -55,14 +58,42 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 
 	g_root = new sNode( "1",
 		new sNode("2", 
-			new sNode("4", NULL, NULL),
-			new sNode("5", NULL, NULL)
-		),
+			new sNode("4", 
+				new sNode("8",
+					new sNode("16", NULL, NULL),
+					new sNode("17", NULL, NULL) ),//8
+				new sNode("9",
+					new sNode("18", NULL, NULL),
+					new sNode("19", NULL, NULL)	)//9
+					),//4,
+			new sNode("5",
+				new sNode("10",
+					new sNode("20", NULL, NULL),
+					new sNode("21", NULL, NULL) ),//10
+				new sNode("11",
+					new sNode("22", NULL, NULL),
+					new sNode("23", NULL, NULL) )//11
+		)//5
+		),//2,
 		new sNode("3", 
-			new sNode("6", NULL, NULL),
-			new sNode("7", NULL, NULL)
-		)
-	);
+			new sNode("6",
+				new sNode("12",
+					new sNode("24", NULL, NULL),
+					new sNode("25", NULL, NULL) ),//12
+				new sNode("13",
+					new sNode("26", NULL, NULL),
+					new sNode("27", NULL, NULL) )//13
+					),//6
+			new sNode("7",
+				new sNode("14",
+					new sNode("28", NULL, NULL),
+					new sNode("29", NULL, NULL) ),//14
+				new sNode("15",
+					new sNode("30", NULL, NULL),
+					new sNode("31", NULL, NULL) )//15
+					)//7
+		)//3
+	);//1
 
 	// 응용 프로그램 초기화를 수행합니다.
 	if (!InitInstance (hInstance, nCmdShow))
@@ -187,7 +218,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
-		print(hdc, g_root, 100, 100);
+		print(hdc, g_root, 100, 100, 100);
+	//	print(hdc, g_root, 50, 100);
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
@@ -221,21 +253,41 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 }
 
 //void print(HDC hdc, sNode *node, int x, int y)
-POINT print(HDC hdc, sNode *node, int x, int y)
-{
-	POINT pt = {x, y};
 
+//원본을 인자로 받아와 만약 노드가 없다면 원본을 반환하고 노드가 있다면 더해진 값을 반환
+//어느 한쪽에서 호출할 때는 똑같은 인자를 두번 넘기는 꼴이 되므로 약간의 비효율적인 면이 있기도 하다...
+int print(HDC hdc, sNode *node, int x, int y, int original)
+{
 	if (!node)
-		return pt;
+		return original;
 
 	Ellipse(hdc, x, y, x+100, y+100);
 	TextOutA(hdc, x+50, y+50, node->name.c_str(), node->name.length() );
 	
-	pt = print(hdc, node->left, pt.x, pt.y + 100 );
-	pt = print(hdc, node->right, pt.x + 100, pt.y );
+	x = print(hdc, node->left, x, y + 100, x);
+	x = print(hdc, node->right, x + 100, y + 100, x);
 
-	return pt;
+	return x;
 
 	/*print(hdc, node->left, x, y + 100 );
 	print(hdc, node->right, x + 200, y + 100 );*/
+}
+
+
+//위와 비슷한 원리로 반환되는 지역변수에 노드가 없다면 넘겨준 인자값 그대로 넣어주고 아니라면 더해진 값을 넣어준다
+//설사 노드가 없더라도 반환되는 변수에 값을 누적시키는게 가능하기에 데이터가 많아질수록 범위가 늘어나므로 임의의 수치로 조절해줘야 된다...
+int print(HDC hdc, sNode *node, int x, int y)
+{	
+	if (!node)
+		return x;
+
+	Ellipse(hdc, x, y, x+100, y+100);
+	TextOutA(hdc, x+50, y+50, node->name.c_str(), node->name.length() );
+	
+	int result = 0;
+	result = print(hdc, node->left, x, y + 100);
+	result += 50;
+	result = print(hdc, node->right, result, y + 100);
+
+	return result;
 }
