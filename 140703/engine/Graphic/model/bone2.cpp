@@ -77,3 +77,12 @@ void cBoneMgr::Clear()
 {
 	SAFE_DELETE(m_root);
 }
+
+
+
+// BoneNode 찾아서 리턴.
+cBoneNode* cBoneMgr::FindBone(const int id)
+{
+	RETV(!m_root, NULL);
+	return (cBoneNode*)m_root->FindNode(id);
+}

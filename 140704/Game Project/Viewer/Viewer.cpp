@@ -1,8 +1,3 @@
-//140703 과제 : 본에서 가운데 관절만 회전시키기
-//기존 소스에 있었던 OnRender함수내의 SetTm 코드를 주석처리(m_rotateTm멤버가 중복되어서)
-//cBoneMgr클래스내에 boneNode를 찾는 FindBone함수를 추가
-//OnUpdate함수내에 가운데 관절만 회전을 적용하는 코드를 추가
-
 
 #include "stdafx.h"
 #include "../wxMemMonitorLib/wxMemMonitor.h"
@@ -72,8 +67,6 @@ bool cViewer::OnInit()
 	m_model = new graphic::cModel();
 	m_model->Create( m_filePath );
 
-//	m_model->
-
 	m_mtrl.InitWhite();
 
 	Vector4 color(1,1,1,1);
@@ -88,7 +81,7 @@ bool cViewer::OnInit()
 	const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
 	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
 	Matrix44 proj;
-	proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
+	proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 1000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
 
 
@@ -102,9 +95,6 @@ bool cViewer::OnInit()
 
 void cViewer::OnUpdate(const float elapseT)
 {
-	if(m_LButtonDown)  //모델의 멤버 bonemgr를 통해 찾은 id값에만 회전을 적용시킴
-		m_model->GetBone()->FindBone(1)->SetTM(m_rotateTm);
-
 	m_model->Move(elapseT);
 }
 
@@ -128,7 +118,7 @@ void cViewer::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
 
-//		m_model->SetTM(m_rotateTm);  //모델의 전체 회전이 되기 때문에 임시 주석처리
+		m_model->SetTM(m_rotateTm);
 		m_model->Render();
 
 		//랜더링 끝

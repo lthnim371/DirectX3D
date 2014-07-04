@@ -5,11 +5,11 @@ namespace graphic
 {
 	class cBoneNode;
 
-	class cBoneMgr
+	class cBone
 	{
 	public:
-		cBoneMgr(const int id, const sRawMeshGroup &rawMeshes);
-		virtual ~cBoneMgr();
+		cBone(const int id, const sRawMeshGroup &rawMeshes);
+		virtual ~cBone();
 
 		void SetAnimation( const sRawAniGroup &rawAnies, int nAniFrame );
 		bool Move(const float elapseTime);
@@ -17,10 +17,11 @@ namespace graphic
 		void Clear();	
 		vector<Matrix44>& GetPalette();
 
-		cBoneNode* FindBone(const int id);
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );
+		bool MoveRec(cBoneNode *node, const float elapseTime);
+		void RenderRec(cBoneNode *node, const Matrix44 &parentTm);
 
 
 	private:
@@ -30,5 +31,5 @@ namespace graphic
 	};
 
 
-	inline vector<Matrix44>& cBoneMgr::GetPalette() { return m_palette; }
+	inline vector<Matrix44>& cBone::GetPalette() { return m_palette; }
 }

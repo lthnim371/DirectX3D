@@ -1,6 +1,6 @@
-ï»¿
+
 #include "stdafx.h"
-#include "bonenode2.h"
+#include "bonenode.h"
 
 
 using namespace graphic;
@@ -35,7 +35,7 @@ cBoneNode::~cBoneNode()
 }
 
 
-// ì• ë‹ˆë©”ì´ì…˜ ì„¤ì •.
+// ¾Ö´Ï¸ŞÀÌ¼Ç ¼³Á¤.
 void cBoneNode::SetAnimation( const sRawAni &rawAni, int nAniFrame, bool bLoop)
 {
 	int aniend = 0;
@@ -64,7 +64,7 @@ void cBoneNode::SetAnimation( const sRawAni &rawAni, int nAniFrame, bool bLoop)
 }
 
 
-// ì—ë‹ˆë©”ì´ì…˜.
+// ¿¡´Ï¸ŞÀÌ¼Ç.
 bool cBoneNode::Move(const float elapseTime)
 {
 	RETV(!m_isAni, true);
@@ -75,13 +75,13 @@ bool cBoneNode::Move(const float elapseTime)
 	m_curPlayFrame = (int)(m_curPlayTime * 30.f);
 	m_incPlayFrame = (int)(m_incPlayTime * 30.f);
 
-	BOOL ani_loop_end = (m_curPlayFrame > m_aniEnd);	// ì—ë‹ˆë©”ì´ì…˜ ëê¹Œì§€ ê°”ë‹¤ë©´ TRUE
-	BOOL ani_end = (!m_isLoop) && (m_incPlayFrame > m_totalPlayTime);	// ì´ì—ë‹ˆë©”ì´ì…˜ ì‹œê°„ì´ ì§€ë‚¬ë‹¤ë©´ TRUE
+	BOOL ani_loop_end = (m_curPlayFrame > m_aniEnd);	// ¿¡´Ï¸ŞÀÌ¼Ç ³¡±îÁö °¬´Ù¸é TRUE
+	BOOL ani_end = (!m_isLoop) && (m_incPlayFrame > m_totalPlayTime);	// ÃÑ¿¡´Ï¸ŞÀÌ¼Ç ½Ã°£ÀÌ Áö³µ´Ù¸é TRUE
 
 	if (ani_loop_end || ani_end)
 	{
-		// ë³´ê°„ì—ë‹ˆë©”ì´ì…˜ì´ ì¢…ë£Œëœí›„ ë°˜ë³µ ì—ë‹ˆë©”ì´ì…˜ì´ë¼ë©´
-		// ë³´ê°„ì—†ì´ ì—ë‹ˆë©”ì´ì…˜ì„ ì²˜ìŒìœ¼ë¡œ ëŒë¦°ë‹¤.
+		// º¸°£¿¡´Ï¸ŞÀÌ¼ÇÀÌ Á¾·áµÈÈÄ ¹İº¹ ¿¡´Ï¸ŞÀÌ¼ÇÀÌ¶ó¸é
+		// º¸°£¾øÀÌ ¿¡´Ï¸ŞÀÌ¼ÇÀ» Ã³À½À¸·Î µ¹¸°´Ù.
 		if (m_isLoop)
 		{
 			m_curPlayFrame = (int)(m_aniStart * 30.f);
@@ -90,17 +90,17 @@ bool cBoneNode::Move(const float elapseTime)
 		}
 		else
 		{
-			// ë°˜ë³µ ì—ë‹ˆë©”ì´ì…˜ì´ ì•„ë‹ˆë¼ë©´ 
-			// ì´ ì—ë‹ˆë©”ì´ì…˜ ì‹œê°„ì´ ì§€ë‚˜ë©´ ì—ë‹ˆë©”ì´ì…˜ì„ ì¢…ë£Œí•˜ê³  FALSEë¥¼ ë¦¬í„´í•œë‹¤.
-			// ê·¸ë ‡ì§€ ì•Šë‹¤ë©´ ì—ë‹ˆë©”ì´ì…˜ì„ ì²˜ìŒìœ¼ë¡œ ëŒë¦°ë‹¤.				
+			// ¹İº¹ ¿¡´Ï¸ŞÀÌ¼ÇÀÌ ¾Æ´Ï¶ó¸é 
+			// ÃÑ ¿¡´Ï¸ŞÀÌ¼Ç ½Ã°£ÀÌ Áö³ª¸é ¿¡´Ï¸ŞÀÌ¼ÇÀ» Á¾·áÇÏ°í FALSE¸¦ ¸®ÅÏÇÑ´Ù.
+			// ±×·¸Áö ¾Ê´Ù¸é ¿¡´Ï¸ŞÀÌ¼ÇÀ» Ã³À½À¸·Î µ¹¸°´Ù.				
 			if (ani_loop_end)
 			{
 				m_curPlayFrame = (int)(m_aniStart * 30.f);
 				m_curPlayTime = 0;
 
-				// ì´ ì—ë‹ˆë©”ì´ì…˜ì´ ëë‚˜ì§€ ì•Šì•˜ë‹¤ë©´ ì—ë‹ˆë©”ì´ì…˜ ì •ë³´ë¥¼ ì²˜ìŒìœ¼ë¡œ ë˜ëŒë¦°ë‹¤.
-				// ì´ ì—ë‹ˆë©”ì´ì…˜ì´ ëë‚¬ë‹¤ë©´ ì •ë³´ë¥¼ ë˜ëŒë¦¬ì§€ ì•Šê³  ë§ˆì§€ë§‰ í”„ë ˆì„ì„ í–¥í•˜ê²Œ ë‚´ë²„ë ¤ë‘”ë‹¤.
-				// ë‹¤ìŒ ì—ë‹ˆë©”ì´ì…˜ì—ì„œ ë³´ê°„ë˜ê¸° ìœ„í•´ì„œ ë§ˆì§€ë§‰ í”„ë ˆì„ìœ¼ë¡œ ë‘ì–´ì•¼ í•œë‹¤.
+				// ÃÑ ¿¡´Ï¸ŞÀÌ¼ÇÀÌ ³¡³ªÁö ¾Ê¾Ò´Ù¸é ¿¡´Ï¸ŞÀÌ¼Ç Á¤º¸¸¦ Ã³À½À¸·Î µÇµ¹¸°´Ù.
+				// ÃÑ ¿¡´Ï¸ŞÀÌ¼ÇÀÌ ³¡³µ´Ù¸é Á¤º¸¸¦ µÇµ¹¸®Áö ¾Ê°í ¸¶Áö¸· ÇÁ·¹ÀÓÀ» ÇâÇÏ°Ô ³»¹ö·ÁµĞ´Ù.
+				// ´ÙÀ½ ¿¡´Ï¸ŞÀÌ¼Ç¿¡¼­ º¸°£µÇ±â À§ÇØ¼­ ¸¶Áö¸· ÇÁ·¹ÀÓÀ¸·Î µÎ¾î¾ß ÇÑ´Ù.
 				if (!ani_end)
 					m_track->InitAnimation();
 			}
@@ -116,39 +116,29 @@ bool cBoneNode::Move(const float elapseTime)
 
 	m_track->Move( m_curPlayFrame, m_aniTM );
 
-	m_accTM = m_localTM * m_aniTM * m_TM;  //
-	//m_localTMì€ ìì‹ ì˜ ìœ„ì¹˜ë¥¼ ì•Œ ìˆ˜ ìˆë‹¤.(ë¶€ëª¨ë¡œë¶€í„° ë¶€ëª¨ì˜ ìœ„ì¹˜ë“¤ì´ ìƒëŒ€ì ìœ¼ë¡œ ìŒ“ì—¬ì„œ ì˜¤ê¸° ë–„ë¬¸ì—)
-	//m_aniTMì€ ì• ë‹ˆë©”ì´ì…˜ëœ(ì´ë™ ë° íšŒì „ ë“±) ì›”ë“œí–‰ë ¬ì´ë‹¤.
-	//m_TM : ì™¸ë¶€ì—ì„œ ì„ì˜ì˜ í–‰ë ¬ê°’ìœ¼ë¡œ ë³€í˜•ì„ ì£¼ê³  ì‹¶ì„ ë•Œ ì´ìš©í•œë‹¤.
-	//â˜…ì´ëŒ€ë¡œ ê³±í•´ì£¼ê²Œ ë˜ë©´ ë¬¸ì œê°€ ìƒê¸´ë‹¤.
-	//m_aniTMì€ 3dsmaxì—ì„œ ì›”ë“œí–‰ë ¬ë¡œ ì •í•´ë†“ì€ ìƒíƒœë¼ ë§Œì•½ ì• ë‹ˆë©”ì´ì…˜ ì¤‘ì— m_TMì„ ì´ìš©í•œë‹¤ë©´ ì›í•˜ëŠ” ë³€í˜•ì„ ì¤„ìˆ˜ê°€ ì—†ë‹¤.
+	m_accTM = m_localTM * m_aniTM * m_TM;
 
-	//ìœ„ì˜ ì‹ì—ì„œ ìœ„ì¹˜(pos)ê°’ì´ localTmê³¼ aniTmì˜ ë‘ê°œ ë‹¤ ì ìš©ëœ ìƒíƒœë¼ ì´ìƒí•œ ìœ„ì¹˜ë¡œ ë˜ë²„ë¦°ë‹¤.
-	//ê·¸ë˜ì„œ ì•„ë˜ì˜ ifë¬¸ì„ í†µí•´ aniTmì˜ ìœ„ì¹˜ê°’ë§Œ ì ìš©í•´ì¤€ë‹¤.
-	// ë§Œì•½ posí‚¤ê°’ì´ ì—†ìœ¼ë©´ local TMì˜ ì¢Œí‘œë¥¼ ì‚¬ìš©í•œë‹¤
+	// ¸¸¾à posÅ°°ªÀÌ ¾øÀ¸¸é local TMÀÇ ÁÂÇ¥¸¦ »ç¿ëÇÑ´Ù
 	if( m_aniTM._41 == 0.0f && m_aniTM._42 == 0.0f && m_aniTM._43 == 0.0f )
 	{
 		m_accTM._41 = m_localTM._41;
 		m_accTM._42 = m_localTM._42;
 		m_accTM._43 = m_localTM._43;
 	}
-	else	// posí‚¤ê°’ì„ ì¢Œí‘œê°’ìœ¼ë¡œ ì ìš©í•œë‹¤(ì´ë ‡ê²Œ í•˜ì§€ ì•Šìœ¼ë©´ TMì˜ posì„±ë¶„ì´ ë‘ë²ˆì ìš©ëœë‹¤)
+	else	// posÅ°°ªÀ» ÁÂÇ¥°ªÀ¸·Î Àû¿ëÇÑ´Ù(ÀÌ·¸°Ô ÇÏÁö ¾ÊÀ¸¸é TMÀÇ pos¼ººĞÀÌ µÎ¹øÀû¿ëµÈ´Ù)
 	{
 		m_accTM._41 = m_aniTM._41;
 		m_accTM._42 = m_aniTM._42;
 		m_accTM._43 = m_aniTM._43;
 	}
 
-	if (m_parent)  //ê·¸ë¦¬ê³ ë‚˜ì„œ ìƒëŒ€ì ì¸ ë¶€ëª¨ì˜ ëˆ„ì ëœ Tmë„ ê³±í•´ì¤€ë‹¤.
+	if (m_parent)
 		m_accTM = m_accTM * ((cBoneNode*)m_parent)->m_accTM;
 
 	m_palette[ m_id] = m_offset * m_accTM;
 
 	//if (m_pBox)
 	//	m_pBox->SetWorldTM(&m_pPalette[ m_nId]);
-
-	BOOST_FOREACH (auto p, m_children)
-		p->Move( elapseTime );
 
 	return true;
 }
@@ -158,7 +148,4 @@ void cBoneNode::Render(const Matrix44 &parentTm)
 {
 	RET(!m_mesh);
 	m_mesh->Render(m_offset * m_accTM * parentTm);
-
-	BOOST_FOREACH (auto p, m_children)
-		p->Render( parentTm );
 }
