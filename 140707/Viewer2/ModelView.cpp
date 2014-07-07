@@ -167,34 +167,37 @@ void CModelView::OnMouseMove(UINT nFlags, CPoint point)
 		CPoint pos = point  - m_curPos;
 		m_curPos = point;
 
-		//{ // rotate Y-Axis
-		//	Quaternion q(Vector3(0,1,0), pos.x * 0.005f); 
-		//	Matrix44 m = q.GetMatrix();
-		//	m_camPos *= m;
-		//}
+		{ // rotate Y-Axis
+			Quaternion q(Vector3(0,1,0), pos.x * 0.005f); 
+			Matrix44 m = q.GetMatrix();
+			m_camPos *= m;
+		}
 
-		//{ // rotate X-Axis
+		{ // rotate X-Axis
 		//	Quaternion q(Vector3(1,0,0), pos.y * 0.005f); 
 		//	Matrix44 m = q.GetMatrix();
 		//	m_camPos *= m;
-		//}
 
-		{
 			Vector3 up(0,1,0);
 			Vector3 dir = m_lookAtPos - m_camPos;
+			dir.Normalize();
 			Vector3 right = up.CrossProduct( dir );
+			right.Normalize();		
 
-			Matrix44 r;
-			r.SetRotationX( (float)pos.y * 0.005f );
-
-			m_camPos = right * r;
-
+			Quaternion q(right, -pos.y * 0.005f); 
+			Matrix44 m = q.GetMatrix();
+			m_camPos *= m;
 		}
 
 		{
-		
-		}
+	
 
+			//Matrix44 r;
+			//r.SetTranslate(right);
+			//r.SetRotationX( -pos.y * 0.005f );
+			//			
+			//m_camPos *= r;
+		}
 
 		UpdateCamera();
 	}

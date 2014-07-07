@@ -1,4 +1,4 @@
-
+ï»¿
 #include "stdafx.h"
 #include "../wxMemMonitorLib/wxMemMonitor.h"
 
@@ -78,16 +78,16 @@ bool cViewer::OnInit()
 	m_lookAtPos = Vector3(0,0,0);
 	UpdateCamera();
 
-	const int WINSIZE_X = 1024;		//ÃÊ±â À©µµ¿ì °¡·Î Å©±â
-	const int WINSIZE_Y = 768;	//ÃÊ±â À©µµ¿ì ¼¼·Î Å©±â
+	const int WINSIZE_X = 1024;		//ì´ˆê¸° ìœˆë„ìš° ê°€ë¡œ í¬ê¸°
+	const int WINSIZE_Y = 768;	//ì´ˆê¸° ìœˆë„ìš° ì„¸ë¡œ í¬ê¸°
 	Matrix44 proj;
 	proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 1000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
 
 
 	graphic::GetDevice()->LightEnable (
-		0, // È°¼ºÈ­/ ºñÈ°¼ºÈ­ ÇÏ·Á´Â ±¤¿ø ¸®½ºÆ® ³»ÀÇ ¿ä¼Ò
-		true); // true = È°¼ºÈ­ £¬ false = ºñÈ°¼ºÈ­
+		0, // í™œì„±í™”/ ë¹„í™œì„±í™” í•˜ë ¤ëŠ” ê´‘ì› ë¦¬ìŠ¤íŠ¸ ë‚´ì˜ ìš”ì†Œ
+		true); // true = í™œì„±í™” ï¼Œ false = ë¹„í™œì„±í™”
 
 	return true;
 }
@@ -101,17 +101,17 @@ void cViewer::OnUpdate(const float elapseT)
 
 void cViewer::OnRender(const float elapseT)
 {
-	//È­¸é Ã»¼Ò
+	//í™”ë©´ ì²­ì†Œ
 	if (SUCCEEDED(graphic::GetDevice()->Clear( 
-		0,			//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ °¹¼ö		( ÀüÃ¼ Å¬¸®¾î 0 )
-		NULL,		//Ã»¼ÒÇÒ ¿µ¿ªÀÇ D3DRECT ¹è¿­ Æ÷ÀÎÅÍ		( ÀüÃ¼ Å¬¸®¾î NULL )
-		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//Ã»¼ÒµÉ ¹öÆÛ ÇÃ·¹±× ( D3DCLEAR_TARGET ÄÃ·¯¹öÆÛ, D3DCLEAR_ZBUFFER ±íÀÌ¹öÆÛ, D3DCLEAR_STENCIL ½ºÅÙ½Ç¹öÆÛ
-		D3DCOLOR_XRGB(150, 150, 150),			//ÄÃ·¯¹öÆÛ¸¦ Ã»¼ÒÇÏ°í Ã¤¿öÁú »ö»ó( 0xAARRGGBB )
-		1.0f,				//±íÀÌ¹öÆÛ¸¦ Ã»¼ÒÇÒ°ª ( 0 ~ 1 0 ÀÌ Ä«¸Þ¶ó¿¡¼­ Á¦ÀÏ°¡±î¿î 1 ÀÌ Ä«¸Þ¶ó¿¡¼­ Á¦ÀÏ ¸Õ )
-		0					//½ºÅÙ½Ç ¹öÆÛ¸¦ Ã¤¿ï°ª
+		0,			//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ ê°¯ìˆ˜		( ì „ì²´ í´ë¦¬ì–´ 0 )
+		NULL,		//ì²­ì†Œí•  ì˜ì—­ì˜ D3DRECT ë°°ì—´ í¬ì¸í„°		( ì „ì²´ í´ë¦¬ì–´ NULL )
+		D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER | D3DCLEAR_STENCIL,	//ì²­ì†Œë  ë²„í¼ í”Œë ˆê·¸ ( D3DCLEAR_TARGET ì»¬ëŸ¬ë²„í¼, D3DCLEAR_ZBUFFER ê¹Šì´ë²„í¼, D3DCLEAR_STENCIL ìŠ¤í…ì‹¤ë²„í¼
+		D3DCOLOR_XRGB(150, 150, 150),			//ì»¬ëŸ¬ë²„í¼ë¥¼ ì²­ì†Œí•˜ê³  ì±„ì›Œì§ˆ ìƒ‰ìƒ( 0xAARRGGBB )
+		1.0f,				//ê¹Šì´ë²„í¼ë¥¼ ì²­ì†Œí• ê°’ ( 0 ~ 1 0 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ê°€ê¹Œìš´ 1 ì´ ì¹´ë©”ë¼ì—ì„œ ì œì¼ ë¨¼ )
+		0					//ìŠ¤í…ì‹¤ ë²„í¼ë¥¼ ì±„ìš¸ê°’
 		)))
 	{
-		//È­¸é Ã»¼Ò°¡ ¼º°øÀûÀ¸·Î ÀÌ·ç¾î Á³´Ù¸é... ·£´õ¸µ ½ÃÀÛ
+		//í™”ë©´ ì²­ì†Œê°€ ì„±ê³µì ìœ¼ë¡œ ì´ë£¨ì–´ ì¡Œë‹¤ë©´... ëžœë”ë§ ì‹œìž‘
 		graphic::GetDevice()->BeginScene();
 
 		graphic::GetRenderer()->RenderFPS();
@@ -121,9 +121,9 @@ void cViewer::OnRender(const float elapseT)
 		m_model->SetTM(m_rotateTm);
 		m_model->Render();
 
-		//·£´õ¸µ ³¡
+		//ëžœë”ë§ ë
 		graphic::GetDevice()->EndScene();
-		//·£´õ¸µÀÌ ³¡³µÀ¸¸é ·£´õ¸µµÈ ³»¿ë È­¸éÀ¸·Î Àü¼Û
+		//ëžœë”ë§ì´ ëë‚¬ìœ¼ë©´ ëžœë”ë§ëœ ë‚´ìš© í™”ë©´ìœ¼ë¡œ ì „ì†¡
 		graphic::GetDevice()->Present( NULL, NULL, NULL, NULL );
 	}
 }
@@ -181,7 +181,7 @@ void cViewer::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		case VK_BACK:
-			// È¸Àü Çà·Ä ÃÊ±âÈ­.
+			// íšŒì „ í–‰ë ¬ ì´ˆê¸°í™”.
 			m_rotateTm.SetIdentity();
 			m_model->SetTM(m_rotateTm);
 			break;

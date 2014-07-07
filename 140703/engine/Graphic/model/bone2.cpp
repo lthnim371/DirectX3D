@@ -79,10 +79,17 @@ void cBoneMgr::Clear()
 }
 
 
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/master
 // BoneNode 찾아서 리턴.
 cBoneNode* cBoneMgr::FindBone(const int id)
 {
 	RETV(!m_root, NULL);
 	return (cBoneNode*)m_root->FindNode(id);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/master

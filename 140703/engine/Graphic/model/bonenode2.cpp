@@ -123,8 +123,11 @@ bool cBoneNode::Move(const float elapseTime)
 	//★이대로 곱해주게 되면 문제가 생긴다.
 	//m_aniTM은 3dsmax에서 월드행렬로 정해놓은 상태라 만약 애니메이션 중에 m_TM을 이용한다면 원하는 변형을 줄수가 없다.
 
+<<<<<<< HEAD
+=======
 	//위의 식에서 위치(pos)값이 localTm과 aniTm의 두개 다 적용된 상태라 이상한 위치로 되버린다.
 	//그래서 아래의 if문을 통해 aniTm의 위치값만 적용해준다.
+>>>>>>> origin/master
 	// 만약 pos키값이 없으면 local TM의 좌표를 사용한다
 	if( m_aniTM._41 == 0.0f && m_aniTM._42 == 0.0f && m_aniTM._43 == 0.0f )
 	{
@@ -139,7 +142,11 @@ bool cBoneNode::Move(const float elapseTime)
 		m_accTM._43 = m_aniTM._43;
 	}
 
+<<<<<<< HEAD
+	if (m_parent)  //★이 코드를 위의 if문 전에 두면 출력이 이상해진다. 즉, 현재 이 코드 순서가 올바르다
+=======
 	if (m_parent)  //그리고나서 상대적인 부모의 누적된 Tm도 곱해준다.
+>>>>>>> origin/master
 		m_accTM = m_accTM * ((cBoneNode*)m_parent)->m_accTM;
 
 	m_palette[ m_id] = m_offset * m_accTM;
