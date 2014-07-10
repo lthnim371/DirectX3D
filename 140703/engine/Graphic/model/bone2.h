@@ -18,10 +18,7 @@ namespace graphic
 		vector<Matrix44>& GetPalette();
 
 		cBoneNode* FindBone(const int id);
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/master
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );
