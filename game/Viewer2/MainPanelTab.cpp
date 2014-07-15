@@ -65,12 +65,12 @@ BOOL CMainPanelTab::OnInitDialog()
 
 	m_modelPanel = new CModelPanel(this);
 	m_modelPanel->Create(CModelPanel::IDD, this);
-	m_modelPanel->MoveWindow(CRect(0, 50, cr.Width(), cr.Height()));
+	m_modelPanel->MoveWindow(CRect(0, 25, cr.Width(), cr.Height()));
 	m_modelPanel->ShowWindow(SW_SHOW);
 
 	m_aniPanel = new CAnimationPanel(this);
 	m_aniPanel->Create(CAnimationPanel::IDD, this);
-	m_aniPanel->MoveWindow(CRect(0, 50, cr.Width(), cr.Height()));
+	m_aniPanel->MoveWindow(CRect(0, 25, cr.Width(), cr.Height()));
 	m_aniPanel->ShowWindow(SW_HIDE);
 
 

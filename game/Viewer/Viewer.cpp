@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "../wxMemMonitorLib/wxMemMonitor.h"
+#include "TestScene.h"
 
 
 DECLARE_TYPE_NAME(cViewer)
@@ -23,12 +24,17 @@ protected:
 
 
 private:
-	graphic::cLight m_light;
+	LPD3DXSPRITE m_sprite;
 
+	graphic::cLight m_light;
 	graphic::cMaterial m_mtrl;
 	graphic::cTexture m_texture;
 	graphic::cModel *m_model;
-	
+	graphic::cSprite *m_image;
+
+	cTestScene *m_scene;
+
+
 	string m_filePath;
 
 	POINT m_curPos;
@@ -45,9 +51,12 @@ INIT_FRAMEWORK(cViewer);
 
 cViewer::cViewer() :
 	m_model(NULL)
+,	m_sprite(NULL)
+,	m_image(NULL)
+,	m_scene(NULL)
 {
 	m_windowName = L"Viewer";
-	const RECT r = {0, 0, 800, 600};
+	const RECT r = {0, 0, 1024, 768};
 	m_windowRect = r;
 	m_LButtonDown = false;
 	m_RButtonDown = false;
@@ -56,12 +65,25 @@ cViewer::cViewer() :
 cViewer::~cViewer()
 {
 	SAFE_DELETE(m_model);
+	SAFE_DELETE(m_image);
+	SAFE_DELETE(m_scene);
+	SAFE_RELEASE(m_sprite);
+	graphic::ReleaseRenderer();
 }
 
 
 bool cViewer::OnInit()
 {
 	DragAcceptFiles(m_hWnd, TRUE);
+
+	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
+
+
+	m_scene = new cTestScene(m_sprite);
+	m_scene->SetPos(Vector3(100,100,0));
+
+
+
 
 	m_filePath = "../media/mesh.dat";
 	m_model = new graphic::cModel();
@@ -70,6 +92,12 @@ bool cViewer::OnInit()
 	//m_model->SetAnimation("../media/ani.ani");
 	//m_model->SetAnimation("../media/ani4.ani");
 	//m_texture.Create("../media/강소라.jpg");
+
+	//m_image = new graphic::cSprite(m_sprite, 0, "image1");
+	//m_image->Create( "../media/강소라.jpg");
+	//m_image->SetScale(Vector3(0.5f,0.5f,0.5f));
+	//m_image->SetPos( Vector3(200, 200, 0) );
+
 
 	m_mtrl.InitWhite();
 
@@ -122,8 +150,11 @@ void cViewer::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
 
+		Matrix44 tm;
+		m_scene->Render(tm);
+	//m_image->Render(tm);
+
 		m_model->SetTM(m_rotateTm);
-		//m_texture.Bind(0);
 		m_model->Render();
 
 		//랜더링 끝
@@ -142,6 +173,9 @@ void cViewer::OnShutdown()
 
 void cViewer::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (m_scene)
+		m_scene->MessageProc(message, wParam, lParam);
+
 	switch (message)
 	{
 	case WM_DROPFILES:
@@ -228,6 +262,12 @@ void cViewer::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 
 	case WM_MOUSEMOVE:
+		if (wParam & 0x10) // middle button down
+		{
+			POINT pos = {LOWORD(lParam), HIWORD(lParam)};
+			m_scene->SetPos(Vector3(pos.x, pos.y,0));
+		}
+
 		if (m_LButtonDown)
 		{
 			POINT pos = {LOWORD(lParam), HIWORD(lParam)};
@@ -263,6 +303,18 @@ void cViewer::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 
 			UpdateCamera();
 		}
+		else
+		{
+			POINT pos = {LOWORD(lParam), HIWORD(lParam)};
+			//m_scene->SetPos(Vector3(pos.x, pos.y,0));
+			//if (m_image->IsContain(Vector2(pos.x, pos.y)))
+			//{
+			//	static int count = 0;
+			//	++count;
+			//	dbg::Print( "IsContain %d", count);
+			//}
+		}
+
 		break;
 	}
 }
