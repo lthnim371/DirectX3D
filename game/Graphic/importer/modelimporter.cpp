@@ -809,8 +809,9 @@ bool importer::ReadMaterial(std::ifstream &fin, const string &fileName, OUT sMat
 	string textureTok, texFilePath;
 	fin >> textureTok; // TEXTURE
 
+	//이 부분을 수정해야 될듯...
 	std::getline(fin, texFilePath);
-	string  textureFileName = common::GetFilePathExceptFileName(fileName) + "\\" + 
+	string  textureFileName = //common::GetFilePathExceptFileName(fileName) + "\\" + 
 		common::trim(texFilePath);
 	mtrl.texture = textureFileName;
 
