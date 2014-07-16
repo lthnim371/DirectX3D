@@ -338,7 +338,8 @@ bool importer::ReadMeshInfoV11( std::ifstream &fin, OUT sRawMesh &rawMesh )
 	{
 		int materialId;
 		fin >> exp >> eq >> materialId;
-		rawMesh.mtrlIds.push_back( materialId );
+		if(materialId >= 0)  //수정하였음 테스트 필요
+			rawMesh.mtrlIds.push_back( materialId );
 	}
 
 	return true;
@@ -809,9 +810,9 @@ bool importer::ReadMaterial(std::ifstream &fin, const string &fileName, OUT sMat
 	string textureTok, texFilePath;
 	fin >> textureTok; // TEXTURE
 
-	//이 부분을 수정해야 될듯...
+	//이 부분을 수정해야 될듯...=> 원상복귀하였음
 	std::getline(fin, texFilePath);
-	string  textureFileName = //common::GetFilePathExceptFileName(fileName) + "\\" + 
+	string  textureFileName = common::GetFilePathExceptFileName(fileName) + "\\" + 
 		common::trim(texFilePath);
 	mtrl.texture = textureFileName;
 

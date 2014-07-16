@@ -27,7 +27,18 @@ bool cTexture::Create(const string &fileName, bool isSizePow2)//isSizePow2=true
 			path += common::GetFileName(fileName);
 		
 			if (FAILED(D3DXCreateTextureFromFileA(GetDevice(), path.c_str(), &m_texture)))
+			{
+				//텍스쳐를 모아놓은 경로로 사용하자
+				/*string path = "../media/tex2d/";
+				path += common::GetFileName(fileName);
+
+				if (FAILED(D3DXCreateTextureFromFileA(GetDevice(), path.c_str(), &m_texture)))
+				{
+
+				}*/
+
 				return false;
+			}
 
 			return true;
 		}
