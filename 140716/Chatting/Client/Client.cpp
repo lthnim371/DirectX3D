@@ -84,6 +84,8 @@ BOOL CClientApp::InitInstance()
 {
 	CWinApp::InitInstance();
 
+//	int aa = sizeof(network::sChatProtocol);
+
 	CClientDlg *dlg;
 	dlg = new CClientDlg();
 	dlg->Create( CClientDlg::IDD );

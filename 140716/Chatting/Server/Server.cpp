@@ -141,14 +141,14 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 }
 
 
-void AcceptClient()
+void AcceptClient()  //클라이언트가 접속할때마다 확인
 {
 	const timeval t = {0, 10}; // 10 millisecond
-	fd_set readSockets;
+	fd_set readSockets;  //소켓 갯수 보관할 변수
 	FD_ZERO(&readSockets);
 	FD_SET(g_svrSock, &readSockets);
 
-	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );
+	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );  //select : 소
 	if (ret != 0 && ret != SOCKET_ERROR)
 	{
 		for (u_int i=0; i < readSockets.fd_count; ++i)
@@ -166,7 +166,7 @@ void AcceptClient()
 				sockaddr_in addr;
 				int len = sizeof(addr);
 				memset(&addr,0,sizeof(addr));
-				getpeername( remoteSocket, (sockaddr*)&addr, &len );
+				getpeername( remoteSocket, (sockaddr*)&addr, &len );  //클라이언트 ip 얻어오기
 				string ip = inet_ntoa(addr.sin_addr);
 
 				sClient client;
@@ -220,7 +220,7 @@ void MakeSessionFdset( OUT fd_set &set)
 }
 
 
-void SendAll(char buff[128])
+void SendAll(char buff[128])  //받은 내용을 다른 클라이언트에게 보내주는 역할
 {
 	auto it = g_clients.begin();
 	while (g_clients.end() != it)
@@ -236,19 +236,21 @@ void MainLoop(int timeDelta)
 {
 	DisplayClient();
 
-	AcceptClient();
+	AcceptClient();  //클라이언트가 접속했는지 판단
 
+
+//클라이언트와 데이터 주고 받는 과정
 	const timeval t = {0, 10}; // 10 millisecond
 	fd_set readSockets;
-	MakeSessionFdset(readSockets);
+	MakeSessionFdset(readSockets);  //연결된 클라이언트가 끊겼는지 확인
 
-	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );
+	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );  //select : peekmessage와 비슷함
 	if (ret != 0 && ret != SOCKET_ERROR)
 	{
 		for (u_int i=0; i < readSockets.fd_count; ++i)
 		{
 			char buff[ 128];
-			const int result = recv(readSockets.fd_array[ i], buff, sizeof(buff), 0);
+			const int result = recv(readSockets.fd_array[ i], buff, sizeof(buff), 0);  //recv : 해당 소켓으로부터 패킷을 가져옴
 			if (result == SOCKET_ERROR || result == 0) // 받은 패킷사이즈가 0이면 서버와 접속이 끊겼다는 의미다.
 			{
 				g_clients.erase(readSockets.fd_array[ i]);
