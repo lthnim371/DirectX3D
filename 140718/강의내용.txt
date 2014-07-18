@@ -1,0 +1,15 @@
+
+
+추가 내용
+boundingbox
+collision
+bonenode
+collisionmanager
+
+
+업그레이드 내용
+common -> etc -> findfile
+파일명만 넘기면 media내에 어떤 폴더에 있든지간에 찾아낸다.(단, 파일명은 중복되는게 없어야 한다)
+
+common -> etc -> collectfiles
+확장자를 알려주는 함수...(추후 교육)
