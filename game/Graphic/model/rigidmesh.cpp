@@ -54,3 +54,11 @@ bool cRigidMesh::Move(const float elapseTime)
 	m_track->Move(m_aniFrame, m_aniTM);
 	return true;
 }
+
+
+// Ãâ·Â.
+void cRigidMesh::Render(const Matrix44 &parentTm)
+{
+	cMesh::Render(parentTm);
+}
+

@@ -71,7 +71,7 @@ bool cEventHandler::SearchEventTable( cEvent &event )
 			if (entry.handler)
 			{
 				cEventHandler *handler = entry.handler;
-				(handler->*entry.fn)( event );  //클래스멤버함수 호출할때의 문법임
+				(handler->*entry.fn)( event );
 			}
 			else
 			{

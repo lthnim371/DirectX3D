@@ -7,7 +7,6 @@ namespace framework
 	class cEvent;
 	class cEventHandler;
 	typedef void (cEventHandler::*EventFunction)(cEvent &);
-	//함수포인터 타입으로 형변환
 
 
 	class cEventHandler

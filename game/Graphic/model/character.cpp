@@ -5,8 +5,9 @@
 using namespace graphic;
 
 
-cCharacter::cCharacter() :
-	m_weapon(NULL)
+cCharacter::cCharacter(const int id) :
+	cModel(id)
+,	m_weapon(NULL)
 ,	m_weaponNode(NULL)
 {
 
@@ -34,7 +35,7 @@ void cCharacter::LoadWeapon(const string &fileName)
 	RET(!m_weaponNode);
 
 	if (!m_weapon)
-		m_weapon = new cModel();
+		m_weapon = new cModel(100);
 
 	if (!m_weapon->Create(fileName))
 		return;
@@ -47,7 +48,7 @@ bool cCharacter::Move(const float elapseTime)
 	
 	if (m_weapon && m_weaponNode)
 	{
-		Matrix44 mat = m_weaponNode->GetAccTM();
+		const Matrix44 mat = m_weaponNode->GetAccTM();
 		m_weapon->SetTM(mat * m_matTM);
 		m_weapon->Move(elapseTime);
 	}

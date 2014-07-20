@@ -22,26 +22,7 @@ bool cTexture::Create(const string &fileName, bool isSizePow2)//isSizePow2=true
 	if (isSizePow2)
 	{
 		if (FAILED(D3DXCreateTextureFromFileA(GetDevice(), fileName.c_str(), &m_texture)))
-		{
-			string path = "../media/";
-			path += common::GetFileName(fileName);
-		
-			if (FAILED(D3DXCreateTextureFromFileA(GetDevice(), path.c_str(), &m_texture)))
-			{
-				//텍스쳐를 모아놓은 경로로 사용하자
-				path = "../media/texture/";
-				path += common::GetFileName(fileName);
-
-				if (FAILED(D3DXCreateTextureFromFileA(GetDevice(), path.c_str(), &m_texture)))
-				{
-					return false;
-				}
-
-				return true;
-			}
-
-			return true;
-		}
+			return false;
 	}
 	else
 	{
@@ -78,18 +59,7 @@ bool cTexture::CreateEx(const string &fileName)
 		NULL,
 		&m_texture)))
 	{
-		string path = "../media/";
-		path += common::GetFileName(fileName);
-
-		if (FAILED(D3DXCreateTextureFromFileExA(
-			GetDevice(), path.c_str(),
-			D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2, // option On
-			NULL, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT,
-			0,
-			&m_imageInfo,
-			NULL,
-			&m_texture)))
-			return false;
+		return false;
 	}
 	
 	return true;

@@ -10,10 +10,14 @@
 using namespace graphic;
 
 
-cModel::cModel() :
-	m_bone(NULL)
+
+cModel::cModel(const int id) :
+	m_id(id)
+,	m_bone(NULL)
 ,	m_isRenderMesh(true)
 ,	m_isRenderBone(false)
+,	m_isRenderBoundingBox(true)
+,	m_type(MODEL_TYPE::RIGID)
 {
 	
 }
@@ -56,6 +60,8 @@ bool cModel::Create(const string &modelName)
 		if (p)
 			m_meshes.push_back(p);
 	}
+
+	m_type = isSkinnedMesh? MODEL_TYPE::SKIN : MODEL_TYPE::RIGID;
 
 	return true;
 }
@@ -105,6 +111,9 @@ void cModel::Render()
 
 	if (m_isRenderBone && m_bone)
 		m_bone->Render(m_matTM);
+
+	if (m_bone && m_isRenderBoundingBox)
+		m_bone->RenderBoundingBox(m_matTM);
 }
 
 
@@ -130,4 +139,58 @@ cMesh* cModel::FindMesh(const string &meshName)
 			return (cMesh*)mesh;
 	}
 	return NULL;
+}
+
+
+void cModel::SetRenderMesh(const bool isRenderMesh) 
+{ 
+	m_isRenderMesh = isRenderMesh; 
+}
+
+void cModel::SetRenderBone(const bool isRenderBone) 
+{ 
+	m_isRenderBone = isRenderBone; 
+}
+
+void cModel::SetRenderBoundingBox(const bool isRenderBoundingBox)
+{
+	m_isRenderBoundingBox = isRenderBoundingBox;
+}
+
+
+int cModel::GetCollisionId() 
+{
+	return GetId();
+}
+
+bool cModel::IsTest( int testNum )
+{
+	return true;
+}
+
+
+void cModel::UpdateCollisionBox()
+{
+	m_boundingBox.SetTransform(m_matTM);
+}
+
+
+cBoundingBox* cModel::GetCollisionBox()
+{
+	sMinMax mm;
+	BOOST_FOREACH (auto &mesh, m_meshes)
+	{
+		const cCube &cube = mesh->GetBoundingBox();
+		mm.Update(cube.GetMin());
+		mm.Update(cube.GetMax());
+	}
+
+	m_boundingBox.SetBoundingBox(mm.Min, mm.Max);
+	return &m_boundingBox;
+}
+
+
+void cModel::Collision( int testNum, ICollisionable *obj )
+{
+
 }

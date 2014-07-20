@@ -20,6 +20,16 @@ using namespace common;
 #include "base/vertexformat.h"
 #include "base/grid.h"
 #include "base/grid2.h"
+#include "base/box.h"
+#include "base/line.h"
+#include "base/cube.h"
+
+
+#include "model/node.h"
+
+#include "collision/boundingbox.h"
+#include "collision/collision.h"
+#include "collision/collisionmanager.h"
 
 #include "model/rawmesh.h"
 #include "model/rawani.h"

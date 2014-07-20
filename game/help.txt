@@ -1,0 +1,25 @@
+140716
+☆ texture.cpp Create 코드 수정
+media -> texture폴더 인식
+//modelimporter.cpp -> ReadMaterial 코드 수정
+//텍스쳐 파일의 경로를 export할 때의 경로로 사용
+
+※ modelimporter.cpp -> ReadRawMeshFileV11 에서 뻑 발생(무기 적용시)
+매트리얼 Id가 -1이라서 벡터 범위를 벗어남(-1로 저장되는 곳은 modelimporter.cpp -> ReadMeshInfoV11 for문 코드)
+//맥스상에서 -1로 출력되는 곳은 exporter_V12 -> fn WriteMeshInfo obj =
+일단 원본 익스포터로 사용하고 만약 매트리얼 값이 있는데 ID값이 제대로 안되어있다면 직접 값을 수정하자
+
+140720
+애니메이션 읽어오기 및 보관
+controller loadfile -> model setanimation -> resourcemanager loadanimation
+-> modelimporter readrawanimationfile -> readrawanimationfilev9 -> readanimation
+=> model setanimation -> bonemgr setanimation -> setanimationrec(재귀) -> bonenode setanimation
+-> track initanimation
+
+애니메이션 실행하기
+viewer2dlg mainloop -> modelview update -> controller update ->
+character move -> model move -> mesh move(현재는 사용안함)
+-> bonemgr move -> bonenode move(재귀) -> track move
+
+애니메이션 변경
+model setanimation

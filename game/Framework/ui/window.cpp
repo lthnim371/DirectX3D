@@ -7,6 +7,7 @@ using namespace framework;
 
 cWindow::cWindow(LPD3DXSPRITE sprite, const int id, const string &name) : // name="window"
 	graphic::cSprite(sprite, id, name)
+,	m_isVisible(true)
 {
 }
 
@@ -39,7 +40,7 @@ bool cWindow::DispatchEvent( cEvent &event )
 	if (!event.IsSkip() && m_parent) // 이벤트가 스킵되지 않았다면 부모로 올라가서 실행한다.
 	{
 		if (cWindow *parent = dynamic_cast<cWindow*>(m_parent))
-			parent->DispatchEvent(event);  //부모로 계속 올라감
+			parent->DispatchEvent(event);
 	}
 	return true;
 }
