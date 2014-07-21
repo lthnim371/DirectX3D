@@ -15,12 +15,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxMemMonitorLib", "wxMemMon
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Viewer2", "Viewer2\Viewer2.vcxproj", "{37A60E43-6F45-4438-ABB4-D634D128D23F}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C998257E-A1FD-488A-BB14-1E3DE70834DC}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9C76A094-52A2-419C-A807-5F3DF4915F0E}"
 	ProjectSection(SolutionItems) = preProject
 		help.txt = help.txt
 	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "System", "System\System.vcxproj", "{EB462FBA-00CB-4CB2-A66B-8ED3DE69603E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,10 +54,6 @@ Global
 		{37A60E43-6F45-4438-ABB4-D634D128D23F}.Debug|Win32.Build.0 = Debug|Win32
 		{37A60E43-6F45-4438-ABB4-D634D128D23F}.Release|Win32.ActiveCfg = Release|Win32
 		{37A60E43-6F45-4438-ABB4-D634D128D23F}.Release|Win32.Build.0 = Release|Win32
-		{EB462FBA-00CB-4CB2-A66B-8ED3DE69603E}.Debug|Win32.ActiveCfg = Debug|Win32
-		{EB462FBA-00CB-4CB2-A66B-8ED3DE69603E}.Debug|Win32.Build.0 = Debug|Win32
-		{EB462FBA-00CB-4CB2-A66B-8ED3DE69603E}.Release|Win32.ActiveCfg = Release|Win32
-		{EB462FBA-00CB-4CB2-A66B-8ED3DE69603E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

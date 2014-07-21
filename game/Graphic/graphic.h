@@ -23,8 +23,7 @@ using namespace common;
 #include "base/box.h"
 #include "base/line.h"
 #include "base/cube.h"
-
-
+#include "base/shader.h"
 #include "model/node.h"
 
 #include "collision/boundingbox.h"
@@ -49,7 +48,3 @@ using namespace common;
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
-
-
-//test¿ë
-#include "basecontrol.h"

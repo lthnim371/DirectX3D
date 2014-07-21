@@ -9,23 +9,36 @@ media -> texture폴더 인식
 //맥스상에서 -1로 출력되는 곳은 exporter_V12 -> fn WriteMeshInfo obj =
 일단 원본 익스포터로 사용하고 만약 매트리얼 값이 있는데 ID값이 제대로 안되어있다면 직접 값을 수정하자
 
+
 140720
-애니메이션 읽어오기 및 보관
+애니메이션 읽어오기 및 보관 (Viewr2 기준임)
 controller loadfile -> model setanimation -> resourcemanager loadanimation
 -> modelimporter readrawanimationfile -> readrawanimationfilev9 -> readanimation
 => model setanimation -> bonemgr setanimation -> setanimationrec(재귀) -> bonenode setanimation
 -> track initanimation
 
-애니메이션 실행하기
+애니메이션 실행하기 (Viewr2 기준임)
 viewer2dlg mainloop -> modelview update -> controller update ->
 character move -> model move -> mesh move(현재는 사용안함)
 -> bonemgr move -> bonenode move(재귀) -> track move
 
+
 140721
-애니메이션 변경
+★ 애니메이션 변경
 model setanimation
 그러나 resourcmanager findanimation까지의 파일이름은 경로까지 포함된 상태이므로
 추후 파일명만 반환해주는 함수를 이용하여 순수 파일명만으로 하게끔 코드를 수정해보자
 
-캐릭터별 보관 <- Viewr2 기준임. 실제 게임 작성시 관리를 따로 할듯
+★ 캐릭터별 보관 (Viewr2 기준임. 실제 게임 작성시 관리를 따로 할듯)
 (예상)controller에서 배열로 소유하고 있으면 될듯 싶다..
+
+★ 코드수정
+character.h, cpp
+
+★ 모델 읽어오기 (viwer2 제외임)
+character create -> model create -> resourcemanager loadmodel
+-> modelimporter readrawmeshfile -> ReadRawMeshFileV13 -> ReadMaterialV13(반복)
+-> ReadMeshInfoV11 -> 기타 읽어오기
+-> ReadBone -> 기타 읽어오기
+=> model create -> bonemgr 생성(반복문으로 모든 본을 정리함)
+-> mesh CreateBoundingBox -> cube setcube
