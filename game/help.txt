@@ -21,5 +21,11 @@ viewer2dlg mainloop -> modelview update -> controller update ->
 character move -> model move -> mesh move(현재는 사용안함)
 -> bonemgr move -> bonenode move(재귀) -> track move
 
+140721
 애니메이션 변경
 model setanimation
+그러나 resourcmanager findanimation까지의 파일이름은 경로까지 포함된 상태이므로
+추후 파일명만 반환해주는 함수를 이용하여 순수 파일명만으로 하게끔 코드를 수정해보자
+
+캐릭터별 보관 <- Viewr2 기준임. 실제 게임 작성시 관리를 따로 할듯
+(예상)controller에서 배열로 소유하고 있으면 될듯 싶다..

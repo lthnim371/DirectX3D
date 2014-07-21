@@ -67,6 +67,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="basecontrol.h" />
     <ClInclude Include="base\box.h" />
     <ClInclude Include="base\cube.h" />
     <ClInclude Include="base\dxInit.h" />
@@ -104,6 +105,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="basecontrol.cpp" />
     <ClCompile Include="base\box.cpp" />
     <ClCompile Include="base\cube.cpp" />
     <ClCompile Include="base\dxinit.cpp" />

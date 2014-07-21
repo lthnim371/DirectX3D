@@ -1,5 +1,5 @@
 #pragma once
-
+//#include "..\basecontrol.h"
 
 namespace graphic
 {
@@ -15,10 +15,18 @@ namespace graphic
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
 
+		void Action();
+
+	protected:
+		void Test();
 
 	private:
 		cModel *m_weapon;
 		cBoneNode *m_weaponNode; // reference
+
+		//test¿ë
+		//cBaseControl test;
+		//string str;
 	};
 
 }

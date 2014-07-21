@@ -1,5 +1,5 @@
-
 #include "stdafx.h"
+//#include "..\stdafx.h"
 #include "character.h"
 
 using namespace graphic;
@@ -44,6 +44,14 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 bool cCharacter::Move(const float elapseTime)
 {
+	//test¿ë
+	//Matrix44 mat;
+	//SetTM(mat);
+	//SetAnimation(str);
+
+	Action();
+	//
+	
 	cModel::Move(elapseTime);
 	
 	if (m_weapon && m_weaponNode)
@@ -62,4 +70,49 @@ void cCharacter::Render()
 
 	if (m_weapon)
 		m_weapon->Render();
+}
+
+
+void cCharacter::Action()
+{
+	Test();	
+}
+
+void cCharacter::Test()
+{
+	Matrix44 mat;
+
+	if( (::GetAsyncKeyState('W') & 0x8001) == 0x8001 )
+	{
+		mat.SetTranslate( Vector3( 0,0,5 ) );
+		MultiplyTM( mat );
+
+		return;
+	}
+	else if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	{
+		SetAnimation( "C:\\Users\\Lee\\Desktop\\ABresource\\scripts\\forward.ani" );
+		mat.SetTranslate( Vector3( 0,0,5 ) );
+		MultiplyTM( mat );
+
+		return;
+	}
+
+	if( (::GetAsyncKeyState('S') & 0x8001) == 0x8001 )
+	{
+		mat.SetTranslate( Vector3( 0,0,-5 ) );
+		MultiplyTM( mat );
+
+		return;
+	}
+	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	{
+		SetAnimation( "C:\\Users\\Lee\\Desktop\\ABresource\\scripts\\backward.ani" );
+		mat.SetTranslate( Vector3( 0,0,-5 ) );
+		MultiplyTM( mat );
+
+		return;
+	}
+
+	//SetAnimation( "C:\\Users\\Lee\\Desktop\\ABresource\\scripts\\idle.ani" );
 }
