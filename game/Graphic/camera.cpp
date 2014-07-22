@@ -31,12 +31,15 @@ void cCamera::SetTranslation(const Vector3& position)
 
 void cCamera::SetRotation(const float x_axis, const float y_axis)
 {
+	m_dir = m_look - m_pos;
+	m_dir.Normalize();
 	m_right = m_up.CrossProduct(m_dir);
 	m_right.Normalize();
 
 	{ // rotate Y-Axis
 		Quaternion q( m_up, x_axis * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
+	//	if()
 		m_pos *= m;
 		m_look *= m;
 	}
