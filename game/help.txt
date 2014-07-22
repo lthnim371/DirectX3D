@@ -42,3 +42,15 @@ character create -> model create -> resourcemanager loadmodel
 -> ReadBone -> 기타 읽어오기
 => model create -> bonemgr 생성(반복문으로 모든 본을 정리함)
 -> mesh CreateBoundingBox -> cube setcube
+
+
+140722
+게임앱 창 띄우기
+framework gamemain을 상속받은 gameapp에서 전역변수로 winmain을 생성(???)하는 듯...
+그래서 관련 작업 처리는 gamemain 및 gameapp에서 하면 될 듯 싶다.
+
+question
+싱글톤을 상속받는 클래스의 생성자 접근 권한은??
+
+카메라 클래스 작성
+x축을 기준으로 위아래 회전시 갑자기 화면이 이상해진다.

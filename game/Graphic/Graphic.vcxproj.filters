@@ -103,6 +103,7 @@
     <ClInclude Include="base\shader.h">
       <Filter>base</Filter>
     </ClInclude>
+    <ClInclude Include="camera.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -193,6 +194,7 @@
     <ClCompile Include="base\shader.cpp">
       <Filter>base</Filter>
     </ClCompile>
+    <ClCompile Include="camera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="model">
