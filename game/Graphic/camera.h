@@ -9,10 +9,15 @@ namespace graphic
 	public:  //friend·Î??
 		cCamera();
 		~cCamera();
-
-		void SetTranslation(const Vector3& position);
-		void SetRotation(const float x_axis = 0.f, const float y_axis = 0.f);
+		
 		void Update();
+		bool Move();
+
+		void SetTranslation(const float step);
+		void SetRotation(const float x = 0.f, const float y = 0.f);
+		void SetView();
+	
+		Vector3 GetPosition() const;
 
 	private:
 		Vector3 m_pos;
@@ -23,4 +28,6 @@ namespace graphic
 	};
 
 	inline cCamera* GetCamera() { return cCamera::Get(); };
+
+	inline Vector3 cCamera::GetPosition() const { return m_pos; };
 }

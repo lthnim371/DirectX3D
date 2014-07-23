@@ -48,7 +48,7 @@ void cGameApp::OnUpdate(const float elapseT)
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
 	::GetCursorPos(&currMouse);
 	::ScreenToClient(m_hWnd, &currMouse);
-	graphic::GetCamera()->Update();
+	graphic::GetCamera()->SetView();
 
 	test->Move(elapseT);
 }
@@ -106,7 +106,7 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 				float y_axis = currMouse.y - prevMouse.y;
 
 				graphic::GetCamera()->SetRotation( x_axis, y_axis );
-				graphic::GetCamera()->Update();
+				graphic::GetCamera()->SetView();
 			}
 		break;
 	}

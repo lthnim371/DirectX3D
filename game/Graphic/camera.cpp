@@ -4,12 +4,9 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,50,-100), m_look(0,50,100), m_up(0,1,0)
+	: m_pos(0,250,-150), m_look(0,0,1000), m_up(0,1,0)
 {
-	Update();
-
-	m_right = m_up.CrossProduct(m_dir);
-	m_right.Normalize();
+	SetView();
 	
 	//set projection
 	const int WINSIZE_X = 1024;	//초기 윈도우 가로 크기
@@ -22,44 +19,71 @@ cCamera::cCamera()
 cCamera::~cCamera()
 {}
 
-
-void cCamera::SetTranslation(const Vector3& position)
-{
-	m_pos += position;
-	m_look += position;
-}
-
-void cCamera::SetRotation(const float x_axis, const float y_axis)
+void cCamera::Update()
 {
 	m_dir = m_look - m_pos;
 	m_dir.Normalize();
 	m_right = m_up.CrossProduct(m_dir);
 	m_right.Normalize();
+}
+
+bool cCamera::Move()
+{
+	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	{		
+		SetTranslation(5.f);
+		return true;
+	}
+	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	{		
+		SetTranslation(-5.f);		
+		return true;
+	}
+
+	return false;
+}
+
+void cCamera::SetTranslation(const float step)
+{
+	Update();
+
+	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
+	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
+
+	SetView();
+}
+
+void cCamera::SetRotation(const float x, const float y)
+{
+	Update();
 
 	{ // rotate Y-Axis
-		Quaternion q( m_up, x_axis * 0.005f ); 
+		Quaternion q( m_up, x * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
-		m_pos *= m;		
-		m_look *= m;		
+		m_look = (m_dir * m) + m_pos;
+//		m_pos *= m;		
+		//m_look *= m;		
 	}
 
 	{ // rotate X-Axis		
-		Quaternion q( m_right, y_axis * 0.005f ); 
+		Quaternion q( m_right, y * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
 		Vector3 currPos(m_pos);
 		currPos *= m;
-		if(currPos.y >= 20.f && currPos.y <= 100.f)  //상하 카메라 방향 고정
+		if(currPos.y >= 100.f && currPos.y <= 250.f)  //상하 카메라 방향 고정
 		{
 			m_pos *= m;
 			m_look *= m;
 		}
+//		dbg::Print( "%f", m_look.y );
 	}
+
+	SetView();
 }
 
-void cCamera::Update()
+void cCamera::SetView()
 {
-	m_dir = m_look - m_pos;
-	m_dir.Normalize();
+	Update();
 
 	Matrix44 view;
 	view.SetView( m_pos, m_dir, m_up );

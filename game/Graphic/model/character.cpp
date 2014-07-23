@@ -9,7 +9,8 @@ cCharacter::cCharacter(const int id) :
 	cModel(id)
 ,	m_weapon(NULL)
 ,	m_weaponNode(NULL)
-,	animode(true)
+, m_animode(true)
+, m_position(0, 0, 0)
 {
 
 }
@@ -86,36 +87,47 @@ void cCharacter::Test()
 {
 	Matrix44 mat;
 
-	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	if( GetCamera()->Move() )
 	{
-		if( !animode )
+		if( !m_animode )
 		{
 			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
-			animode = true;
-		}
-		mat.SetTranslate( Vector3( 0,0,5 ) );
-		MultiplyTM( mat );
-
-		return;
+			m_animode = true;
+		}		
+		mat.SetTranslate( GetCamera()->GetPosition() + Vector3(0,-300,150) );
+		SetTM( mat );
 	}
-	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
-	{
-		if( !animode )
-		{
-			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
-			animode = true;
-		}
-		mat.SetTranslate( Vector3( 0,0,-5 ) );
-		MultiplyTM( mat );
-
-		return;
-	}
-
-	if(animode)
+	else if(m_animode)
 	{
 		SetAnimation( "..\\media\\valle(new)\\normal.ani" );
-		animode = false;
+		m_animode = false;
 	}
+	
 
 	//SetAnimation( "C:\\Users\\Lee\\Desktop\\ABresource\\scripts\\idle.ani" );
 }
+//backup
+	//if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	//{
+	//	if( !animode )
+	//	{
+	//		SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+	//		animode = true;
+	//	}
+	//	mat.SetTranslate( Vector3( 0,0,5 ) );
+	//	MultiplyTM( mat );
+
+	//	return;
+	//}
+	//else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	//{
+	//	if( !animode )
+	//	{
+	//		SetAnimation( "..\\media\\valle(new)\\backward.ani" );
+	//		animode = true;
+	//	}
+	//	mat.SetTranslate( Vector3( 0,0,-5 ) );
+	//	MultiplyTM( mat );
+
+	//	return;
+	//}

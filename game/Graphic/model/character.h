@@ -28,7 +28,8 @@ namespace graphic
 		//cBaseControl test;
 		//string str;
 
-		bool animode;
+		bool m_animode;
+		Vector3 m_position;
 	};
 
 }
