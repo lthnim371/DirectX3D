@@ -24,4 +24,6 @@ private:
 
 	POINT currMouse;
 	POINT prevMouse;
+
+	graphic::cCharacter* test;
 };

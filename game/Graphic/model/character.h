@@ -27,6 +27,8 @@ namespace graphic
 		//test¿ë
 		//cBaseControl test;
 		//string str;
+
+		bool animode;
 	};
 
 }

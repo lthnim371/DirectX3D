@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "GameApp.h"
 
-#include <windowsx.h>
+#include <windowsx.h>  //for GET_X_LPARAM & GET_Y_LPARAM
 
 INIT_FRAMEWORK(cGameApp);
 
@@ -11,6 +11,8 @@ cGameApp::cGameApp()
 	m_windowName = L"GameApp";
 	const RECT r = {0, 0, 1280, 800};
 	m_windowRect = r;
+
+	test = new graphic::cCharacter(0);
 }
 
 cGameApp::~cGameApp()
@@ -20,8 +22,6 @@ cGameApp::~cGameApp()
 
 bool cGameApp::OnInit()
 {
-
-
 	m_mtrl.InitRed();
 
 	Vector4 color(1,1,1,1);
@@ -31,16 +31,13 @@ bool cGameApp::OnInit()
 		color * 0.6f,
 		Vector3(1,0,0));
 	
-
-
-
-	
-
 	m_light.Bind(0);
 
 	graphic::GetDevice()->LightEnable (
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
+
+	test->Create( "..\\media\\valle(new)\\valle1.dat" );
 
 	return true;
 }
@@ -52,6 +49,8 @@ void cGameApp::OnUpdate(const float elapseT)
 	::GetCursorPos(&currMouse);
 	::ScreenToClient(m_hWnd, &currMouse);
 	graphic::GetCamera()->Update();
+
+	test->Move(elapseT);
 }
 
 
@@ -74,6 +73,8 @@ void cGameApp::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderFPS();
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
+
+		test->Render();
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();

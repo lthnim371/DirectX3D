@@ -273,7 +273,10 @@ bool CModelView::LoadFile(const string &fileName)
 
 	cController::Get()->LoadFile(fileName);
 	graphic::cCharacter *character = cController::Get()->GetCharacter();
-	character->LoadWeapon( "../media/weapon.dat");
+//	character->LoadWeapon( "../media/weapon.dat");
+//	character->LoadWeapon( "../media/valle_weapon1.dat");
+//	character->LoadWeapon( "../media/test_weapon.dat");
+//	character->LoadWeapon( "../media/test_weapon2.dat");
 
 	return false;
 }

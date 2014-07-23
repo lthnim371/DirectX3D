@@ -39,16 +39,20 @@ void cCamera::SetRotation(const float x_axis, const float y_axis)
 	{ // rotate Y-Axis
 		Quaternion q( m_up, x_axis * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
-	//	if()
-		m_pos *= m;
-		m_look *= m;
+		m_pos *= m;		
+		m_look *= m;		
 	}
 
-	{ // rotate X-Axis
+	{ // rotate X-Axis		
 		Quaternion q( m_right, y_axis * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
-		m_pos *= m;
-		m_look *= m;
+		Vector3 currPos(m_pos);
+		currPos *= m;
+		if(currPos.y >= 20.f && currPos.y <= 100.f)  //상하 카메라 방향 고정
+		{
+			m_pos *= m;
+			m_look *= m;
+		}
 	}
 }
 

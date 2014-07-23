@@ -38,8 +38,7 @@ namespace graphic
 		void SetRenderMesh(const bool isRenderMesh);
 		void SetRenderBone(const bool isRenderBone);
 		void SetRenderBoundingBox(const bool isRenderBoundingBox);
-
-
+			
 	protected:
 		int m_id;
 		MODEL_TYPE::TYPE m_type;
