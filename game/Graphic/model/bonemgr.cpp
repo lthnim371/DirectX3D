@@ -1,3 +1,5 @@
+//#include "..\stdafx.h"
+
 
 #include "stdafx.h"
 #include "bonemgr.h"
@@ -228,4 +230,51 @@ void cBoneMgr::SetBoundingBoxIndex(cBoneNode *node, OUT map<int, int> &boneIndic
 
 	BOOST_FOREACH (auto &child, node->GetChildren())
 		SetBoundingBoxIndex((cBoneNode*)child, boneIndices, nextBoneIdx);
+}
+
+
+//test
+void cBoneMgr::SwapBone(cBoneMgr* weaponBone)
+{
+	auto bone = weaponBone->GetAllBoneNode();
+	int cnt = bone.size();
+	cBoneNode* tempNode = FindBone( bone[0]->GetName() );
+	cBoneNode* tempParent = (cBoneNode*)tempNode->GetParent();
+	int tempId = tempNode->GetId();
+	tempParent->RemoveNode( tempId );
+	for(int i = 0; i < cnt; ++i)
+	{
+		bone[ i ]->SetId( tempId + i );
+		tempParent->InsertChild( bone[ i ] );
+		tempParent = bone[ i ];
+		m_bones[ tempId + i ] = tempParent;
+	}
+	
+
+
+	/* for(int i = cnt - 1; i >= 0; --i)
+	 {
+		 cBoneNode* tempNode = FindBone( bone[ i ]->GetName() );
+		 cBoneNode* tempParent = (cBoneNode*)tempNode->GetParent();
+		 int tempId = tempNode->GetId();
+		 tempParent->RemoveNode( tempId );
+		 bone[ i ]->SetId( tempId );
+		 tempParent->InsertChild( bone[ i ] );
+	 }*/
+	
+	
+	
+
+
+
+	/*for(auto it = weaponBone->GetAllBoneNode().begin();
+		it < weaponBone->GetAllBoneNode().end();
+		++it )
+	{
+		it->SwapBone(it);
+	}*/
+
+
+//	if( cBoneNode* bone = FindBone(name) );
+//		return;
 }
