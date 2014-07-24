@@ -4,8 +4,8 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,250,-150), m_look(0,0,1000), m_up(0,1,0)
-{
+	: m_pos(0,250,-250), m_look(0,0,0), m_up(0,1,0)
+{	
 	SetView();
 	
 	//set projection
@@ -27,20 +27,22 @@ void cCamera::Update()
 	m_right.Normalize();
 }
 
-bool cCamera::Move()
+int cCamera::Move(const Matrix44& character)
 {
 	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
 	{		
 		SetTranslation(5.f);
-		return true;
+		m_look = character.GetPosition();
+		return 1;
 	}
 	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
 	{		
 		SetTranslation(-5.f);		
-		return true;
+		m_look = character.GetPosition();
+		return 2;
 	}
 
-	return false;
+	return 0;
 }
 
 void cCamera::SetTranslation(const float step)
@@ -48,44 +50,51 @@ void cCamera::SetTranslation(const float step)
 	Update();
 
 	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
-	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
+	//m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
+//	m_pos += ( m_dir * step );
+//	m_look += ( m_dir * step );
 
-	SetView();
+//	SetView();
 }
 
-void cCamera::SetRotation(const float x, const float y)
+void cCamera::SetRotation(const Matrix44& character, const float x, const float y)
 {
 	Update();
 
 	{ // rotate Y-Axis
-		Quaternion q( m_up, x * 0.005f ); 
+		Quaternion q( m_up, -x * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
-		m_look = (m_dir * m) + m_pos;
-//		m_pos *= m;		
-		//m_look *= m;		
+//		m_look = (m_dir * m) + m_pos;
+
+		m_look = character.GetPosition();
+		m_rot *= m;
+//		m_look *= R;
+//		m_right *= R;
 	}
 
 	{ // rotate X-Axis		
-		Quaternion q( m_right, y * 0.005f ); 
-		Matrix44 m = q.GetMatrix();
-		Vector3 currPos(m_pos);
-		currPos *= m;
-		if(currPos.y >= 100.f && currPos.y <= 250.f)  //상하 카메라 방향 고정
-		{
-			m_pos *= m;
-			m_look *= m;
-		}
+//		Quaternion q( m_right, y * 0.005f ); 
+//		m_rot[2] = q.GetMatrix();
+//		Vector3 currPos(m_pos);
+//		currPos *= m_rot[1];
+//		if(currPos.y >= 100.f && currPos.y <= 250.f)  //상하 카메라 방향 고정
+//		{
+//			m_pos *= m_rot[1];
+////			m_look *= m;
+//		}
 //		dbg::Print( "%f", m_look.y );
 	}
 
-	SetView();
+//	SetView();
 }
 
 void cCamera::SetView()
 {
 	Update();
 
+	m_rot *= m_pos;
+			
 	Matrix44 view;
-	view.SetView( m_pos, m_dir, m_up );
+	view.SetView( m_rot, m_dir, m_up );
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&view);
 }

@@ -11,13 +11,14 @@ namespace graphic
 		~cCamera();
 		
 		void Update();
-		bool Move();
+		int Move(const Matrix44& character);
 
 		void SetTranslation(const float step);
-		void SetRotation(const float x = 0.f, const float y = 0.f);
+		void SetRotation(const Matrix44& character, const float x = 0.f, const float y = 0.f);
 		void SetView();
 	
 		Vector3 GetPosition() const;
+		Vector3 GetDirection() const;
 
 	private:
 		Vector3 m_pos;
@@ -25,9 +26,11 @@ namespace graphic
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
+		Vector3 m_rot;
 	};
 
 	inline cCamera* GetCamera() { return cCamera::Get(); };
 
 	inline Vector3 cCamera::GetPosition() const { return m_pos; };
+	inline Vector3 cCamera::GetDirection() const { return Vector3(m_dir.x, 0.f, m_dir.z); };
 }

@@ -37,7 +37,8 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-	test->Create( "..\\media\\valle(new)\\valle1.dat" );
+//	test->Create( "..\\media\\valle(new)\\valle1.dat" );
+	test->Create( "..\\media\\valle(new)\\valle2.dat" );
 
 	return true;
 }
@@ -96,6 +97,19 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 //test
 	switch (message)
 	{
+		/*case WM_KEYDOWN:
+			if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+			{		
+				graphic::GetCamera()->SetTranslation(5.f);
+				test->Action(test->FORWARD);
+			}
+			else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+			{		
+				graphic::GetCamera()->SetTranslation(-5.f);
+				test->Action(test->BACKWARD);
+			}
+		break;*/
+
 		case WM_MOUSEMOVE:
 			{	
 				prevMouse = currMouse;
@@ -105,8 +119,8 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 				float x_axis = currMouse.x - prevMouse.x;
 				float y_axis = currMouse.y - prevMouse.y;
 
-				graphic::GetCamera()->SetRotation( x_axis, y_axis );
-				graphic::GetCamera()->SetView();
+				graphic::GetCamera()->SetRotation(test->GetTM(), x_axis, y_axis );
+				//graphic::GetCamera()->SetView();
 			}
 		break;
 	}

@@ -1,3 +1,4 @@
+//#include "..stdafx.h"
 
 #include "stdafx.h"
 #include "bonenode.h"
@@ -167,4 +168,26 @@ void cBoneNode::SetCurrentFrame(const int curFrame)
 	m_curPlayFrame = curFrame; 
 	if (m_track)
 		m_track->SetCurrentFramePos(curFrame);
+}
+
+
+//test
+//void cBoneNode::SwapBone(cBoneNode* weaponBone)
+void cBoneNode::SwapBone()
+{
+
+
+
+	/*for(auto it = weaponBone->GetChildren().begin();
+		it < weaponBone->GetChildren().end();
+		++it )
+	{
+		it->SwapBone(it);
+	}*/
+
+
+//	BOOST_FOREACH (auto bone, m_children)
+//		(cBoneNode*)bone->SwapBone();
+
+
 }

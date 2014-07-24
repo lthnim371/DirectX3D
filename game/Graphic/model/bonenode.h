@@ -19,6 +19,10 @@ namespace graphic
 		int GetPlayFrame() const;
 		void SetCurrentFrame(const int curFrame);
 
+		//test
+//		void SwapBone(cBoneNode* weaponBone);
+		void SwapBone();
+//		inline void SetPalette(vector<Matrix44>& m_palette) { m_
 
 	private:
 		cTrack *m_track;

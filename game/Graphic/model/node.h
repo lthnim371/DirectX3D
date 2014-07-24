@@ -30,6 +30,8 @@ namespace graphic
 		virtual bool Move(const float elapseTime) {return true;}
 		virtual void Render(const Matrix44 &parentTm);
 
+		//test
+		inline void SetId(const int id) { m_id = id; };
 
 	protected:
 		int m_id;

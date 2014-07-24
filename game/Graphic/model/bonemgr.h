@@ -24,6 +24,8 @@ namespace graphic
 		cBoneNode* FindBone(const string &name);
 		vector<Matrix44>& GetPalette();
 
+		//test
+		void SwapBone(cBoneMgr* weaponBone);
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );

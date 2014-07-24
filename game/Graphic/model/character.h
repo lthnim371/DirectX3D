@@ -3,10 +3,14 @@
 
 namespace graphic
 {
-
 	class cCharacter : public cModel
 	{
 	public:
+		enum STATE
+		{
+			NONE, FORWARD, BACKWARD,
+		};
+
 		cCharacter(const int id);
 		virtual ~cCharacter();
 
@@ -16,6 +20,8 @@ namespace graphic
 		virtual void Render() override;
 
 		void Action();
+
+		void SetState(const int state);
 
 	protected:
 		void Test();
@@ -30,6 +36,8 @@ namespace graphic
 
 		bool m_animode;
 		Vector3 m_position;
+		int m_state;
 	};
 
+	inline void cCharacter::SetState(const int state) { m_state = state; };
 }
