@@ -1,0 +1,14 @@
+hlsl_rigid.fx
+viwer.cpp init, render
+mesh.cpp RenderShader
+
+포인트!!
+1.sampler의 address u,v 옵션 설정시 만약 텍스쳐의 u,v좌표가 1 초과할 때 문제 발생
+(초과할때는 옵션을 wrap으로)
+
+2.begin 또는 beginpass 할때 하나 하고 end 또는 endpass를 해야된다.
+(beginpass 하고 또 beginpass 하면 이상해질 수 있다)
+
+
+bonenode m_aniStart
+익스포트한 애니메이션 스타트프레임이 저장된다.

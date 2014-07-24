@@ -16,17 +16,19 @@ namespace graphic
 		void SetTranslation(const float step);
 		void SetRotation(const Matrix44& character, const float x = 0.f, const float y = 0.f);
 		void SetView();
-	
+		void SetPosition(const Vector3& characterPos);
+				
 		Vector3 GetPosition() const;
 		Vector3 GetDirection() const;
 
 	private:
+		Vector3 m_lookPos;
 		Vector3 m_pos;
 		Vector3 m_look;
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
-		Vector3 m_rot;
+		Vector3 m_final;
 	};
 
 	inline cCamera* GetCamera() { return cCamera::Get(); };

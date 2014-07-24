@@ -87,34 +87,38 @@ void cCharacter::Action()
 {
 	Matrix44 mat;
 
-	switch( GetCamera()->Move(m_matTM) )
-	{
-		case NONE:
-			if( m_animode )
-			{
-				SetAnimation( "..\\media\\valle(new)\\normal.ani" );
-				m_animode = false;
-			}
-		break;
-		case FORWARD:
-			if( !m_animode )
-			{
-				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
-				m_animode = true;
-			}
-			mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
-			MultiplyTM( mat );
-		break;
-		case BACKWARD:
-			if( !m_animode )
-			{
-				SetAnimation( "..\\media\\valle(new)\\backward.ani" );
-				m_animode = true;
-			}
-			mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
-			MultiplyTM( mat );
-		break;
+	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	{		
+		if( !m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+			m_animode = true;
+		}
+		mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
+//		MultiplyTM( mat );
+//		GetCamera()->SetPosition( GetTM().GetPosition() );
 	}
+	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	{	
+		if( !m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
+			m_animode = true;
+		}
+		mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
+
+	}
+	else
+	{
+		if( m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\normal.ani" );
+			m_animode = false;
+		}
+	}
+
+	MultiplyTM( mat );
+	GetCamera()->SetPosition( GetTM().GetPosition() );
 }
 
 //void cCharacter::Test()
@@ -140,28 +144,65 @@ void cCharacter::Action()
 //
 //	//SetAnimation( "C:\\Users\\Lee\\Desktop\\ABresource\\scripts\\idle.ani" );
 //}
-//backup
-	//if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
-	//{
-	//	if( !animode )
-	//	{
-	//		SetAnimation( "..\\media\\valle(new)\\forward.ani" );
-	//		animode = true;
-	//	}
-	//	mat.SetTranslate( Vector3( 0,0,5 ) );
-	//	MultiplyTM( mat );
 
-	//	return;
-	//}
-	//else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
-	//{
-	//	if( !animode )
-	//	{
-	//		SetAnimation( "..\\media\\valle(new)\\backward.ani" );
-	//		animode = true;
-	//	}
-	//	mat.SetTranslate( Vector3( 0,0,-5 ) );
-	//	MultiplyTM( mat );
+/*	backup1
+	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	{
+		if( !animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+			animode = true;
+		}
+		mat.SetTranslate( Vector3( 0,0,5 ) );
+		MultiplyTM( mat );
 
-	//	return;
-	//}
+		return;
+	}
+	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	{
+		if( !animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
+			animode = true;
+		}
+		mat.SetTranslate( Vector3( 0,0,-5 ) );
+		MultiplyTM( mat );
+
+		return;
+	}
+*/
+/*  backup2
+void cCharacter::Action()
+{
+	Matrix44 mat;
+
+	switch( GetCamera()->Move(m_matTM) )
+	{
+	case NONE:
+		if( m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\normal.ani" );
+			m_animode = false;
+		}
+		break;
+	case FORWARD:
+		if( !m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+			m_animode = true;
+		}
+		mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
+		MultiplyTM( mat );
+		break;
+	case BACKWARD:
+		if( !m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
+			m_animode = true;
+		}
+		mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
+		MultiplyTM( mat );
+		break;
+	}
+}
+*/
