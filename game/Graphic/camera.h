@@ -28,7 +28,7 @@ namespace graphic
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
-		Vector3 m_final;
+		Vector3 m_test;
 	};
 
 	inline cCamera* GetCamera() { return cCamera::Get(); };

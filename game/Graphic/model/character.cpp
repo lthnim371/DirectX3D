@@ -95,8 +95,8 @@ void cCharacter::Action()
 			m_animode = true;
 		}
 		mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
-//		MultiplyTM( mat );
-//		GetCamera()->SetPosition( GetTM().GetPosition() );
+		MultiplyTM( mat );
+		GetCamera()->SetPosition( GetTM().GetPosition() );
 	}
 	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
 	{	
@@ -106,7 +106,8 @@ void cCharacter::Action()
 			m_animode = true;
 		}
 		mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
-
+		MultiplyTM( mat );
+		GetCamera()->SetPosition( GetTM().GetPosition() );
 	}
 	else
 	{
@@ -116,9 +117,6 @@ void cCharacter::Action()
 			m_animode = false;
 		}
 	}
-
-	MultiplyTM( mat );
-	GetCamera()->SetPosition( GetTM().GetPosition() );
 }
 
 //void cCharacter::Test()
