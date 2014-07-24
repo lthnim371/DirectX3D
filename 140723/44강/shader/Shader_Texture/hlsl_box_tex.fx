@@ -6,7 +6,7 @@ float4x4 mWVP;		// 로컬에서 투영공간으로의 좌표변환
 
 
 // ------------------------------------------------------------
-// 텍스처  //멀티 텍스쳐 할시 같은 방법으로 추가작성하면 됨
+// 텍스처
 // ------------------------------------------------------------
 texture Tex;
 sampler Samp = sampler_state
@@ -28,7 +28,7 @@ sampler Samp = sampler_state
 struct VS_OUTPUT
 {
     float4 Pos	 : POSITION;
-	float2 Tex : TEXCOORD0;  //TEXCOORD0 : 보간을 자동으로 해주는 플래그
+	float2 Tex : TEXCOORD0;
 };
 
 
@@ -54,13 +54,12 @@ VS_OUTPUT VS_pass0(
 
 
 // -------------------------------------------------------------
-// 1패스:픽셀셰이더  //보간을 자동으로 해준다. 정점셰이더는 정점만 알고 있으므로 그 사이의 픽셀들을
+// 1패스:픽셀셰이더
 // -------------------------------------------------------------
 float4 PS_pass0(VS_OUTPUT In) : COLOR
 {
     float4 Out;
 
-	//tex2D반환은 RGBA임...즉, uv의 칼라값
 	Out = tex2D(Samp, In.Tex);
 
     return Out;

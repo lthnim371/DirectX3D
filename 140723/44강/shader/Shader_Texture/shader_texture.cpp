@@ -281,9 +281,6 @@ void Render(int timeDelta)
 		g_shader.SetMatrix("mWVP", g_LocalTm * g_matView * g_matProj);
 		g_shader.SetTexture("Tex", g_texture);
 
-		//SetTexture : 어떠한 한 모델에만 하나의 텍스쳐로 적용한다면 한번만 설정하면 됨. 그러나 2개 이상의 모델에 교차로 텍스쳐 적용할때는 그때그때마다 설정해야 됨
-		//Begin : 디폴트값으로 셋팅되어 있다.
-
 		g_shader.Begin();
 		g_shader.BeginPass(0);
 

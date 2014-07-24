@@ -19,7 +19,7 @@ struct VS_OUTPUT
 // 1패스:정점셰이더
 // -------------------------------------------------------------
 VS_OUTPUT VS_pass0(
-      float4 Pos    : POSITION,          // 모델정점
+      float4 Pos    : POSITION,          // 모델정점  // : POSITION , : COLOR0  -> 이렇게 콜론하고 적는 것은 버텍스포맷의 FVF 설정이다.
 	  float4 Diffuse : COLOR0			// 정점 컬러
 )
 {

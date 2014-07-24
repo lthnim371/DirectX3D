@@ -3,23 +3,18 @@
 // 전역변수
 // -------------------------------------------------------------
 float4x4 mWVP;		// 로컬에서 투영공간으로의 좌표변환
+float4x4 mWIT;
+float3 vLightDir; //(0,-1,0)
 
 
-// ------------------------------------------------------------
-// 텍스처  //멀티 텍스쳐 할시 같은 방법으로 추가작성하면 됨
-// ------------------------------------------------------------
-texture Tex;
-sampler Samp = sampler_state
-{
-    Texture = <Tex>;
-    MinFilter = LINEAR;
-    MagFilter = LINEAR;
-    MipFilter = NONE;
 
-    AddressU = Clamp;
-    AddressV = Clamp;
-};
+// 광원 밝기.
+float4 I_a = {0.3f, 0.3f, 0.3f, 0.0f}; // ambient
+float4 I_d = {0.7f, 0.7f, 0.7f, 0.0f}; // diffuse
 
+// 반사율
+float4 K_a = {1.0f, 1.0f, 1.0f, 1.0f}; // ambient 
+float4 K_d = {1.0f, 1.0f, 1.0f, 1.0f}; // diffuse
 
 
 // -------------------------------------------------------------
@@ -28,7 +23,7 @@ sampler Samp = sampler_state
 struct VS_OUTPUT
 {
     float4 Pos	 : POSITION;
-	float2 Tex : TEXCOORD0;  //TEXCOORD0 : 보간을 자동으로 해주는 플래그
+	float4 Diffuse : COLOR0;
 };
 
 
@@ -37,31 +32,33 @@ struct VS_OUTPUT
 // -------------------------------------------------------------
 VS_OUTPUT VS_pass0(
       float4 Pos : POSITION,          // 모델정점
-	  float2 Tex : TEXCOORD0			// 텍스쳐 좌표
+	  float3 Normal : NORMAL		// 법선벡터
 )
 {
     VS_OUTPUT Out = (VS_OUTPUT)0;        // 출력데이터
     
     // 좌표변환
-	float4 pos = mul( Pos, mWVP );
+	Out.Pos = mul( Pos, mWVP );
+
+	// 정점 색
+	float3 L = -vLightDir;
+	float3 N = normalize( mul(Normal, (float3x3)mWIT) ); // 월드 좌표계에서의 법선.
 	
-    // 위치좌표
-    Out.Pos = pos;
-	Out.Tex = Tex;
-    
+	Out.Diffuse = I_a * K_a + 
+					I_d * K_d * max(0, dot(N,L));
+
     return Out;
 }
 
 
 // -------------------------------------------------------------
-// 1패스:픽셀셰이더  //보간을 자동으로 해준다. 정점셰이더는 정점만 알고 있으므로 그 사이의 픽셀들을
+// 1패스:픽셀셰이더
 // -------------------------------------------------------------
 float4 PS_pass0(VS_OUTPUT In) : COLOR
 {
     float4 Out;
 
-	//tex2D반환은 RGBA임...즉, uv의 칼라값
-	Out = tex2D(Samp, In.Tex);
+	Out = In.Diffuse;
 
     return Out;
 }

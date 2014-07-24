@@ -1,0 +1,7 @@
+commitchange : set 함수 설정 후 사용하여 설정변경값을 알려주는 역할
+
+mWIT (법선벡터)를  구하다??변화될때??  이동값은 제외하고 회전값만 적용되도록...
+그리고 스케일(크기)값이 변할때는 월드행렬를 역행렬로 바꾼뒤 전치행렬로 바꿔줘야 한다.
+
+WVP : world view projection
+WIT : world invers trans
