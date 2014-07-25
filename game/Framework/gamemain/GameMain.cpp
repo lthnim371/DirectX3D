@@ -152,6 +152,7 @@ void cGameMain::Run()
 		const float t = elapseT * 0.001f;
 		oldT = curT;
 
+		Input(t);  //Ãß°¡
 		Update(t);
 		Render(t);
 		Sleep(0);
@@ -190,4 +191,10 @@ const wstring& cGameMain::GetWindowName()
 const RECT& cGameMain::GetWindowRect()
 {
 	return m_windowRect;
+}
+
+
+void cGameMain::Input(const float elapseT)
+{
+	OnInput(elapseT);
 }

@@ -8,7 +8,7 @@ namespace graphic
 	public:
 		enum STATE
 		{
-			NONE, FORWARD, BACKWARD,
+			NONE, FORWARD, BACKWARD, LEFTWALK, RIGHTWALK,
 		};
 
 		cCharacter(const int id);
@@ -18,8 +18,9 @@ namespace graphic
 		void LoadWeapon(const string &fileName);
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
-
-		void Action();
+		
+	//Ãß°¡
+		void Action(const int state);
 
 		void SetState(const int state);
 

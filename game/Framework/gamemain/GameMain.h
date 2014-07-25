@@ -29,6 +29,7 @@ namespace framework
 		const RECT& GetWindowRect();		
 		virtual void MessageProc( UINT message, WPARAM wParam, LPARAM lParam);
 
+		virtual void Input(const float elapseT);
 
 	protected:
 		virtual bool OnInit() { return true; }
@@ -36,6 +37,8 @@ namespace framework
 		virtual void OnRender(const float elapseT) {}
 		virtual void OnShutdown() {}
 
+	//Ãß°¡	
+		virtual void OnInput(const float elapseT) {}
 
 	protected:
 		STATE m_state;

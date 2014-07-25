@@ -14,6 +14,9 @@ public:
 	virtual void OnShutdown() override;
 	virtual void MessageProc( UINT message, WPARAM wParam, LPARAM lParam) override;
 
+//Ãß°¡
+	virtual void OnInput(const float elapseT) override;
+
 private:
 	graphic::cVertexBuffer m_vtxBuff;
 	graphic::cIndexBuffer m_idxBuff;
@@ -22,8 +25,9 @@ private:
 	graphic::cMaterial m_mtrl;
 	graphic::cLight m_light;
 
-	POINT currMouse;
-	POINT prevMouse;
+	POINT m_currMouse;
+	POINT m_prevMouse;
+	bool m_bMouse;
 
-	graphic::cCharacter* test;
+	graphic::cCharacter* character;
 };

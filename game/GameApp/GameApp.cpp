@@ -12,7 +12,7 @@ cGameApp::cGameApp()
 	const RECT r = {0, 0, 1280, 800};
 	m_windowRect = r;
 
-	test = new graphic::cCharacter(0);
+	character = new graphic::cCharacter(0);
 }
 
 cGameApp::~cGameApp()
@@ -37,21 +37,53 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-//	test->Create( "..\\media\\valle(new)\\valle1.dat" );
-	test->Create( "..\\media\\valle(new)\\valle2.dat" );
+//	character->Create( "..\\media\\valle(new)\\valle1.dat" );
+	character->Create( "..\\media\\valle(new)\\valle2.dat" );
+
+	::GetCursorPos( &m_currMouse );
+	::ScreenToClient( m_hWnd, &m_currMouse );
+	m_prevMouse = m_currMouse;
+	m_bMouse = false;
 
 	return true;
 }
 
+void cGameApp::OnInput(const float elapseT)
+{
+	if( InputMgr->isStayKey('W') )
+	{		
+		character->Action( character->FORWARD );
+	}
+	else if( InputMgr->isStayKey('S') )
+	{	
+		character->Action( character->BACKWARD );
+	}
+	else if( InputMgr->isStayKey('A') )
+	{	
+		character->Action( character->LEFTWALK );
+	}
+	else if( InputMgr->isStayKey('D') )
+	{	
+		character->Action( character->RIGHTWALK );
+	}
+	else
+		character->Action( character->NONE );
+
+	::GetCursorPos( &m_currMouse );
+	::ScreenToClient( m_hWnd, &m_currMouse );
+	if( m_currMouse.x != m_prevMouse.x || m_currMouse.y != m_prevMouse.y )
+		m_bMouse = true;
+	else
+		m_bMouse = false;
+
+}
 
 void cGameApp::OnUpdate(const float elapseT)
 {
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
-	::GetCursorPos(&currMouse);
-	::ScreenToClient(m_hWnd, &currMouse);
+	
+	character->Move(elapseT);
 	graphic::GetCamera()->SetView();
-
-	test->Move(elapseT);
 }
 
 
@@ -75,7 +107,7 @@ void cGameApp::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
 
-		test->Render();
+		character->Render();
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
@@ -101,26 +133,28 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
 			{		
 				graphic::GetCamera()->SetTranslation(5.f);
-				test->Action(test->FORWARD);
+				character->Action(character->FORWARD);
 			}
 			else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
 			{		
 				graphic::GetCamera()->SetTranslation(-5.f);
-				test->Action(test->BACKWARD);
+				character->Action(character->BACKWARD);
 			}
 		break;*/
 
 		case WM_MOUSEMOVE:
 			{	
-				prevMouse = currMouse;
-				currMouse.x = GET_X_LPARAM(lParam);
-				currMouse.y = GET_Y_LPARAM(lParam);
+				if(m_bMouse)
+				{
+					m_prevMouse = m_currMouse;
+					m_currMouse.x = GET_X_LPARAM(lParam);
+					m_currMouse.y = GET_Y_LPARAM(lParam);
 
-				float x_axis = currMouse.x - prevMouse.x;
-				float y_axis = currMouse.y - prevMouse.y;
+					float x_axis = m_currMouse.x - m_prevMouse.x;
+					float y_axis = m_currMouse.y - m_prevMouse.y;
 
-				graphic::GetCamera()->SetRotation(test->GetTM(), x_axis, y_axis );
-				//graphic::GetCamera()->SetView();
+					graphic::GetCamera()->SetRotation( x_axis, y_axis );
+				}
 			}
 		break;
 	}

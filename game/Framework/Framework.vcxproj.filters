@@ -25,6 +25,7 @@
     <ClInclude Include="ui\eventhandler.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="keyManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -46,6 +47,7 @@
     <ClCompile Include="ui\eventhandler.cpp">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="keyManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">

@@ -59,7 +59,7 @@ bool cCharacter::Move(const float elapseTime)
 	//SetTM(mat);
 	//SetAnimation(str);
 
-	Action();
+//	Action();
 	
 	
 	cModel::Move(elapseTime);
@@ -82,41 +82,69 @@ void cCharacter::Render()
 		m_weapon->Render();
 }
 
-
-void cCharacter::Action()
+void cCharacter::Action(const int state)
 {
 	Matrix44 mat;
-
-	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
-	{		
-		if( !m_animode )
-		{
-			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
-			m_animode = true;
-		}
-		mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
-		MultiplyTM( mat );
-		GetCamera()->SetPosition( GetTM().GetPosition() );
-	}
-	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
-	{	
-		if( !m_animode )
-		{
-			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
-			m_animode = true;
-		}
-		mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
-		MultiplyTM( mat );
-		GetCamera()->SetPosition( GetTM().GetPosition() );
-	}
-	else
+	Vector3 camDir( GetCamera()->GetDirection() );
+	Vector3 camR( GetCamera()->GetRight() );
+	
+	switch( state )
 	{
-		if( m_animode )
-		{
-			SetAnimation( "..\\media\\valle(new)\\normal.ani" );
-			m_animode = false;
-		}
+		case NONE:
+			if( m_animode )
+			{
+				SetAnimation( "..\\media\\valle(new)\\normal.ani" );
+				m_animode = false;
+			}
+		break;
+		
+		case FORWARD:
+			if( !m_animode )
+			{
+				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+				m_animode = true;
+			}
+			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+			MultiplyTM( mat );
+			GetCamera()->SetTranslation( GetTM() );
+		break;
+		
+		case BACKWARD:
+			if( !m_animode )
+			{
+				SetAnimation( "..\\media\\valle(new)\\backward.ani" );
+				m_animode = true;
+			}
+			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+			MultiplyTM( mat );
+			GetCamera()->SetTranslation( GetTM() );
+		break;
+
+		case LEFTWALK:
+			if( !m_animode )
+			{
+				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+				m_animode = true;
+			}
+			mat.SetTranslate( Vector3( camR.x, 0.f, camR.z ) * -5.f );
+			MultiplyTM( mat );
+			GetCamera()->SetTranslation( GetTM() );
+		break;
+
+		case RIGHTWALK:
+			if( !m_animode )
+			{
+				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
+				m_animode = true;
+			}
+			mat.SetTranslate( Vector3( camR.x, 0.f, camR.z ) * 5.f );
+			MultiplyTM( mat );
+			GetCamera()->SetTranslation( GetTM() );
+		break;
+
+
 	}
+	
 }
 
 //void cCharacter::Test()
@@ -169,21 +197,15 @@ void cCharacter::Action()
 		return;
 	}
 */
-/*  backup2
+
+
+/* backup2
 void cCharacter::Action()
 {
 	Matrix44 mat;
 
-	switch( GetCamera()->Move(m_matTM) )
-	{
-	case NONE:
-		if( m_animode )
-		{
-			SetAnimation( "..\\media\\valle(new)\\normal.ani" );
-			m_animode = false;
-		}
-		break;
-	case FORWARD:
+	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
+	{		
 		if( !m_animode )
 		{
 			SetAnimation( "..\\media\\valle(new)\\forward.ani" );
@@ -191,8 +213,10 @@ void cCharacter::Action()
 		}
 		mat.SetTranslate( GetCamera()->GetDirection() * 5.f );
 		MultiplyTM( mat );
-		break;
-	case BACKWARD:
+		GetCamera()->SetPosition( GetTM().GetPosition() );
+	}
+	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
+	{	
 		if( !m_animode )
 		{
 			SetAnimation( "..\\media\\valle(new)\\backward.ani" );
@@ -200,7 +224,15 @@ void cCharacter::Action()
 		}
 		mat.SetTranslate( GetCamera()->GetDirection() * -5.f );
 		MultiplyTM( mat );
-		break;
+		GetCamera()->SetPosition( GetTM().GetPosition() );
+	}
+	else
+	{
+		if( m_animode )
+		{
+			SetAnimation( "..\\media\\valle(new)\\normal.ani" );
+			m_animode = false;
+		}
 	}
 }
 */

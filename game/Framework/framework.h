@@ -31,3 +31,7 @@
 #include "ui/eventhandler.h"
 #include "ui/window.h"
 #include "ui/button.h"
+
+//Ãß°¡
+#include "keyManager.h"
+#define InputMgr framework::keyManager::Get()
