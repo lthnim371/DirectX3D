@@ -42,7 +42,7 @@ bool cGameApp::OnInit()
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );
-	m_prevMouse = m_currMouse;
+//	m_prevMouse = m_currMouse;
 	m_bMouse = false;
 
 	return true;
@@ -50,7 +50,19 @@ bool cGameApp::OnInit()
 
 void cGameApp::OnInput(const float elapseT)
 {
-	if( InputMgr->isStayKey('W') )
+	m_prevMouse = m_currMouse;
+	::GetCursorPos( &m_currMouse );
+	::ScreenToClient( m_hWnd, &m_currMouse );
+	if( m_currMouse.x != m_prevMouse.x || m_currMouse.y != m_prevMouse.y )
+//		m_bMouse = true;
+	{
+		//character->Action( character->ROTATION, m_currMouse.x );
+		POINT ptMouse;
+		ptMouse.x = m_currMouse.x - m_prevMouse.x;
+		ptMouse.y = m_currMouse.y - m_prevMouse.y;
+		graphic::GetCamera()->SetRotation( ptMouse );
+	}
+	else if( InputMgr->isStayKey('W') )
 	{		
 		character->Action( character->FORWARD );
 	}
@@ -67,15 +79,9 @@ void cGameApp::OnInput(const float elapseT)
 		character->Action( character->RIGHTWALK );
 	}
 	else
+	{
 		character->Action( character->NONE );
-
-	::GetCursorPos( &m_currMouse );
-	::ScreenToClient( m_hWnd, &m_currMouse );
-	if( m_currMouse.x != m_prevMouse.x || m_currMouse.y != m_prevMouse.y )
-		m_bMouse = true;
-	else
-		m_bMouse = false;
-
+	}
 }
 
 void cGameApp::OnUpdate(const float elapseT)
@@ -127,9 +133,10 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 {
 
 //test
+/*
 	switch (message)
 	{
-		/*case WM_KEYDOWN:
+		case WM_KEYDOWN:
 			if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
 			{		
 				graphic::GetCamera()->SetTranslation(5.f);
@@ -140,8 +147,9 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 				graphic::GetCamera()->SetTranslation(-5.f);
 				character->Action(character->BACKWARD);
 			}
-		break;*/
-
+		break;
+		
+		
 		case WM_MOUSEMOVE:
 			{	
 				if(m_bMouse)
@@ -149,13 +157,17 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 					m_prevMouse = m_currMouse;
 					m_currMouse.x = GET_X_LPARAM(lParam);
 					m_currMouse.y = GET_Y_LPARAM(lParam);
-
+					
 					float x_axis = m_currMouse.x - m_prevMouse.x;
 					float y_axis = m_currMouse.y - m_prevMouse.y;
 
 					graphic::GetCamera()->SetRotation( x_axis, y_axis );
+
+				//	character->SetRotation(  x_axis, y_axis );
 				}
 			}
 		break;
+		
 	}
+*/
 }

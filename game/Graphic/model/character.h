@@ -8,7 +8,7 @@ namespace graphic
 	public:
 		enum STATE
 		{
-			NONE, FORWARD, BACKWARD, LEFTWALK, RIGHTWALK,
+			NONE, FORWARD, BACKWARD, LEFTWALK, RIGHTWALK, ROTATION
 		};
 
 		cCharacter(const int id);
@@ -20,9 +20,10 @@ namespace graphic
 		virtual void Render() override;
 		
 	//Ãß°¡
-		void Action(const int state);
+		void Action(const int state, const float x = 0.f);
 
 		void SetState(const int state);
+		void SetRotation(const float x, const float y);
 
 	protected:
 		void Test();

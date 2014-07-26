@@ -4,10 +4,10 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,250,-250), m_look(0,0,0), m_up(0,1,0)
+	: m_pos(0,250, 250), m_look(0,0,0), m_up(0,1,0)
 {	
 //	m_lookPos = m_look - m_pos;
-
+	
 	SetView();
 	
 	//set projection
@@ -32,22 +32,36 @@ void cCamera::Update()
 }
 
 void cCamera::SetTranslation(const Matrix44& character)
+//void cCamera::SetTranslation(const float step)
 {
 
 //	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
 //	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
 //	m_pos += ( m_dir * step );
 //	m_look += ( m_dir * step );
-	m_look = character.GetPosition();// + Vector3(0,100.f,0);
 //	m_pos = m_look - m_lookPos;
+	m_look = character.GetPosition();// + Vector3(0,100.f,0);
 	m_pos = m_look - m_dir;
 }
 
 
-void cCamera::SetRotation(const float x, const float y)
+//void cCamera::SetRotation(const float x, const float y)
+void cCamera::SetRotation(const POINT& ptMouse)
 {
 //	Update();
+	
+//	m_rot += x;
 
+	if( ptMouse.x != 0 )
+	{ // rotate Y-Axis
+		Quaternion q( m_up, -ptMouse.x * 0.005f ); 
+		Matrix44 m = q.GetMatrix();
+		Vector3 currDir(m_pos - m_look);
+		currDir *= m;
+		m_pos = m_look + currDir;
+	}
+
+/*
 	if( x != 0 )
 	{ // rotate Y-Axis
 		Quaternion q( m_up, -x * 0.005f ); 
@@ -56,7 +70,7 @@ void cCamera::SetRotation(const float x, const float y)
 		currDir *= m;
 		m_pos = m_look + currDir;
 	}
-
+*/
 	//if( y != 0 )
 	//{ // rotate X-Axis		
 	//	if(m_pos.y >= 50.f && m_pos.y <= 300)
@@ -81,6 +95,15 @@ void cCamera::SetView()
 
 	//dbg::Print("%f,%f,%f", m_pos.x,m_pos.y,m_pos.z);
 }
+
+/*
+float cCamera::GetRotation()
+{
+	float tempRot = m_rot;
+	m_rot = 0.f;
+	return tempRot;
+}
+*/
 
 /* backup1
 int cCamera::Move(const Matrix44& character)

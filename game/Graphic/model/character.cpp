@@ -70,6 +70,7 @@ bool cCharacter::Move(const float elapseTime)
 	//	m_weapon->SetTM(mat * m_matTM);
 		m_weapon->Move(elapseTime);
 	}
+
 	return true;
 }
 
@@ -82,7 +83,7 @@ void cCharacter::Render()
 		m_weapon->Render();
 }
 
-void cCharacter::Action(const int state)
+void cCharacter::Action(const int state, const float x)
 {
 	Matrix44 mat;
 	Vector3 camDir( GetCamera()->GetDirection() );
@@ -103,10 +104,31 @@ void cCharacter::Action(const int state)
 			{
 				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
 				m_animode = true;
+
+				/*Matrix44 rot;
+				rot.SetRotationY( GetCamera()->GetRotation() );
+				MultiplyTM( rot );*/
+
+				/*
+				Vector3 pos( m_matTM.GetPosition() );
+				float theta = pos.Normal().DotProduct( camDir.Normal() );
+				theta = acos(theta);
+				theta = theta * (180 / MATH_PI);
+				if( theta != 0.f )
+				{
+					theta *= ( (camDir.x < pos.x) ? 1 : -1 );
+					Quaternion q( Vector3(0,1,0), theta ); 
+					Matrix44 m = q.GetMatrix();
+					MultiplyTM( m );
+				}
+				*/
 			}
-			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+		//	MultiplyTM( GetCamera()->GetRotation() );
+		//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+			mat.SetTranslate( Vector3( camDir.Normal().x, 0.f, camDir.Normal().z ) * 5.f );
 			MultiplyTM( mat );
 			GetCamera()->SetTranslation( GetTM() );
+		//	GetCamera()->SetTranslation( 5.f );
 		break;
 		
 		case BACKWARD:
@@ -115,9 +137,12 @@ void cCharacter::Action(const int state)
 				SetAnimation( "..\\media\\valle(new)\\backward.ani" );
 				m_animode = true;
 			}
-			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+		//	SetTM( m_matTM * GetCamera()->GetRotation() );
+		//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+			mat.SetTranslate( Vector3( camDir.Normal().x, 0.f, camDir.Normal().z ) * -5.f );
 			MultiplyTM( mat );
 			GetCamera()->SetTranslation( GetTM() );
+		//	GetCamera()->SetTranslation( -5.f );
 		break;
 
 		case LEFTWALK:
@@ -142,10 +167,32 @@ void cCharacter::Action(const int state)
 			GetCamera()->SetTranslation( GetTM() );
 		break;
 
+		/*case ROTATION:
+			{
+				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
+				Matrix44 m = q.GetMatrix();
+				MultiplyTM( m );				
+			}
+		break;*/
+
 
 	}
 	
 }
+
+//void cCharacter::SetRotation(const float x, const float y)
+//{
+//	if( x != 0 )
+//	{ // rotate Y-Axis
+//	//	Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
+//	//	Matrix44 m = q.GetMatrix();
+//		Matrix44 m;
+//		m.SetRotationY( x * 0.005f );
+//		MultiplyTM( m );
+//	}
+//	
+//	GetCamera()->SetRotation( x, y );
+//}
 
 //void cCharacter::Test()
 //{
