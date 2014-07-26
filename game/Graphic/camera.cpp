@@ -1,3 +1,7 @@
+/*  추후 업데이트 사항
+카메라 상하 움직임
+*/
+
 #include "stdafx.h"
 #include "camera.h"
 
@@ -5,10 +9,8 @@ using namespace graphic;
 
 cCamera::cCamera()
 	: m_pos(0,250, 250), m_look(0,0,0), m_up(0,1,0)
-{	
-//	m_lookPos = m_look - m_pos;
-	
-	SetView();
+{		
+	SetView();  //set view
 	
 	//set projection
 	const int WINSIZE_X = 1024;	//초기 윈도우 가로 크기
@@ -24,36 +26,28 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	m_dir = m_look - m_pos;
-//	m_lookPos = m_dir;
 //	m_dir.Normalize();
-//	m_right = m_up.CrossProduct( m_dir );
 	m_right = m_up.CrossProduct( m_dir.Normal() );
 	m_right.Normalize();
 }
 
-void cCamera::SetTranslation(const Matrix44& character)
 //void cCamera::SetTranslation(const float step)
+void cCamera::SetTranslation(const Matrix44& character)
 {
-
 //	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
 //	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
-//	m_pos += ( m_dir * step );
-//	m_look += ( m_dir * step );
-//	m_pos = m_look - m_lookPos;
 	m_look = character.GetPosition();// + Vector3(0,100.f,0);
 	m_pos = m_look - m_dir;
+
+	Update();
 }
 
 
 //void cCamera::SetRotation(const float x, const float y)
 void cCamera::SetRotation(const POINT& ptMouse)
 {
-//	Update();
-	
-//	m_rot += x;
-
 	if( ptMouse.x != 0 )
-	{ // rotate Y-Axis
+	{  // rotate Y-Axis
 		Quaternion q( m_up, -ptMouse.x * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
 		Vector3 currDir(m_pos - m_look);
@@ -82,30 +76,21 @@ void cCamera::SetRotation(const POINT& ptMouse)
 	//		m_pos = m_look + currDir;
 	//	}
 	//}
+
+	Update();
 }
 
-void cCamera::SetView()
+void cCamera::SetView()  //set view
 {
 	Update();
 	
 	Matrix44 view;
-//	view.SetView( m_pos, m_dir, m_up );
 	view.SetView( m_pos, m_dir.Normal(), m_up );
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&view);
-
-	//dbg::Print("%f,%f,%f", m_pos.x,m_pos.y,m_pos.z);
 }
 
-/*
-float cCamera::GetRotation()
-{
-	float tempRot = m_rot;
-	m_rot = 0.f;
-	return tempRot;
-}
-*/
 
-/* backup1
+/* backup
 int cCamera::Move(const Matrix44& character)
 {
 	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
@@ -123,12 +108,17 @@ int cCamera::Move(const Matrix44& character)
 
 	return 0;
 }
-*/
 
-/* backup2
 void cCamera::SetPosition(const Vector3& characterPos)
 {
 	m_look = characterPos;
 	m_pos = m_look - m_lookPos;
+}
+
+float cCamera::GetRotation()
+{
+	float tempRot = m_rot;
+	m_rot = 0.f;
+	return tempRot;
 }
 */

@@ -61,8 +61,10 @@ void cGameApp::OnInput(const float elapseT)
 		ptMouse.x = m_currMouse.x - m_prevMouse.x;
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
 		graphic::GetCamera()->SetRotation( ptMouse );
+		character->Action( character->ROTATION, ptMouse.x );
 	}
-	else if( InputMgr->isStayKey('W') )
+
+	if( InputMgr->isStayKey('W') )
 	{		
 		character->Action( character->FORWARD );
 	}
@@ -72,11 +74,11 @@ void cGameApp::OnInput(const float elapseT)
 	}
 	else if( InputMgr->isStayKey('A') )
 	{	
-		character->Action( character->LEFTWALK );
+		character->Action( character->LEFTWARD );
 	}
 	else if( InputMgr->isStayKey('D') )
 	{	
-		character->Action( character->RIGHTWALK );
+		character->Action( character->RIGHTWARD );
 	}
 	else
 	{

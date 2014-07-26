@@ -54,14 +54,6 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 bool cCharacter::Move(const float elapseTime)
 {
-	//test용
-	//Matrix44 mat;
-	//SetTM(mat);
-	//SetAnimation(str);
-
-//	Action();
-	
-	
 	cModel::Move(elapseTime);
 	
 	if (m_weapon)// && m_weaponNode)
@@ -87,76 +79,61 @@ void cCharacter::Action(const int state, const float x)
 {
 	Matrix44 mat;
 	Vector3 camDir( GetCamera()->GetDirection() );
+	Vector3 camDirN( camDir.Normal() );
 	Vector3 camR( GetCamera()->GetRight() );
 	
 	switch( state )
 	{
-		case NONE:
-			if( m_animode )
+		case NONE:  //기본 동작
+			if( m_animode )  //현재 다른 애니모션 상태라면..
 			{
 				SetAnimation( "..\\media\\valle(new)\\normal.ani" );
 				m_animode = false;
 			}
 		break;
+
+		case ROTATION:  //캐릭터 회전
+			{
+				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
+				Matrix44 m = q.GetMatrix();
+				SetTM( m * GetTM() );  //R * T
+			}
+		break;
 		
-		case FORWARD:
-			if( !m_animode )
+		case FORWARD:  //앞으로 이동
+			if( !m_animode )  //입력키가 처음 눌러졌다면..
 			{
 				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
 				m_animode = true;
-
-				/*Matrix44 rot;
-				rot.SetRotationY( GetCamera()->GetRotation() );
-				MultiplyTM( rot );*/
-
-				/*
-				Vector3 pos( m_matTM.GetPosition() );
-				float theta = pos.Normal().DotProduct( camDir.Normal() );
-				theta = acos(theta);
-				theta = theta * (180 / MATH_PI);
-				if( theta != 0.f )
-				{
-					theta *= ( (camDir.x < pos.x) ? 1 : -1 );
-					Quaternion q( Vector3(0,1,0), theta ); 
-					Matrix44 m = q.GetMatrix();
-					MultiplyTM( m );
-				}
-				*/
 			}
-		//	MultiplyTM( GetCamera()->GetRotation() );
-		//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
-			mat.SetTranslate( Vector3( camDir.Normal().x, 0.f, camDir.Normal().z ) * 5.f );
-			MultiplyTM( mat );
-			GetCamera()->SetTranslation( GetTM() );
-		//	GetCamera()->SetTranslation( 5.f );
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 5.f );  //카메라 방향으로
+			MultiplyTM( mat );  //현재 위치에 더해주기
+			GetCamera()->SetTranslation( GetTM() );  //카메라 위치도 갱신
 		break;
 		
-		case BACKWARD:
+		case BACKWARD:  //뒤로 이동
 			if( !m_animode )
 			{
 				SetAnimation( "..\\media\\valle(new)\\backward.ani" );
 				m_animode = true;
 			}
-		//	SetTM( m_matTM * GetCamera()->GetRotation() );
-		//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
-			mat.SetTranslate( Vector3( camDir.Normal().x, 0.f, camDir.Normal().z ) * -5.f );
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * -5.f );
 			MultiplyTM( mat );
 			GetCamera()->SetTranslation( GetTM() );
-		//	GetCamera()->SetTranslation( -5.f );
 		break;
 
-		case LEFTWALK:
+		case LEFTWARD:  //왼쪽 이동
 			if( !m_animode )
 			{
 				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
 				m_animode = true;
 			}
-			mat.SetTranslate( Vector3( camR.x, 0.f, camR.z ) * -5.f );
+			mat.SetTranslate( Vector3( camR.x, 0.f, camR.z ) * -5.f );  //카메라 좌우방향으로
 			MultiplyTM( mat );
 			GetCamera()->SetTranslation( GetTM() );
 		break;
 
-		case RIGHTWALK:
+		case RIGHTWARD:  //오른쪽 이동
 			if( !m_animode )
 			{
 				SetAnimation( "..\\media\\valle(new)\\forward.ani" );
@@ -166,18 +143,7 @@ void cCharacter::Action(const int state, const float x)
 			MultiplyTM( mat );
 			GetCamera()->SetTranslation( GetTM() );
 		break;
-
-		/*case ROTATION:
-			{
-				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
-				Matrix44 m = q.GetMatrix();
-				MultiplyTM( m );				
-			}
-		break;*/
-
-
 	}
-	
 }
 
 //void cCharacter::SetRotation(const float x, const float y)

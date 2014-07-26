@@ -8,7 +8,7 @@ namespace graphic
 	public:
 		enum STATE
 		{
-			NONE, FORWARD, BACKWARD, LEFTWALK, RIGHTWALK, ROTATION
+			NONE, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD, 
 		};
 
 		cCharacter(const int id);
@@ -31,10 +31,6 @@ namespace graphic
 	private:
 		cModel *m_weapon;
 		cBoneNode *m_weaponNode; // reference
-
-		//test¿ë
-		//cBaseControl test;
-		//string str;
 
 		bool m_animode;
 		Vector3 m_position;

@@ -10,21 +10,15 @@ namespace graphic
 		cCamera();
 		~cCamera();
 		
-		void Update();
-//		int Move(const Matrix44& character);
+		void Update();  //카메라 방향벡터, 우방벡터 업데이트
 
-		void SetTranslation(const Matrix44& character);
-//		void SetTranslation(const float step);
-//		void SetRotation(const float x = 0.f, const float y = 0.f);
-		void SetRotation(const POINT& ptMouse);
+		void SetTranslation(const Matrix44& character);  //카메라 look, 위치 갱신
+		void SetRotation(const POINT& ptMouse);  //카메라 회전 연산
 		void SetView();
-//		void SetPosition(const Vector3& characterPos);
-				
+		
 		Vector3 GetPosition() const;
 		Vector3 GetDirection() const;
 		Vector3 GetRight() const;
-//		float GetRotation();
-//		POINT GetRotation() const;
 
 	private:
 		Vector3 m_pos;
@@ -32,17 +26,31 @@ namespace graphic
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
+	};
+
+	inline cCamera* GetCamera() { return cCamera::Get(); };  //this
+	inline Vector3 cCamera::GetPosition() const { return m_pos; };
+	inline Vector3 cCamera::GetDirection() const { return m_dir; };
+	inline Vector3 cCamera::GetRight() const { return m_right; };
+
+}
+
+/*  backup
+//		int Move(const Matrix44& character);
+
+//		void SetTranslation(const Matrix44& character);
+//		void SetTranslation(const float step);
+//		void SetRotation(const float x = 0.f, const float y = 0.f);
+//		void SetPosition(const Vector3& characterPos);
+
+//		float GetRotation();
+//		POINT GetRotation() const;
+
+//	inline Vector3 cCamera::GetDirection() const { return m_dir; };
+//	inline Matrix44 cCamera::GetRotation() const { return m_rot; };
+//	inline POINT cCamera::GetRotation() const { return m_ptRot; };
+
 //		Vector3 m_lookPos;  //= m_dir
 //		Matrix44 m_rot;
 //		float m_rot;
-	};
-
-	inline cCamera* GetCamera() { return cCamera::Get(); };
-
-	inline Vector3 cCamera::GetPosition() const { return m_pos; };
-//	inline Vector3 cCamera::GetDirection() const { return m_dir; };
-	inline Vector3 cCamera::GetDirection() const { return m_dir; };
-	inline Vector3 cCamera::GetRight() const { return m_right; };
-//	inline Matrix44 cCamera::GetRotation() const { return m_rot; };
-//	inline POINT cCamera::GetRotation() const { return m_ptRot; };
-}
+*/
