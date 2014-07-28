@@ -18,11 +18,10 @@ namespace graphic
 		int GetCurrentFrame() const;
 		int GetPlayFrame() const;
 		void SetCurrentFrame(const int curFrame);
+		void UpdateAccTM();
 
-		//test
-//		void SwapBone(cBoneNode* weaponBone);
-		void SwapBone();
-//		inline void SetPalette(vector<Matrix44>& m_palette) { m_
+	//test
+		bool GetAniState() const;
 
 	private:
 		cTrack *m_track;
@@ -47,4 +46,7 @@ namespace graphic
 	inline const Matrix44& cBoneNode::GetAccTM() const { return m_accTM; }
 	inline int cBoneNode::GetCurrentFrame() const { return m_curPlayFrame; }
 	inline int cBoneNode::GetPlayFrame() const { return m_incPlayFrame; }
+
+//test
+	inline bool cBoneNode::GetAniState() const { return m_isAni; }
 }

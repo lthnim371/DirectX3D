@@ -1,5 +1,4 @@
 #pragma once
-//#include "..\basecontrol.h"
 
 namespace graphic
 {
@@ -8,7 +7,12 @@ namespace graphic
 	public:
 		enum STATE
 		{
-			NONE, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD, 
+			NONE, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
+			LATTACK, RATTACK
+		};
+		enum MODE
+		{
+			NORMAL, MOVE, ATTACK,
 		};
 
 		cCharacter(const int id);
@@ -32,10 +36,14 @@ namespace graphic
 		cModel *m_weapon;
 		cBoneNode *m_weaponNode; // reference
 
+	//test
 		bool m_animode;
 		Vector3 m_position;
-		int m_state;
+		short m_state;
+		short m_attackCnt;
+		bool m_reserveL;
+//		short m_mode;
 	};
 
-	inline void cCharacter::SetState(const int state) { m_state = state; };
+	inline void cCharacter::SetState(const int state) { m_state = state; }
 }

@@ -11,6 +11,8 @@ using namespace  graphic;
 cBoneMgr::cBoneMgr(const int id, const sRawMeshGroup &rawMeshes) :
 	m_root(NULL)
 ,	m_id(id)
+//test
+, m_aniLoop(true)
 {
 	m_palette.resize(rawMeshes.bones.size());
 
@@ -64,7 +66,9 @@ void cBoneMgr::SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAnies, i
 	RET(!node);
 	RET(node->GetId() >= (int)rawAnies.anies.size());
 
-	node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, true );
+	//node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, true );
+//test
+	node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, m_aniLoop );
 	BOOST_FOREACH (auto p, node->GetChildren())
 	{
 		SetAnimationRec((cBoneNode*)p, rawAnies, nAniFrame );
@@ -232,6 +236,10 @@ void cBoneMgr::SetBoundingBoxIndex(cBoneNode *node, OUT map<int, int> &boneIndic
 		SetBoundingBoxIndex((cBoneNode*)child, boneIndices, nextBoneIdx);
 }
 
+bool cBoneMgr::GetAniState() const
+{
+	return m_root->GetAniState();
+}
 
 //test
 void cBoneMgr::SwapBone(cBoneMgr* weaponBone)

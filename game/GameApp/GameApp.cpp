@@ -37,8 +37,7 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-//	character->Create( "..\\media\\valle(new)\\valle1.dat" );
-	character->Create( "..\\media\\valle(new)\\valle2.dat" );
+	character->Create( "..\\media\\valle\\valle_character1.dat" );
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );
@@ -80,6 +79,14 @@ void cGameApp::OnInput(const float elapseT)
 	{	
 		character->Action( character->RIGHTWARD );
 	}
+	else if( InputMgr->isStayKey( VK_LBUTTON ) )
+	{
+		character->Action( character->LATTACK );
+	}
+	else if( InputMgr->isStayKey( VK_RBUTTON ) )
+	{
+		character->Action( character->RATTACK );
+	}
 	else
 	{
 		character->Action( character->NONE );
@@ -91,6 +98,7 @@ void cGameApp::OnUpdate(const float elapseT)
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
 	
 	character->Move(elapseT);
+	graphic::GetCamera()->SetTranslation( character->GetTM() );
 	graphic::GetCamera()->SetView();
 }
 

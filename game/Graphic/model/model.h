@@ -38,6 +38,9 @@ namespace graphic
 		void SetRenderMesh(const bool isRenderMesh);
 		void SetRenderBone(const bool isRenderBone);
 		void SetRenderBoundingBox(const bool isRenderBoundingBox);
+
+	//test
+		void SetAniLoop(const bool loop);
 			
 	protected:
 		int m_id;

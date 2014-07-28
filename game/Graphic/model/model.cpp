@@ -194,3 +194,10 @@ void cModel::Collision( int testNum, ICollisionable *obj )
 {
 
 }
+
+
+//test
+void cModel::SetAniLoop(const bool loop)
+{
+	m_bone->SetAniLoop(loop);
+}
