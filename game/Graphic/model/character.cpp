@@ -56,11 +56,14 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 bool cCharacter::Move(const float elapseTime)
 {
+	bool bAniState = cModel::Move(elapseTime);
+
 	if(m_attackCnt > 0)
 	{
 	//	bool baniState = m_bone->GetAniState();
 
-		if(m_bone->GetAniState() == false)
+//		if(m_bone->GetAniState() == false)
+		if(bAniState == false)
 		{
 			if(m_reserveL)
 			{
@@ -83,7 +86,8 @@ bool cCharacter::Move(const float elapseTime)
 				case 3:
 					m_attackCnt = 0;
 					SetAnimation( "..\\media\\valle\\valle_normal.ani" );
-					m_animode = false;					
+					m_animode = false;
+					m_bone->SetAniLoop(true);
 			//		m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 				break;
 				}
@@ -93,12 +97,13 @@ bool cCharacter::Move(const float elapseTime)
 				m_attackCnt = 0;
 				SetAnimation( "..\\media\\valle\\valle_normal.ani" );
 				m_animode = false;
+				m_bone->SetAniLoop(true);
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 			}
 		}
 	}
 
-	cModel::Move(elapseTime);
+//	cModel::Move(elapseTime);
 	
 	if (m_weapon)// && m_weaponNode)
 	{

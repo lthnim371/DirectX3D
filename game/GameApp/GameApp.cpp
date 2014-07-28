@@ -37,7 +37,7 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-	character->Create( "..\\media\\valle\\valle_character1.dat" );
+	character->Create( "..\\media\\valle\\valle_character2.dat" );
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );

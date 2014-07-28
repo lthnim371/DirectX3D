@@ -85,3 +85,9 @@ Input 및 OnInput 추가
 ★ GameApp.h , cpp
 마우스 움직임 체크 및 마우스 위치 값 얻어오기
 ★ 왼쪽, 오른쪽 임시 추가(앞으로 가는 애니모션 상태임) 
+
+
+140728
+m_totalPlayTime : 애니메이션 총 반복 횟수
+m_curPlayTime = m_aniStart * 0.03334f : 왜 이 수치로 곱하냐면 해당 프레임의 시간을 구하기 위해
+(만약 all 3으로 하면 m_curPlayFrame = (int)(m_curPlayTime * 30.f)에서 '0'으로 될수도 있기 때문)
