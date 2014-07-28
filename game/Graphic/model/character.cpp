@@ -55,11 +55,22 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 
 bool cCharacter::Move(const float elapseTime)
-{
+{	
 	bool bAniState = cModel::Move(elapseTime);
 
 	if(m_attackCnt > 0)
 	{
+	//	MultiplyTM( m_bone->GetRoot()->GetAccTM() );
+	//	SetTM( m_bone->GetRoot()->GetAccTM() );
+		SetTM( m_bone->GetPalette()[0] );
+		Vector3 test( m_bone->GetRoot()->GetAniTM() );
+		dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
+		/*
+		Vector3 pos( (m_bone->GetPalette()[0]).GetPosition() );
+		Matrix44 mat;
+		mat.SetTranslate( pos );
+		MultiplyTM( mat );
+		*/
 	//	bool baniState = m_bone->GetAniState();
 
 //		if(m_bone->GetAniState() == false)
@@ -73,6 +84,7 @@ bool cCharacter::Move(const float elapseTime)
 					m_bone->SetAniLoop(false);
 					SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
 					m_attackCnt++;
+					m_reserveL = false;
 			//		m_weapon->SetAniLoop(false);
 			//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
 				break;
@@ -80,14 +92,16 @@ bool cCharacter::Move(const float elapseTime)
 					m_bone->SetAniLoop(false);
 					SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
 					m_attackCnt++;
+					m_reserveL = false;
 			//		m_weapon->SetAniLoop(false);
 			//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLLA.ani");
 				break;
 				case 3:
 					m_attackCnt = 0;
+					m_bone->SetAniLoop(true);
 					SetAnimation( "..\\media\\valle\\valle_normal.ani" );
 					m_animode = false;
-					m_bone->SetAniLoop(true);
+					m_reserveL = false;
 			//		m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 				break;
 				}
@@ -95,9 +109,10 @@ bool cCharacter::Move(const float elapseTime)
 			else
 			{
 				m_attackCnt = 0;
+				m_bone->SetAniLoop(true);
 				SetAnimation( "..\\media\\valle\\valle_normal.ani" );
 				m_animode = false;
-				m_bone->SetAniLoop(true);
+				m_reserveL = false;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 			}
 		}

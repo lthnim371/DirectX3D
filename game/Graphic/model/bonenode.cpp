@@ -1,4 +1,4 @@
-
+//#include "..\stdafx.h"
 #include "stdafx.h"
 #include "bonenode.h"
 
@@ -62,6 +62,9 @@ void cBoneNode::SetAnimation( const sRawAni &rawAni, int nAniFrame, bool bLoop)
 
 	SAFE_DELETE(m_track)
 	m_track = new cTrack(rawAni);
+
+//test
+	m_incPlayTime = m_curPlayTime;  //m_incPlayTime √ ±‚»≠
 }
 
 

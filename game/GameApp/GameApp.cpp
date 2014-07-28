@@ -79,11 +79,11 @@ void cGameApp::OnInput(const float elapseT)
 	{	
 		character->Action( character->RIGHTWARD );
 	}
-	else if( InputMgr->isStayKey( VK_LBUTTON ) )
+	else if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
 		character->Action( character->LATTACK );
 	}
-	else if( InputMgr->isStayKey( VK_RBUTTON ) )
+	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
 	{
 		character->Action( character->RATTACK );
 	}

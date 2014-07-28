@@ -92,7 +92,8 @@ bool cModel::Move(const float elapseTime)
 		node->Move(elapseTime);
 
 	if (m_bone)
-		m_bone->Move(elapseTime);
+//		m_bone->Move(elapseTime);
+		return m_bone->Move(elapseTime);
 
 	return true;
 }

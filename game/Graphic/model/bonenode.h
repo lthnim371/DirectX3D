@@ -22,6 +22,7 @@ namespace graphic
 
 	//test
 		bool GetAniState() const;
+		Vector3 GetAniTM() const;
 
 	private:
 		cTrack *m_track;
@@ -49,4 +50,5 @@ namespace graphic
 
 //test
 	inline bool cBoneNode::GetAniState() const { return m_isAni; }
+	inline Vector3 cBoneNode::GetAniTM() const { return m_aniTM.GetPosition(); }
 }
