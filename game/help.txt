@@ -96,4 +96,11 @@ bonemgr클래스에 setaniloop함수, getanistate함수 추가
 model클래스에 setaniloop함수 추가
 bonenode클래스에 getanistate함수 추가
 
-bonenode생성자에 m_incPlayTime를 초기화하는 코드를 추가
+model클래스 move에 m_bone 결과를 리턴하는 코드 추가
+bonenode생성자에 m_incPlayTime를 초기화하는 코드 추가
+
+
+140729
+character클래스 업데이트
+
+common.h에 unsigned short typedef 추가

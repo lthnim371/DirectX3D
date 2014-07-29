@@ -32,7 +32,7 @@
 
 
 typedef unsigned int    u_int;
-
+typedef unsigned short	u_short;
 
 // 포함 파일들.
 #include <string>

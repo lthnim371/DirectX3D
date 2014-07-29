@@ -1,6 +1,6 @@
-/*  추후 업데이트 사항
-카메라 상하 움직임
-*/
+//디버그용
+//	Vector3 test( m_look );
+//	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
 
 #include "stdafx.h"
 #include "camera.h"
@@ -26,17 +26,24 @@ cCamera::~cCamera()
 void cCamera::Update()
 {
 	m_dir = m_look - m_pos;
-//	m_dir.Normalize();
+//	m_dir.Normalize();  //dir의 크기가 필요한 곳이 있으므로 정규화하지 않음
 	m_right = m_up.CrossProduct( m_dir.Normal() );
 	m_right.Normalize();
 }
 
-//void cCamera::SetTranslation(const float step)
-void cCamera::SetTranslation(const Matrix44& character)
+void cCamera::SetPosition(const Matrix44& pos)
 {
 //	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
 //	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
-	m_look = character.GetPosition();// + Vector3(0,100.f,0);
+	m_look = pos.GetPosition();// + Vector3(0,100.f,0);
+	m_pos = m_look - m_dir;
+
+	Update();
+}
+
+void cCamera::SetTranslation(const Vector3& pos)
+{
+	m_look += pos;
 	m_pos = m_look - m_dir;
 
 	Update();
@@ -55,16 +62,6 @@ void cCamera::SetRotation(const POINT& ptMouse)
 		m_pos = m_look + currDir;
 	}
 
-/*
-	if( x != 0 )
-	{ // rotate Y-Axis
-		Quaternion q( m_up, -x * 0.005f ); 
-		Matrix44 m = q.GetMatrix();
-		Vector3 currDir(m_pos - m_look);
-		currDir *= m;
-		m_pos = m_look + currDir;
-	}
-*/
 	//if( y != 0 )
 	//{ // rotate X-Axis		
 	//	if(m_pos.y >= 50.f && m_pos.y <= 300)
@@ -88,37 +85,3 @@ void cCamera::SetView()  //set view
 	view.SetView( m_pos, m_dir.Normal(), m_up );
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&view);
 }
-
-
-/* backup
-int cCamera::Move(const Matrix44& character)
-{
-	if( (::GetAsyncKeyState('W') & 0x8000) == 0x8000 )
-	{		
-		SetTranslation(5.f);
-		m_look = character.GetPosition();
-		return 1;
-	}
-	else if( (::GetAsyncKeyState('S') & 0x8000) == 0x8000 )
-	{		
-		SetTranslation(-5.f);		
-		m_look = character.GetPosition();
-		return 2;
-	}
-
-	return 0;
-}
-
-void cCamera::SetPosition(const Vector3& characterPos)
-{
-	m_look = characterPos;
-	m_pos = m_look - m_lookPos;
-}
-
-float cCamera::GetRotation()
-{
-	float tempRot = m_rot;
-	m_rot = 0.f;
-	return tempRot;
-}
-*/

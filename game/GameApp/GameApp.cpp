@@ -60,36 +60,36 @@ void cGameApp::OnInput(const float elapseT)
 		ptMouse.x = m_currMouse.x - m_prevMouse.x;
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
 		graphic::GetCamera()->SetRotation( ptMouse );
-		character->Action( character->ROTATION, ptMouse.x );
+		character->Update( character->ROTATION, ptMouse.x );
 	}
 
 	if( InputMgr->isStayKey('W') )
 	{		
-		character->Action( character->FORWARD );
+		character->Update( character->FORWARD );
 	}
 	else if( InputMgr->isStayKey('S') )
 	{	
-		character->Action( character->BACKWARD );
+		character->Update( character->BACKWARD );
 	}
 	else if( InputMgr->isStayKey('A') )
 	{	
-		character->Action( character->LEFTWARD );
+		character->Update( character->LEFTWARD );
 	}
 	else if( InputMgr->isStayKey('D') )
 	{	
-		character->Action( character->RIGHTWARD );
+		character->Update( character->RIGHTWARD );
 	}
 	else if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
-		character->Action( character->LATTACK );
+		character->Update( character->LATTACK );
 	}
 	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
 	{
-		character->Action( character->RATTACK );
+		character->Update( character->RATTACK );
 	}
 	else
 	{
-		character->Action( character->NONE );
+		character->Update( character->NONE );
 	}
 }
 
@@ -98,7 +98,7 @@ void cGameApp::OnUpdate(const float elapseT)
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
 	
 	character->Move(elapseT);
-	graphic::GetCamera()->SetTranslation( character->GetTM() );
+//	graphic::GetCamera()->SetPosition( character->GetTM() );
 	graphic::GetCamera()->SetView();
 }
 
