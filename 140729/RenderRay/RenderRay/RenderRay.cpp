@@ -37,6 +37,8 @@ graphic::cVertexBuffer g_VtxBuff;
 graphic::cIndexBuffer g_IdxBuff;
 graphic::cLine g_Line;
 
+//
+graphic::cCube g_cube;
 
 LPDIRECT3DDEVICE9 graphic::GetDevice()
 {
@@ -295,7 +297,9 @@ void Render(int timeDelta)
 
 		g_Line.Render();
 
-
+//
+		g_cube.Render( Matrix44() );
+	
 		//랜더링 끝
 		g_pDevice->EndScene();
 		//랜더링이 끝났으면 랜더링된 내용 화면으로 전송

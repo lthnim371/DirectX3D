@@ -1,26 +1,26 @@
 
-// MapTool.cpp : 응용 프로그램에 대한 클래스 동작을 정의합니다.
+// MfcControl.cpp : 응용 프로그램에 대한 클래스 동작을 정의합니다.
 //
 
 #include "stdafx.h"
-#include "MapTool.h"
-#include "MapToolDlg.h"
+#include "MfcControl.h"
+#include "MfcControlDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 
-// CMapToolApp
+// CMfcControlApp
 
-BEGIN_MESSAGE_MAP(CMapToolApp, CWinApp)
+BEGIN_MESSAGE_MAP(CMfcControlApp, CWinApp)
 	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
 END_MESSAGE_MAP()
 
 
-// CMapToolApp 생성
+// CMfcControlApp 생성
 
-CMapToolApp::CMapToolApp()
+CMfcControlApp::CMfcControlApp()
 {
 	// 다시 시작 관리자 지원
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
@@ -30,14 +30,14 @@ CMapToolApp::CMapToolApp()
 }
 
 
-// 유일한 CMapToolApp 개체입니다.
+// 유일한 CMfcControlApp 개체입니다.
 
-CMapToolApp theApp;
+CMfcControlApp theApp;
 
 
-// CMapToolApp 초기화
+// CMfcControlApp 초기화
 
-BOOL CMapToolApp::InitInstance()
+BOOL CMfcControlApp::InitInstance()
 {
 	// 응용 프로그램 매니페스트가 ComCtl32.dll 버전 6 이상을 사용하여 비주얼 스타일을
 	// 사용하도록 지정하는 경우, Windows XP 상에서 반드시 InitCommonControlsEx()가 필요합니다.
@@ -67,13 +67,8 @@ BOOL CMapToolApp::InitInstance()
 	// 적절한 내용으로 수정해야 합니다.
 	SetRegistryKey(_T("로컬 응용 프로그램 마법사에서 생성된 응용 프로그램"));
 
-//WinMain역할하는 코드
-//	CMapToolDlg dlg;
-//	m_pMainWnd = &dlg;
-	CMapToolDlg* dlg = new CMapToolDlg();
-
-
-
+	CMfcControlDlg dlg;
+	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
@@ -91,8 +86,6 @@ BOOL CMapToolApp::InitInstance()
 	{
 		delete pShellManager;
 	}
-
-//만들었던 객체들 해제하는 코드
 
 	// 대화 상자가 닫혔으므로 응용 프로그램의 메시지 펌프를 시작하지 않고  응용 프로그램을 끝낼 수 있도록 FALSE를
 	// 반환합니다.

@@ -5,13 +5,10 @@
 #include <d3dx9.h>
 #include "../../math/Math.h"
 #include "../../base/base.h"
-#include "Utility.h"
 #include <vector>
 #include <map>
-#include <sstream>
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
-#pragma comment( lib, "winmm.lib" )
 
 
 using namespace std;
@@ -35,7 +32,7 @@ Matrix44 g_matView;
 
 graphic::cVertexBuffer g_VtxBuff;
 graphic::cIndexBuffer g_IdxBuff;
-graphic::cLine g_Line;
+graphic::cLight g_Light;
 
 
 LPDIRECT3DDEVICE9 graphic::GetDevice()
@@ -46,6 +43,7 @@ LPDIRECT3DDEVICE9 graphic::GetDevice()
 
 // 콜백 프로시져 함수 프로토 타입
 LRESULT CALLBACK WndProc( HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam );
+bool InitDirectX(HWND hWnd);
 bool InitVertexBuffer();
 void Render(int timeDelta);
 void UpdateCamera();
@@ -54,7 +52,6 @@ void GetRay(int sx, int sy, Vector3 &orig, Vector3 &dir);
 bool IntersectTriangle( const D3DXVECTOR3& orig, const D3DXVECTOR3& dir,
 	D3DXVECTOR3& v0, D3DXVECTOR3& v1, D3DXVECTOR3& v2,
 	FLOAT* t, FLOAT* u, FLOAT* v );
-void RenderRay(const Vector3 &orig, const Vector3 &dir);
 
 
 int APIENTRY WinMain(HINSTANCE hInstance, 
@@ -62,8 +59,8 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	LPSTR lpCmdLine, 
 	int nCmdShow)
 {
-	wchar_t className[32] = L"Render Ray";
-	wchar_t windowName[32] = L"Render Ray";
+	wchar_t className[32] = L"Render Terrain";
+	wchar_t windowName[32] = L"Render Terrain";
 
 	//윈도우 클레스 정보 생성
 	//내가 이러한 윈도를 만들겠다 라는 정보
@@ -106,7 +103,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	SetWindowPos( hWnd, NULL, 0, 0, rcClient.right - rcClient.left, rcClient.bottom - rcClient.top, 
 		SWP_NOZORDER | SWP_NOMOVE );
 
-	if (!InitDirectX(hWnd, WINSIZE_X, WINSIZE_Y, &g_pDevice))
+	if (!InitDirectX(hWnd))
 	{
 		return 0;
 	}
@@ -131,7 +128,7 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 		}
 		else
 		{
-			const int curT = timeGetTime();
+			const int curT = GetTickCount();
 			const int elapseT = curT - oldT;
 			if (elapseT > 15)
 			{
@@ -233,23 +230,6 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 
 			UpdateCamera();
 		}	
-		else
-		{
-			g_CurPos.x = LOWORD(lParam);
-			g_CurPos.y = HIWORD(lParam);
-		}
-		break;
-
-	case WM_MOUSEWHEEL:
-		{
-			const int fwKeys = GET_KEYSTATE_WPARAM(wParam);
-			const int zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-
-			Vector3 dir = g_lookAtPos - g_camPos;
-			dir.Normalize();
-			g_camPos += (zDelta < 0)? dir * -50 : dir*50;
-			UpdateCamera();
-		}
 		break;
 
 	case WM_DESTROY: //윈도우가 파괴된다면..
@@ -257,6 +237,76 @@ LRESULT CALLBACK WndProc( HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam )
 		break;
 	}
 	return DefWindowProc( hWnd, msg, wParam, lParam );
+}
+
+
+bool InitDirectX(HWND hWnd)
+{
+	LPDIRECT3D9 d3d9;
+	d3d9 = Direct3DCreate9( D3D_SDK_VERSION );
+
+	// 하드웨어 정보를 가지고 와서 자신의 정점 프로세스 타입을 정하자
+	D3DCAPS9 caps;
+
+	//Direct3D9 객체 통해 비디오 카드의 하드웨어 정보를 가지고 온다.
+	d3d9->GetDeviceCaps(
+		D3DADAPTER_DEFAULT,			//주 디스플레이 그래픽 카드 그냥 D3DADAPTER_DEFAULT
+		D3DDEVTYPE_HAL,				//디바이스타입 설정 그냥 D3DDEVTYPE_HAL
+		&caps						//디바이스 정보를 받아올 D3DCAPS9 포인터
+		);
+
+	//정점계산 처리방식을 지정할 플레그 값
+	int vertexProcessing = 0;
+
+	//정점 위치와 광원 계산시 하드웨어 사용이 가능한가
+	if (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
+		vertexProcessing = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+	else
+		vertexProcessing = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+
+
+	//3. D3DPRESENT_PARAMETERS 구조체 정보를 생성
+	//내가 이러한 Device 를 만들겟다라는 정보
+
+	D3DPRESENT_PARAMETERS d3dpp;		
+	d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8;				//뎁스 버퍼와 스테실 버퍼 크기 뎁스 24bit 스텐실 버퍼 8 비트
+	d3dpp.BackBufferCount = 1;						//백버퍼 갯수 그냥 1개
+	d3dpp.BackBufferFormat = D3DFMT_A8R8G8B8;			//백버퍼 색상 포맷 알파8비트,레드8비트,그린8비트,블루8비트
+	d3dpp.BackBufferHeight = WINSIZE_Y;				//백버퍼 픽셀 크기
+	d3dpp.BackBufferWidth = WINSIZE_X;				//백버퍼 픽셀 크기
+	d3dpp.EnableAutoDepthStencil = true;						//자동 깊이버퍼 사용 여부 ( 그냥 true )
+	d3dpp.Flags = 0;						//추기 플래그 ( 일단 0 )
+	d3dpp.FullScreen_RefreshRateInHz	= D3DPRESENT_RATE_DEFAULT;	//화면 주사율 ( 그냥 D3DPRESENT_RATE_DEFAULT 모니터 주사율과 동일시 )
+	d3dpp.hDeviceWindow = hWnd;					//Device 가 출력될 윈도우 핸들
+	d3dpp.MultiSampleQuality = 0;						//멀티 샘플링 질
+	d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;		//멀티 샘플링 타입 
+	d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;	//화면 전송 간격 ( 그냥 D3DPRESENT_INTERVAL_ONE 모니터 주사율과 동일시 )
+	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;	//화면 스왑 체인 방식
+	d3dpp.Windowed = true;						//윈도우 모드냐? ( 이게 false 면 풀스크린 된다! )
+
+	//4. Device 생성
+	if (FAILED(d3d9->CreateDevice(
+		D3DADAPTER_DEFAULT,					//주 디스플레이 그래픽 카드 그냥 D3DADAPTER_DEFAULT
+		D3DDEVTYPE_HAL,						//디바이스타입 설정 그냥 D3DDEVTYPE_HAL
+		hWnd,								//디바이스를 사용할 윈도우 핸들
+		vertexProcessing,					//정점 처리 방식에 대한 플레그
+		&d3dpp,								//앞에서 정의한 D3DPRESENT_PARAMETERS 구조체 포인터
+		&g_pDevice							//얻어올 디바이스 더블포인터
+		)))
+	{
+		//디바이스 생성 실패
+		d3d9->Release(); // Deivce 를 만들기 위해 생성된 Direct3D9 객체를 해제
+		d3d9 = NULL;
+
+		MessageBoxA( hWnd, "CreateDevice() - FAILED", "FAILED", MB_OK );
+		return false;
+	}
+
+
+	//디바이스 생성 성공
+	d3d9->Release(); // Deivce 를 만들었으니 넌 더이상 필요없다 ( 사라져라! )
+	d3d9 = NULL;
+	return true;
 }
 
 
@@ -279,21 +329,11 @@ void Render(int timeDelta)
 		Matrix44 tm = g_LocalTm;
 		g_pDevice->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&tm);
 
-
+		
 		g_VtxBuff.Bind();
 		g_IdxBuff.Bind();
 		g_pDevice->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, g_VtxBuff.GetVertexCount(), 
 			0, g_IdxBuff.GetFaceCount());
-
-		RenderAxis();
-		g_pDevice->SetRenderState(D3DRS_LIGHTING, FALSE);
-
-
-		Vector3 orig, dir;
-		GetRay( g_CurPos.x, g_CurPos.y, orig, dir );
-		RenderRay(orig, dir);
-
-		g_Line.Render();
 
 
 		//랜더링 끝
@@ -315,9 +355,9 @@ bool InitVertexBuffer()
 	const int cellCnt = rowCellCnt * colCellCnt;
 	const int vtxCount= rowVtxCnt * colVtxCnt;
 
-	g_VtxBuff.Create( vtxCount, sizeof(sVertexDiffuse), sVertexDiffuse::FVF);
+	g_VtxBuff.Create( vtxCount, sizeof(sVertexNormDiffuse), sVertexNormDiffuse::FVF);
 	{
-		sVertexDiffuse *vertices = (sVertexDiffuse*)g_VtxBuff.Lock();
+		sVertexNormDiffuse *vertices = (sVertexNormDiffuse*)g_VtxBuff.Lock();
 		const float startx = -cellSize*(rowCellCnt/2);
 		const float starty = cellSize*(colCellCnt/2);
 		const float endx = startx + cellSize*rowCellCnt;
@@ -334,7 +374,8 @@ bool InitVertexBuffer()
 			{
 				int index = (i * colVtxCnt) + k;
 				vertices[ index].p = Vector3(x, 0.1f, y);
-				vertices[ index].c = 0xffcccccc;
+				vertices[ index].n = Vector3(0,1,0);
+				vertices[ index].c = 0xffffffff;
 			}
 		}
 		g_VtxBuff.Unlock();
@@ -364,14 +405,25 @@ bool InitVertexBuffer()
 		g_IdxBuff.Unlock();
 	}
 
+	
+	// 빛 생성.
+	Vector4 color(1,1,1,1);
+	g_Light.Init(graphic::cLight::LIGHT_DIRECTIONAL, 
+		color*0.4f, color, color*0.6f, Vector3(0,-1,0));
 
 	// 카메라, 투영행렬 생성
 	UpdateCamera();
 
-	g_matProj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
+	g_matProj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 1000.0f) ;
 	g_pDevice->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&g_matProj) ;
 
-	g_pDevice->SetRenderState(D3DRS_LIGHTING, false);
+	g_Light.Bind(0);
+	g_pDevice->LightEnable(
+		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
+		true); // true = 활성화 ， false = 비활성화
+
+	g_pDevice->SetRenderState(D3DRS_NORMALIZENORMALS, true);
+	g_pDevice->SetRenderState(D3DRS_SPECULARENABLE, true);
 
 	return true;
 }
@@ -386,12 +438,12 @@ void UpdateCamera()
 }
 
 
-bool Pick(int x, int y)  //마우스위치에 있는 물체의 면 충돌 여부 체크
+bool Pick(int x, int y)
 {
 	Vector3 orig, dir;
 	GetRay( x, y, orig, dir );
 
-	sVertexDiffuse *vertices = (sVertexDiffuse*)g_VtxBuff.Lock();
+	sVertexNormDiffuse *vertices = (sVertexNormDiffuse*)g_VtxBuff.Lock();
 	WORD *indices = (WORD*)g_IdxBuff.Lock();
 
 	const int size = g_IdxBuff.GetFaceCount()*3;
@@ -422,7 +474,7 @@ bool Pick(int x, int y)  //마우스위치에 있는 물체의 면 충돌 여부 체크
 }
 
 
-void GetRay(int sx, int sy, Vector3 &orig, Vector3 &dir)  //마우스 위치(스크린좌표)에서 실제 물체위치(월드좌표)로 변환(인자에 마우스 위치 넣어줌)
+void GetRay(int sx, int sy, Vector3 &orig, Vector3 &dir)
 {
 	const float x =  ( (sx * 2.0F / WINSIZE_X ) - 1.0F );
 	const float y = -( (sy * 2.0F / WINSIZE_Y) - 1.0F );
@@ -444,9 +496,9 @@ void GetRay(int sx, int sy, Vector3 &orig, Vector3 &dir)  //마우스 위치(스크린좌
 }
 
 
-bool IntersectTriangle( const D3DXVECTOR3& orig, const D3DXVECTOR3& dir,  //충돌 여부 체크(광선이 어떤 면 안에 있는지 판단)
+bool IntersectTriangle( const D3DXVECTOR3& orig, const D3DXVECTOR3& dir,
 	D3DXVECTOR3& v0, D3DXVECTOR3& v1, D3DXVECTOR3& v2,
-	FLOAT* t, FLOAT* u, FLOAT* v )  //t : 오리진에서 부닺힌 타겟 대상과의 거리값  //
+	FLOAT* t, FLOAT* u, FLOAT* v )
 {
 	// Find vectors for two edges sharing vert0
 	D3DXVECTOR3 edge1 = v1 - v0;
@@ -497,10 +549,3 @@ bool IntersectTriangle( const D3DXVECTOR3& orig, const D3DXVECTOR3& dir,  //충돌
 	return TRUE;
 }
 
-
-void RenderRay(const Vector3 &orig, const Vector3 &dir)
-{
-	Vector3 p0 = orig + Vector3(10,10,0);
-	Vector3 p1 = orig + dir * 200.f;
-	g_Line.SetLine( p0, p1, 1 );
-}

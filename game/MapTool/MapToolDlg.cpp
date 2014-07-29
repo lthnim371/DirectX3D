@@ -7,6 +7,7 @@
 #include "MapToolDlg.h"
 #include "afxdialogex.h"
 
+//Ãß°¡
 #include "MainPanel.h"
 
 #ifdef _DEBUG

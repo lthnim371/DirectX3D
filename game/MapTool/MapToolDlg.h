@@ -15,7 +15,7 @@ public:
 // 대화 상자 데이터입니다.
 	enum { IDD = IDD_MAPTOOL_DIALOG };
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
 
 
