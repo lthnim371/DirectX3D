@@ -61,3 +61,5 @@ using std::wstringstream;
 #include "etc/dbg.h"
 #include "etc/observer.h"
 #include "etc/rect.h"
+
+#include "number.h"

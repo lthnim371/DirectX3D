@@ -43,6 +43,7 @@
     <ClInclude Include="etc\rect.h">
       <Filter>Etc</Filter>
     </ClInclude>
+    <ClInclude Include="number.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -73,6 +74,7 @@
     <ClCompile Include="etc\rect.cpp">
       <Filter>Etc</Filter>
     </ClCompile>
+    <ClCompile Include="number.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">

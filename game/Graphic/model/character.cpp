@@ -121,6 +121,7 @@ void cCharacter::Update(const short state, const float x, const float y)
 				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
 				Matrix44 m = q.GetMatrix();
 				SetTM( m * GetTM() );  //R * T (이동한 뒤 회전하는걸 방지)
+				GetCamera()->SetPosition( GetTM() );
 				graphic::GetCamera()->SetRotation( x, y );  //카메라 회전도 갱신
 			}
 		break;
@@ -229,20 +230,17 @@ void cCharacter::Update(const short state, const float x, const float y)
 
 bool cCharacter::Attack(bool bAniState)
 {
-	Vector3 camDir( GetCamera()->GetDirection() );
-	camDir.Normalize();
-	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;
+	Vector3 camRight( GetCamera()->GetRight() );  //카메라 우방벡터 가져오기
+	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0)) );  //방향벡터 구하기
+	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
 //	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
-	//	Vector3 test( GetTM().GetPosition() );
-	//	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
-	float fCurrPos = fAniPos - m_prevAniPos;
+	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
 	m_prevAniPos = fAniPos;
-	fCurrPos = ::fabs(fCurrPos);
-	if( fCurrPos >= 0.1f  )
+	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
+	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우
 	{
-		//	dbg::Print( "%f", fCurrPos);
+		//카메라가 바라보는 방향으로 (카메라 look을)차이값만큼 이동
 		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
-	//	GetCamera()->SetTranslation( fCurrPos );
 	}
 //		MultiplyTM( mat );
 //		bool baniState = m_bone->GetAniState();

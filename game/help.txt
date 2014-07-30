@@ -109,6 +109,8 @@ common.h에 unsigned short typedef 추가
 ★ update
 character클래스 업데이트
 
+character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거의 일치시킴
+
 ＠ question
 부호값 얻는 방법 (카메라 방향벡터 정규화 값이 소수점으로 나오기 때문)
 무기 본을 캐릭터 무기 본으로 실시간 공유 가능 여부
