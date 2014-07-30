@@ -68,9 +68,9 @@ BOOL CMapToolApp::InitInstance()
 	SetRegistryKey(_T("로컬 응용 프로그램 마법사에서 생성된 응용 프로그램"));
 
 //WinMain역할하는 코드
-//	CMapToolDlg dlg;
-//	m_pMainWnd = &dlg;
-	CMapToolDlg* dlg = new CMapToolDlg();
+	CMapToolDlg dlg;
+	m_pMainWnd = &dlg;
+//	CMapToolDlg* dlg = new CMapToolDlg();
 
 
 

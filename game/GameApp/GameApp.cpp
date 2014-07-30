@@ -38,6 +38,19 @@ bool cGameApp::OnInit()
 		true); // true = 활성화 ， false = 비활성화
 
 	character->Create( "..\\media\\valle\\valle_character2.dat" );
+	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
+
+	character->SetAnimation( "..\\media\\valle\\valle_backward.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_forward.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_LA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_RA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_normal.ani" );
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );
@@ -59,11 +72,14 @@ void cGameApp::OnInput(const float elapseT)
 		POINT ptMouse;
 		ptMouse.x = m_currMouse.x - m_prevMouse.x;
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
-		graphic::GetCamera()->SetRotation( ptMouse );
-		character->Update( character->ROTATION, ptMouse.x );
+		character->Update( character->ROTATION, ptMouse.x, ptMouse.y );
 	}
-
-	if( InputMgr->isStayKey('W') )
+		
+	if( InputMgr->isStayKey('W') && InputMgr->isStayKey(VK_SHIFT) )
+	{		
+		character->Update( character->DASH );
+	}
+	else if( InputMgr->isStayKey('W') )
 	{		
 		character->Update( character->FORWARD );
 	}
@@ -89,7 +105,7 @@ void cGameApp::OnInput(const float elapseT)
 	}
 	else
 	{
-		character->Update( character->NONE );
+		character->Update( character->NORMAL );
 	}
 }
 

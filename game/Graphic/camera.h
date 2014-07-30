@@ -18,7 +18,9 @@ namespace graphic
 
 		void SetPosition(const Matrix44& pos);  //카메라 look, pos 갱신
 		void SetTranslation(const Vector3& pos);  //카메라 look, pos 이동
-		void SetRotation(const POINT& ptMouse);  //카메라 회전 연산
+//		void SetTranslation(const float z);
+//		void SetRotation(const POINT& ptMouse);  //카메라 회전 연산
+		void SetRotation(const float x = 0, const float y = 0);  //카메라 회전 연산
 		void SetView();
 		
 		Vector3 GetPosition() const;

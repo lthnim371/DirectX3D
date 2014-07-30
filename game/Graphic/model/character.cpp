@@ -1,3 +1,7 @@
+//use debug
+//	Vector3 test( GetTM().GetPosition() );
+//	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
+
 #include "stdafx.h"
 //#include "..\stdafx.h"
 #include "character.h"
@@ -9,13 +13,16 @@ cCharacter::cCharacter(const int id) :
 	cModel(id)
 ,	m_weapon(NULL)
 ,	m_weaponNode(NULL)
-, m_animode(true)
-, m_attackCnt(0)
 , m_reserveL(false)
+, m_reserveR(false)
 , m_prevAniPos(0.f)
 {
-	//m_state = NONE;
-	//m_mode = NORMAL;
+//	m_animode = true;
+//	m_state = NORMAL;
+	m_attackCnt = 0;
+//	m_countL = 0;
+//	m_countR = 0;
+	m_mode = NORMAL;
 }
 
 cCharacter::~cCharacter()
@@ -58,89 +65,16 @@ bool cCharacter::Move(const float elapseTime)
 {	
 	bool bAniState = cModel::Move(elapseTime);  //애니메이션 결과 저장
 
-	if(m_attackCnt > 0)  //공격 상태 확인
-	{
-		Vector3 camDir( GetCamera()->GetDirection() );
-		camDir.Normalize();
-		float faniPos = (m_bone->GetPalette()[0]).GetPosition().z;
-//		float faniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
-		float fcurrPos = faniPos - m_prevAniPos;
-		m_prevAniPos = faniPos;
-		fcurrPos = ::fabs(fcurrPos);
-//		dbg::Print( "%f", fcurrPos );
-		Matrix44 mat;
-		if( fcurrPos >= 1  )
-		{
-//			mat.SetTranslate(  );
-			GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fcurrPos );
-		}
-//		MultiplyTM( mat );
-		//	Vector3 test( GetTM().GetPosition() );
-		//	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
-	
-		
-//		bool baniState = m_bone->GetAniState();
-
-//		if(m_bone->GetAniState() == false)
-		if(bAniState == false)
-		{
-			if(m_reserveL)
-			{
-				switch(m_attackCnt)
-				{
-				case 1:
-					m_bone->SetAniLoop(false);
-					SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
-					m_attackCnt++;
-					m_reserveL = false;
-			//		m_weapon->SetAniLoop(false);
-			//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
-				break;
-				case 2:
-					m_bone->SetAniLoop(false);
-					SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
-					m_attackCnt++;
-					m_reserveL = false;
-			//		m_weapon->SetAniLoop(false);
-			//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLLA.ani");
-				break;
-				case 3:
-					m_attackCnt = 0;
-					m_bone->SetAniLoop(true);
-					SetAnimation( "..\\media\\valle\\valle_normal.ani" );
-					m_animode = false;
-					m_reserveL = false;
-			//		m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
-				break;
-				}
-			}
-			else
-			{
-				m_attackCnt = 0;
-				m_bone->SetAniLoop(true);
-				SetAnimation( "..\\media\\valle\\valle_normal.ani" );
-				m_animode = false;
-				m_reserveL = false;
-			//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
-			}
-		//	m_prevAniPos = Vector3(0.f,0.f,0.f);
-			m_prevAniPos = 0.f;
-		//	mat = GetTM();
-		//	mat.SetIdentity();
-			Vector3 test = GetCamera()->GetLook();
-		//	test *= Vector3( camDir.x, 0.f, camDir.z );
-			mat.SetTranslate( test - GetTM().GetPosition() );
-			MultiplyTM( mat );
-		}
-	}
-
-//	cModel::Move(elapseTime);
-	
 	if (m_weapon)// && m_weaponNode)
 	{
 	//	const Matrix44 mat = m_weaponNode->GetAccTM();
 	//	m_weapon->SetTM(mat * m_matTM);
 		m_weapon->Move(elapseTime);
+	}
+
+	if(m_mode >= LATTACK)  //공격 상태 확인
+	{
+		Attack(bAniState);
 	}
 
 	return true;
@@ -155,11 +89,13 @@ void cCharacter::Render()
 		m_weapon->Render();
 }
 
-void cCharacter::Update(const short state, const float x)
+void cCharacter::Update(const short state, const float x, const float y)
 {
-	if(m_attackCnt > 0)  //공격 상태 확인
+	if(m_mode >= LATTACK)  //공격 상태 확인
 	{
-		if( (state != LATTACK && state != RATTACK) )  //공격 키 이외의 키 입력시 무시
+		if( (state != LATTACK && state != RATTACK) )  //공격 이외의 키 입력시 무시
+			return;
+		else if( m_mode == RATTACK && state != RATTACK)
 			return;
 	}
 
@@ -171,11 +107,11 @@ void cCharacter::Update(const short state, const float x)
 		
 	switch( state )
 	{
-		case NONE:  //기본 동작
-			if( m_animode )  //현재 다른 애니모션 상태라면..
+		case NORMAL:  //기본 동작
+			if( m_mode != NORMAL )  //현재 다른 애니모션 상태라면..
 			{	//기본모션으로 한번만 셋팅
 				SetAnimation( "..\\media\\valle\\valle_normal.ani" );
-				m_animode = false;
+				m_mode = NORMAL;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 			}
 		break;
@@ -185,14 +121,15 @@ void cCharacter::Update(const short state, const float x)
 				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
 				Matrix44 m = q.GetMatrix();
 				SetTM( m * GetTM() );  //R * T (이동한 뒤 회전하는걸 방지)
+				graphic::GetCamera()->SetRotation( x, y );  //카메라 회전도 갱신
 			}
 		break;
 		
 		case FORWARD:  //앞으로 이동
-			if( !m_animode )  //입력키가 처음 눌러졌다면..
+			if( m_mode != FORWARD )  //입력키가 처음 눌러졌다면..
 			{	//한번만 셋팅
 				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
-				m_animode = true;
+				m_mode = FORWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
 			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 5.f );  //카메라가 바라보는 방향으로
@@ -201,10 +138,10 @@ void cCharacter::Update(const short state, const float x)
 		break;
 		
 		case BACKWARD:  //뒤로 이동
-			if( !m_animode )
+			if( m_mode != BACKWARD )
 			{
 				SetAnimation( "..\\media\\valle\\valle_backward.ani" );
-				m_animode = true;
+				m_mode = BACKWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_backward.ani");
 			}
 			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * -5.f );
@@ -213,10 +150,10 @@ void cCharacter::Update(const short state, const float x)
 		break;
 
 		case LEFTWARD:  //왼쪽 이동
-			if( !m_animode )
+			if( m_mode != LEFTWARD )
 			{
 				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
-				m_animode = true;
+				m_mode = LEFTWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
@@ -226,16 +163,28 @@ void cCharacter::Update(const short state, const float x)
 		break;
 
 		case RIGHTWARD:  //오른쪽 이동
-			if( !m_animode )
+			if( m_mode != RIGHTWARD )
 			{
 				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
-				m_animode = true;
+				m_mode = RIGHTWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
 			mat.SetTranslate( Vector3( camR.x, 0.f, camR.z ) * 5.f );
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
+		break;
+
+		case DASH:
+			if( m_mode != DASH )  //입력키가 처음 눌러졌다면..
+			{	//한번만 셋팅
+				SetAnimation( "..\\media\\valle\\valle_dash.ani" );
+				m_mode = DASH;
+			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
+			}
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
+			MultiplyTM( mat );  //현재 위치에 더해주기
+			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
 		break;
 
 		case LATTACK:  //마우스 왼클릭
@@ -247,10 +196,139 @@ void cCharacter::Update(const short state, const float x)
 					m_attackCnt++;  //공격 횟수 증가
 				//	m_weapon->SetAniLoop(false);
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
+					m_mode = LATTACK;
 				}
 				else  //한번 이상 공격하는 상태라면..
+				{
 					m_reserveL = true;  //공격 예약
+					m_reserveR = false;
+				}
+			}
+		break;
+
+		case RATTACK:  //마우스 오른클릭
+			{
+				if(m_attackCnt == 0)  //첫 공격이라면..
+				{
+					m_bone->SetAniLoop(false);  //애니 반복 상태 끄기
+					SetAnimation( "..\\media\\valle\\valle_RA.ani" );  //한번만 셋팅
+					m_attackCnt++;  //공격 횟수 증가
+				//	m_weapon->SetAniLoop(false);
+				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
+					m_mode = RATTACK;
+				}
+				else  //한번 이상 공격하는 상태라면..
+				{
+					m_reserveR = true;  //공격 예약
+					m_reserveL = false;
+				}
 			}
 		break;
 	}
+}
+
+bool cCharacter::Attack(bool bAniState)
+{
+	Vector3 camDir( GetCamera()->GetDirection() );
+	camDir.Normalize();
+	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;
+//	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
+	//	Vector3 test( GetTM().GetPosition() );
+	//	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
+	float fCurrPos = fAniPos - m_prevAniPos;
+	m_prevAniPos = fAniPos;
+	fCurrPos = ::fabs(fCurrPos);
+	if( fCurrPos >= 0.1f  )
+	{
+		//	dbg::Print( "%f", fCurrPos);
+		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
+	//	GetCamera()->SetTranslation( fCurrPos );
+	}
+//		MultiplyTM( mat );
+//		bool baniState = m_bone->GetAniState();
+//		if(m_bone->GetAniState() == false)
+	if(bAniState == false)
+	{
+				//	m_prevAniPos = Vector3(0.f,0.f,0.f);
+		
+	//	mat = GetTM();
+	//	mat.SetIdentity();
+		
+	//	test *= Vector3( camDir.x, 0.f, camDir.z );		
+		if(m_reserveL)
+		{
+			switch(m_attackCnt)
+			{
+			case 1:
+				m_bone->SetAniLoop(false);
+				SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
+				m_attackCnt++;
+				m_reserveL = false;
+		//		m_weapon->SetAniLoop(false);
+		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
+				return true;
+			break;
+			case 2:
+				m_bone->SetAniLoop(false);
+				SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
+				m_attackCnt++;
+				m_reserveL = false;
+		//		m_weapon->SetAniLoop(false);
+		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLLA.ani");
+				return true;
+			break;
+			}
+		}
+		else if(m_reserveR)
+		{
+			switch(m_attackCnt)
+			{
+			case 1:
+				m_bone->SetAniLoop(false);
+				if(m_mode == RATTACK)
+					SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
+				else if(m_mode == LATTACK)
+				{
+					SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
+					m_attackCnt++;  //이 애니동작까지만 실행
+				}
+				m_attackCnt++;
+				m_reserveR = false;
+		//		m_weapon->SetAniLoop(false);
+		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
+				return true;
+			break;
+			case 2:
+				m_bone->SetAniLoop(false);
+				if(m_mode == RATTACK)
+					SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
+				else if(m_mode == LATTACK)
+					SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
+				m_attackCnt++;
+				m_reserveR = false;
+		//		m_weapon->SetAniLoop(false);
+		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLLA.ani");
+				return true;
+			break;
+			}
+		}
+		
+		m_prevAniPos = 0.f;
+
+		Vector3 finalPos = GetCamera()->GetLook();
+		Matrix44 mat;
+		mat.SetTranslate( finalPos - GetTM().GetPosition() );
+		MultiplyTM( mat );
+		
+		m_attackCnt = 0;
+		m_bone->SetAniLoop(true);
+		SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+		m_mode = NORMAL;
+		m_reserveL = false;
+		m_reserveR = false;
+	//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
+		return true;
+	}
+	
+	return false;
 }

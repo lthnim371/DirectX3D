@@ -1,4 +1,4 @@
-//디버그용
+//use debug
 //	Vector3 test( m_look );
 //	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
 
@@ -37,25 +37,30 @@ void cCamera::SetPosition(const Matrix44& pos)
 //	m_look += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
 	m_look = pos.GetPosition();// + Vector3(0,100.f,0);
 	m_pos = m_look - m_dir;
-
+	
 	Update();
 }
 
 void cCamera::SetTranslation(const Vector3& pos)
+//void cCamera::SetTranslation(const float z)
 {
 	m_look += pos;
+//	m_look *= z;
+//	m_look *= Vector3(m_dir.x, 0.f, m_dir.z);
 	m_pos = m_look - m_dir;
+
+//	dbg::Print( "%f", pos.z);
 
 	Update();
 }
 
 
-//void cCamera::SetRotation(const float x, const float y)
-void cCamera::SetRotation(const POINT& ptMouse)
+void cCamera::SetRotation(const float x, const float y)
+//void cCamera::SetRotation(const POINT& ptMouse)
 {
-	if( ptMouse.x != 0 )
+	if( x != 0 )
 	{  // rotate Y-Axis
-		Quaternion q( m_up, -ptMouse.x * 0.005f ); 
+		Quaternion q( m_up, -x * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
 		Vector3 currDir(m_pos - m_look);
 		currDir *= m;
