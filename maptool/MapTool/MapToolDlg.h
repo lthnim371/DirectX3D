@@ -4,8 +4,8 @@
 
 #pragma once
 
-
-// CMapToolDlg 대화 상자
+class CMapView;
+	// CMapToolDlg 대화 상자
 class CMapToolDlg : public CDialogEx
 {
 // 생성입니다.

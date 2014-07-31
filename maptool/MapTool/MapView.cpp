@@ -10,6 +10,8 @@
 using namespace graphic;
 // CMapView
 
+const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
+const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
 
 CMapView::CMapView()
 	: m_dxInit(false)
@@ -32,6 +34,7 @@ BEGIN_MESSAGE_MAP(CMapView, CView)
 	ON_WM_MOUSEMOVE()
 	ON_WM_MBUTTONDOWN()
 	ON_WM_MBUTTONUP()
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 
@@ -69,10 +72,7 @@ LPDIRECT3DDEVICE9 graphic::GetDevice()
 
 // CMapView 메시지 처리기입니다.
 bool CMapView::Init()
-{
-	const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
-	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
-
+{	
 	if (!graphic::InitDirectX(m_hWnd, WINSIZE_X, WINSIZE_Y, g_pDevice))
 	{
 		return 0;
@@ -82,9 +82,9 @@ bool CMapView::Init()
 	m_lookAtPos = Vector3(0,0,0);
 	UpdateCamera();
 
-	Matrix44 proj;
-	proj.SetProjection(D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
-	GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
+//	Matrix44 proj;
+	m_proj.SetProjection(D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
+	GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_proj) ;
 
 	GetDevice()->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
@@ -93,6 +93,11 @@ bool CMapView::Init()
 		true); // true = 활성화 ， false = 비활성화
 
 	m_grid.Create(50, 50, 50);
+	m_cube.SetCube(Vector3(-10,-10,-10), Vector3(10,10,10));
+	m_cube.SetColor( 0xFFFF00FF );
+
+	::GetCursorPos(&m_curPos);
+	::ScreenToClient(m_hWnd, &m_curPos);
 	
 	m_dxInit = true;
 
@@ -124,9 +129,14 @@ void CMapView::Render()
 
 //		graphic::GetRenderer()->RenderFPS();
 //		RenderGrid();
-		//순서 중요
+	//순서 중요
+		Matrix44 mat;
+		GetDevice()->SetTransform( D3DTS_WORLD, (D3DXMATRIX*)&mat );
 		m_grid.Render();
 		RenderAxis();
+		mat.SetTranslate( m_mouseRay );
+		m_cube.SetTransform( mat );
+		m_cube.Render( Matrix44() );
 
 		GetDevice()->SetRenderState(D3DRS_LIGHTING, false);  //노말벡터가 없으므로 라이트 기능을 끈다
 
@@ -139,11 +149,11 @@ void CMapView::Render()
 
 void CMapView::UpdateCamera()
 {
-	Matrix44 V;
+//	Matrix44 V;
 	Vector3 dir = m_lookAtPos - m_camPos;
 	dir.Normalize();
-	V.SetView(m_camPos, dir, Vector3(0,1,0));
-	GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&V);
+	m_view.SetView(m_camPos, dir, Vector3(0,1,0));
+	GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_view);
 }
 
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
@@ -247,6 +257,26 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 		UpdateCamera();
 	}
+	else
+	{
+		m_ray.Create(point.x, point.y, WINSIZE_X, WINSIZE_Y, m_proj, m_view);
+		m_grid.Pick(m_ray.orig, m_ray.dir, m_mouseRay);
+	}
 
 	CView::OnMouseMove(nFlags, point);
+}
+
+
+void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	if (nChar == VK_TAB)
+	{
+		static bool flag = false;
+		GetDevice()->SetRenderState(D3DRS_CULLMODE, flag);
+		GetDevice()->SetRenderState(D3DRS_FILLMODE, flag? D3DFILL_SOLID : D3DFILL_WIREFRAME);
+		flag = !flag;
+	}
+
+	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }

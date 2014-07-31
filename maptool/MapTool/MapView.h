@@ -25,17 +25,22 @@ public:
 #endif
 
 private:
-	bool m_dxInit;
 	Matrix44 m_rotateTm;
 	Vector3 m_camPos;
 	Vector3 m_lookAtPos;
+	Matrix44 m_proj;
+	Matrix44 m_view;
+	Vector3 m_mouseRay;
 
+	bool m_dxInit;
 	bool m_LButtonDown;
 	bool m_RButtonDown;
 	bool m_MButtonDown;
 	CPoint m_curPos;
 
 	graphic::cGrid2 m_grid;
+	graphic::cCube m_cube;
+	Ray m_ray;
 
 protected:
 	DECLARE_MESSAGE_MAP()
@@ -47,6 +52,7 @@ public:
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnMButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnMButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
 
 

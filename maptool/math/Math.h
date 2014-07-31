@@ -13,3 +13,6 @@ const float MATH_2PI = 6.283f;
 #include "vector4.h"
 #include "matrix44.h"
 #include "quaternion.h"
+#include "ray.h"
+#include "plane.h"
+#include "triangle.h"

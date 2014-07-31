@@ -117,16 +117,21 @@
     <ClInclude Include="..\etc\Utility.h" />
     <ClInclude Include="..\math\Math.h" />
     <ClInclude Include="..\math\matrix44.h" />
+    <ClInclude Include="..\math\plane.h" />
     <ClInclude Include="..\math\quaternion.h" />
+    <ClInclude Include="..\math\ray.h" />
+    <ClInclude Include="..\math\triangle.h" />
     <ClInclude Include="..\math\vector2.h" />
     <ClInclude Include="..\math\vector3.h" />
     <ClInclude Include="..\math\vector4.h" />
+    <ClInclude Include="MainPanel.h" />
     <ClInclude Include="MapTool.h" />
     <ClInclude Include="MapToolDlg.h" />
     <ClInclude Include="MapView.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TopPanel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\base\cube.cpp" />
@@ -144,9 +149,13 @@
     <ClCompile Include="..\base\vertexbuffer.cpp" />
     <ClCompile Include="..\etc\Utility.cpp" />
     <ClCompile Include="..\math\matrix44.cpp" />
+    <ClCompile Include="..\math\plane.cpp" />
     <ClCompile Include="..\math\quaternion.cpp" />
+    <ClCompile Include="..\math\ray.cpp" />
+    <ClCompile Include="..\math\triangle.cpp" />
     <ClCompile Include="..\math\vector3.cpp" />
     <ClCompile Include="..\math\vector4.cpp" />
+    <ClCompile Include="MainPanel.cpp" />
     <ClCompile Include="MapTool.cpp" />
     <ClCompile Include="MapToolDlg.cpp" />
     <ClCompile Include="MapView.cpp" />
@@ -154,6 +163,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TopPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="MapTool.rc" />

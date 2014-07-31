@@ -58,4 +58,6 @@
 #pragma comment( lib, "d3dx9.lib" )
 #pragma comment( lib, "winmm.lib" )
 #include "..\etc\Utility.h"
-#include "MapView.h"
+
+class CMainPanel;
+extern CMainPanel* g_mainPanel;  //extern : 전역으로 사용하겠다는 의미(단, 어딘가에 원본은 따로 있어야 함)

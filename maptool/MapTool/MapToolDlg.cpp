@@ -8,6 +8,8 @@
 #include "afxdialogex.h"
 
 #include <MMSystem.h>  //for timegettime
+#include "TopPanel.h"
+#include "MapView.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,12 +79,30 @@ BOOL CMapToolDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	MoveWindow(CRect(0,0,REAL_WINDOW_WIDTH,REAL_WINDOW_HEIGHT));
 	
-	// Create Main Model View
+	//MapView
 	m_mapView = new CMapView();
 	m_mapView->Create(NULL, _T("CView"), WS_CHILDWINDOW, 
 		CRect(0,25, WINDOW_WIDTH, WINDOW_HEIGHT+25), this, 0);
 	m_mapView->Init();
 	m_mapView->ShowWindow(SW_SHOW);
+
+
+	const int PANEL_WIDTH = 400;
+	const int PANEL_HEIGHT = 800;
+
+	//TopPanel
+	CTopPanel *dlg = new CTopPanel();
+	const CString StrClassName = AfxRegisterWndClass( CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS,
+		LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(COLOR_BTNFACE+1), 
+		LoadIcon(NULL, IDI_APPLICATION) );
+
+	//초기화 시켜주는 것(꼭 해줘야 함)
+	dlg->CreateEx(0, StrClassName, L"Panel", 
+		WS_POPUP | WS_CAPTION | WS_SYSMENU | MFS_THICKFRAME, CRect(0, 0, PANEL_WIDTH, PANEL_HEIGHT), this );
+
+	dlg->Init();
+
+	dlg->ShowWindow(SW_SHOW);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }

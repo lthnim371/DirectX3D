@@ -1,5 +1,5 @@
-
 #include "stdafx.h"
+#include "base.h"
 #include "grid2.h"
 
 using namespace graphic;
@@ -92,94 +92,4 @@ void cGrid2::Render(const int stage)
 	m_idxBuff.Bind();
 	GetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, m_vtxBuff.GetVertexCount(), 
 		0, m_idxBuff.GetFaceCount());
-}
-
-/*
-void cGrid2::RenderShader(cShader &shader)
-{
-	shader.Begin();
-	shader.BeginPass();
-
-	m_mtrl.Bind(shader);
-	m_tex.Bind(shader, "Tex");
-
-	m_vtxBuff.Bind();
-	m_idxBuff.Bind();
-	GetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, m_vtxBuff.GetVertexCount(), 
-		0, m_idxBuff.GetFaceCount());
-
-	shader.EndPass();
-	shader.End();
-}
-*/
-
-// 법선 벡터를 다시 계산한다.
-void cGrid2::CalculateNormals()
-{
-	sVertexNormTex *vertices = (sVertexNormTex*)m_vtxBuff.Lock();
-	WORD *indices = (WORD*)m_idxBuff.Lock();
-	for (int i=0; i < m_idxBuff.GetFaceCount()*3; i+=3)
-	{
-		sVertexNormTex &p1 = vertices[ indices[ i]];
-		sVertexNormTex &p2 = vertices[ indices[ i+1]];
-		sVertexNormTex &p3 = vertices[ indices[ i+2]];
-
-		Vector3 v1 = p2.p - p1.p;
-		Vector3 v2 = p3.p - p1.p;
-		v1.Normalize();
-		v2.Normalize();
-		Vector3 n = v1.CrossProduct(v2);
-		n.Normalize();
-		p1.n = n;
-		p2.n = n;
-		p3.n = n;
-	}
-
-	m_vtxBuff.Unlock();
-	m_idxBuff.Unlock();
-}
-
-
-// 광선 orig, dir 에 충돌된 면이 있다면 true 를 리턴하고, 충돌 위치를 out에 
-// 저장해서 리턴한다.
-bool cGrid2::Pick( const Vector3 &orig, const Vector3 &dir, Vector3 &out )
-{
-	bool isFirst = true;
-	sVertexNormTex *vertices = (sVertexNormTex*)m_vtxBuff.Lock();
-	WORD *indices = (WORD*)m_idxBuff.Lock();
-	RETV(!vertices || !indices, false);
-
-	for (int i=0; i < m_idxBuff.GetFaceCount()*3; i+=3)
-	{
-		const Vector3 &p1 = vertices[ indices[ i]].p;
-		const Vector3 &p2 = vertices[ indices[ i+1]].p;
-		const Vector3 &p3 = vertices[ indices[ i+2]].p;
-
-		const Triangle tri(p1, p2, p3);
-		const Plane p(p1, p2, p3);
-
-		const float dot = dir.DotProduct( p.N );
-		if (dot >= 0)
-			continue;
-
-		float t;
-		if (tri.Intersect(orig, dir, &t))
-		{
-			if (isFirst)
-			{
-				isFirst = false;
-				out = orig + dir * t;
-			}
-			else
-			{
-				const Vector3 v = orig + dir * t;
-				if (orig.LengthRoughly(v) < orig.LengthRoughly(out))
-					out = v;
-			}
-		}
-	}
-	m_vtxBuff.Unlock();
-	m_idxBuff.Unlock();
-
-	return !isFirst;
 }

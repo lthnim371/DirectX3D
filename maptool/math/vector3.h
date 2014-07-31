@@ -11,6 +11,7 @@ struct Vector3
 
 	bool IsEmpty() const;
 	float Length() const;
+	float LengthRoughly(const Vector3 &rhs) const;
 	Vector3 Normal() const;
 	void Normalize();
 	float	DotProduct( const Vector3& v ) const;
