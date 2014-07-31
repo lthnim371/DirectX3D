@@ -238,8 +238,8 @@ BOOL CModelView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CModelView::OnRButtonDown(UINT nFlags, CPoint point)
 {
-	SetFocus();
-	SetCapture();
+	SetFocus();  //마우스 위치 이벤트를 받을 윈도우창
+	SetCapture();  //윈도우창 밖으로 마우스 위치가 적용 가능. 단, 볼일을 다 보고 나면 ReleaseCapture를 꼭 해줘야 한다.
 	m_RButtonDown = true;
 	m_curPos = point;
 	CView::OnRButtonDown(nFlags, point);
