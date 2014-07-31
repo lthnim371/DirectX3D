@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+//#include "..\stdafx.h"
 #include "bonemgr.h"
 #include "bonenode.h"
 
@@ -236,3 +237,8 @@ bool cBoneMgr::GetAniState() const
 {
 	return m_root->GetAniState();
 }
+
+//void SetBone(const cBoneNode* sourBone)
+//{
+//	m_root
+//}

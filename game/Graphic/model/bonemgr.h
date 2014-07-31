@@ -1,5 +1,6 @@
 #pragma once
 
+//#include "..\stdafx.h"
 
 namespace graphic
 {
@@ -25,7 +26,7 @@ namespace graphic
 		vector<Matrix44>& GetPalette();
 
 	//Ãß°¡
-	//	void SwapBone(cBoneMgr* weaponBone);
+	//	void SetBone(const cBoneNode* sourBone);
 		void SetAniLoop(const bool loop);
 		bool GetAniState() const;
 		void SetPalette(const vector<Matrix44>& palette);

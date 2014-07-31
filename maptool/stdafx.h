@@ -53,11 +53,11 @@
 #endif
 #endif
 
-#include "..\base\base.h"
+#include "base\base.h"
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
 #pragma comment( lib, "winmm.lib" )
-#include "..\etc\Utility.h"
+#include "etc\Utility.h"
 
 class CMainPanel;
 extern CMainPanel* g_mainPanel;  //extern : 전역으로 사용하겠다는 의미(단, 어딘가에 원본은 따로 있어야 함)

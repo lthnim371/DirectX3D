@@ -60,10 +60,7 @@ void cCharacter::LoadWeapon(const string &fileName)
 //	m_weapon->SetAnimation("..\\media\\valle(new)\\forward.ani");
 //	m_weapon->SetBoneMgr( GetBoneMgr() );
 	if(m_weapon)
-	{
-		m_weapon->GetBoneMgr()->SetPalette(m_bone->GetPalette());
-		m_weapon->SetTM( GetTM() );
-	}
+		FindWeapon();
 
 //debug용	
 	m_weapon->SetRenderBoundingBox(true);
@@ -89,10 +86,7 @@ bool cCharacter::Move(const float elapseTime)
 	}
 
 	if(m_weapon)
-	{
-		m_weapon->GetBoneMgr()->SetPalette(m_bone->GetPalette());
-		m_weapon->SetTM( GetTM() );
-	}
+		UpdateWeapon();
 
 	return true;
 }
@@ -359,4 +353,41 @@ bool cCharacter::Attack(bool bAniState)
 	}
 	
 	return false;
+}
+
+void cCharacter::FindWeapon()
+{
+	//무기 bone 정보 가져오기
+	vector<cBoneNode*>& weaponNode = m_weapon->GetBoneMgr()->GetAllBoneNode();
+
+	for(auto it = weaponNode.begin(); it != weaponNode.end(); ++it)
+	{
+		//무기 bone 이름으로 캐릭터의 동일한 bone 찾아서 주소 가져오기
+		cBoneNode* pNode = m_bone->FindBone( (*it)->GetName() );
+		
+		if( !pNode )
+			continue;
+		
+		m_characterWeapon.push_back( pNode );  //가져온 주소 보관하기
+	}
+}
+
+void cCharacter::UpdateWeapon()
+{
+	//무기 bone의 node, palette 정보 가져오기
+	vector<cBoneNode*>& weaponNode = m_weapon->GetBoneMgr()->GetAllBoneNode();
+	vector<Matrix44>& weaponPalette = m_weapon->GetBoneMgr()->GetPalette();
+
+	for( int i = 0; i < (int)weaponNode.size(); ++i )  //무기 bone accTM 갱신
+	{
+		weaponNode[i]->SetAccTM( m_characterWeapon[i]->GetAccTM() );
+	}
+	
+	for( int i = 0; i < (int)weaponPalette.size(); ++i )  //무기 bone palette 갱신
+	{
+		//무기 bone의 id값으로 찾아서 값을 가져오기
+		weaponPalette[i] = ( m_bone->GetPalette() )[ m_characterWeapon[i]->GetId() ];
+	}
+	
+	m_weapon->SetTM( GetTM() );  //현재 캐릭터 위치로 무기 위치 갱신
 }

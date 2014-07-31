@@ -5,7 +5,7 @@
 #include "MapTool.h"
 #include "MapView.h"
 
-#include "..\etc\Utility.h"
+#include "etc\Utility.h"
 
 using namespace graphic;
 // CMapView

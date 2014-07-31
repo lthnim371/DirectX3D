@@ -1,6 +1,6 @@
 #pragma once
 #include "afxwin.h"
-#include "MainPanel.h"
+//#include "MainPanel.h"
 
 // CMainPanel 대화 상자입니다.
 

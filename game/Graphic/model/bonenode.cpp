@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+//#include "..\stdafx.h"
 #include "bonenode.h"
 
 
@@ -179,3 +180,12 @@ void cBoneNode::UpdateAccTM()
 		m_accTM = m_accTM * ((cBoneNode*)m_parent)->m_accTM;
 	m_palette[ m_id] = m_offset * m_accTM;
 }
+
+
+////Ãß°¡
+//void cBoneNode::SetAccTM(const cBoneNode* sourBone)
+//{
+////	m_accTM = sourBone->GetAccTM();
+//
+////	GetChildren()[0]->SetAccTM( (sourBone->GetChildren())[0] );
+//}

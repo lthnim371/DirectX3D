@@ -23,6 +23,8 @@ namespace graphic
 	//추가
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool Attack(bool bAniState);
+		void FindWeapon();  //현재 무기bone 이름과 같은 캐릭터의 무기bone 찾기
+		void UpdateWeapon();  //
 
 //		void SetRotation(const float x, const POINT& ptMouse);
 
@@ -44,5 +46,6 @@ namespace graphic
 		short m_mode;
 //		Vector3 m_prevAniPos;
 		float m_prevAniPos;  //애니 적용시 이동한 값 보관
+		vector<cBoneNode*> m_characterWeapon;  //캐릭터의 무기bone 주소 보관
 	};
 }

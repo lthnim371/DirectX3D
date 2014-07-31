@@ -23,6 +23,7 @@ namespace graphic
 	//추가
 		bool GetAniState() const;
 		Vector3 GetAniTM() const;
+		void SetAccTM(const Matrix44& accTM);
 
 	private:
 		cTrack *m_track;
@@ -51,4 +52,5 @@ namespace graphic
 //추가
 	inline bool cBoneNode::GetAniState() const { return m_isAni; }
 	inline Vector3 cBoneNode::GetAniTM() const { return m_aniTM.GetPosition(); }
+	inline void cBoneNode::SetAccTM(const Matrix44& accTM) { m_accTM = accTM; }
 }

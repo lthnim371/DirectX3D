@@ -126,3 +126,6 @@ graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거�
 
 코드 수정 : 선생님 소스 코드대로 하면 애니 적용시 카메라 look위치가 이상해짐
 -> graphic의 bonenode클래스 생성자
+
+무기 경계박스 정상 적용 : 캐릭터의 무기에 해당하는 본을 찾아서 무기 본에 적용
+-> graphic의 character클래스에 find~, update~ 함수 추가
