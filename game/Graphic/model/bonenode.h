@@ -20,7 +20,7 @@ namespace graphic
 		void SetCurrentFrame(const int curFrame);
 		void UpdateAccTM();
 
-	//test
+	//추가
 		bool GetAniState() const;
 		Vector3 GetAniTM() const;
 
@@ -48,7 +48,7 @@ namespace graphic
 	inline int cBoneNode::GetCurrentFrame() const { return m_curPlayFrame; }
 	inline int cBoneNode::GetPlayFrame() const { return m_incPlayFrame; }
 
-//test
+//추가
 	inline bool cBoneNode::GetAniState() const { return m_isAni; }
 	inline Vector3 cBoneNode::GetAniTM() const { return m_aniTM.GetPosition(); }
 }

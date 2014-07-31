@@ -1,4 +1,4 @@
-//#include "..\stdafx.h"
+
 #include "stdafx.h"
 #include "bonenode.h"
 
@@ -51,20 +51,21 @@ void cBoneNode::SetAnimation( const sRawAni &rawAni, int nAniFrame, bool bLoop)
 	}
 
 	m_aniStart = rawAni.start;
-	m_aniEnd	 = aniend;
+	m_aniEnd = aniend;
 	m_incPlayFrame = 0;
+//	m_incPlayTime = 0;  //애니 적용시 카메라 look 위치가 이상해지므로 일단 주석처리
 
 	m_isLoop = bLoop;
 	m_isAni = true;
 
 	m_curPlayFrame = rawAni.start;
-	m_curPlayTime = rawAni.start * 0.03333f;
+	m_curPlayTime = rawAni.start * 0.03334f;
 
 	SAFE_DELETE(m_track)
 	m_track = new cTrack(rawAni);
 
-//test
-	m_incPlayTime = m_curPlayTime;  //m_incPlayTime 초기화
+//추가
+	m_incPlayTime = m_curPlayTime;  //일단 이렇게 해야 안전하게 적용됨
 }
 
 

@@ -1,5 +1,3 @@
-//#include "..\stdafx.h"
-
 
 #include "stdafx.h"
 #include "bonemgr.h"
@@ -11,36 +9,31 @@ using namespace  graphic;
 cBoneMgr::cBoneMgr(const int id, const sRawMeshGroup &rawMeshes) :
 	m_root(NULL)
 ,	m_id(id)
-//test
+//추가
 , m_aniLoop(true)
 {
-	m_palette.resize(rawMeshes.bones.size());
-
+	m_palette.resize(rawMeshes.bones.size(), Matrix44());
 	m_bones.resize(rawMeshes.bones.size(), NULL);
 
 	for (u_int i=0; i < rawMeshes.bones.size(); ++i)
 	{
 		const int id = rawMeshes.bones[ i].id;
 		const int parentId = rawMeshes.bones[ i].parentId;
-		bool twoRoot = false;
 		if (m_root && (parentId < 0))
-			twoRoot = true;
+			continue;
 
 		cBoneNode *bone = new cBoneNode(id, m_palette, rawMeshes.bones[ i]);
 		SAFE_DELETE(m_bones[ id]);
 		m_bones[ id] = bone;
 
-		if (!twoRoot && (-1 >=  parentId)) // root
+		if (-1 >=  parentId) // root
 		{
 			m_root = bone;
-		}
-		else if (twoRoot)
-		{
-			// nothing~
 		}
 		else
 		{
 			m_bones[ parentId]->InsertChild( bone );
+			bone->UpdateAccTM();
 		}
 	}
 
@@ -66,9 +59,10 @@ void cBoneMgr::SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAnies, i
 	RET(!node);
 	RET(node->GetId() >= (int)rawAnies.anies.size());
 
-	//node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, true );
-//test
+//	node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, true );
+//추가
 	node->SetAnimation( rawAnies.anies[ node->GetId()], nAniFrame, m_aniLoop );
+
 	BOOST_FOREACH (auto p, node->GetChildren())
 	{
 		SetAnimationRec((cBoneNode*)p, rawAnies, nAniFrame );
@@ -236,53 +230,9 @@ void cBoneMgr::SetBoundingBoxIndex(cBoneNode *node, OUT map<int, int> &boneIndic
 		SetBoundingBoxIndex((cBoneNode*)child, boneIndices, nextBoneIdx);
 }
 
+
+//추가
 bool cBoneMgr::GetAniState() const
 {
 	return m_root->GetAniState();
-}
-
-//test
-void cBoneMgr::SwapBone(cBoneMgr* weaponBone)
-{
-	auto bone = weaponBone->GetAllBoneNode();
-	int cnt = bone.size();
-	cBoneNode* tempNode = FindBone( bone[0]->GetName() );
-	cBoneNode* tempParent = (cBoneNode*)tempNode->GetParent();
-	int tempId = tempNode->GetId();
-	tempParent->RemoveNode( tempId );
-	for(int i = 0; i < cnt; ++i)
-	{
-		bone[ i ]->SetId( tempId + i );
-		tempParent->InsertChild( bone[ i ] );
-		tempParent = bone[ i ];
-		m_bones[ tempId + i ] = tempParent;
-	}
-	
-
-
-	/* for(int i = cnt - 1; i >= 0; --i)
-	 {
-		 cBoneNode* tempNode = FindBone( bone[ i ]->GetName() );
-		 cBoneNode* tempParent = (cBoneNode*)tempNode->GetParent();
-		 int tempId = tempNode->GetId();
-		 tempParent->RemoveNode( tempId );
-		 bone[ i ]->SetId( tempId );
-		 tempParent->InsertChild( bone[ i ] );
-	 }*/
-	
-	
-	
-
-
-
-	/*for(auto it = weaponBone->GetAllBoneNode().begin();
-		it < weaponBone->GetAllBoneNode().end();
-		++it )
-	{
-		it->SwapBone(it);
-	}*/
-
-
-//	if( cBoneNode* bone = FindBone(name) );
-//		return;
 }

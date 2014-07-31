@@ -18,6 +18,8 @@ namespace graphic
 		void SetAnimation( const string &aniFileName);
 		virtual bool Move(const float elapseTime);
 		virtual void Render();
+		virtual void RenderShader(cShader &shader);
+		virtual void RenderShadow(cShader &shader);
 		void Clear();
 
 		int GetId() const;
@@ -39,9 +41,10 @@ namespace graphic
 		void SetRenderBone(const bool isRenderBone);
 		void SetRenderBoundingBox(const bool isRenderBoundingBox);
 
-	//test
+	//추가
 		void SetAniLoop(const bool loop);
-			
+//		void SetBoneMgr(cBoneMgr* const bone);
+
 	protected:
 		int m_id;
 		MODEL_TYPE::TYPE m_type;
@@ -62,4 +65,7 @@ namespace graphic
 	inline void cModel::MultiplyTM(const Matrix44 &tm) { m_matTM *= tm; }
 	inline const Matrix44& cModel::GetTM() const { return m_matTM; }
 	inline cBoneMgr* cModel::GetBoneMgr() { return m_bone; }
+
+//추가
+//	inline void cModel::SetAniLoop(const bool loop) { m_bone->SetAniLoop(loop); }
 }

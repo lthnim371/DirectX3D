@@ -29,9 +29,8 @@ namespace graphic
 
 		virtual bool Move(const float elapseTime) {return true;}
 		virtual void Render(const Matrix44 &parentTm);
-
-		//test
-		inline void SetId(const int id) { m_id = id; };
+		virtual void RenderShader( cShader &shader, const Matrix44 &parentTm );
+		virtual void RenderShadow(cShader &shader, const Matrix44 &parentTm);
 
 	protected:
 		int m_id;

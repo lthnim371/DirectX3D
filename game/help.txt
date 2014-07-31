@@ -80,7 +80,8 @@ GameApp.exe에 포커스가 있을 때 사용자가 F12 키를 눌렀기 때문일 수도 있습니다.
 앞뒤 이동 : 카메라가(또는 캐릭터가) 바라보는 방향벡터(즉, m_dir)에 변화량 곱하기
 좌우 이동 : 카메라가(또는 캐릭터가) 바라보는 방향에서 우방벡터(즉, m_right)에 변화량 곱하기
 
-★ GameMain.h , cpp
+★ keymanager 추가
+★ framework의 GameMain.h , cpp
 Input 및 OnInput 추가
 ★ GameApp.h , cpp
 마우스 움직임 체크 및 마우스 위치 값 얻어오기
@@ -92,16 +93,16 @@ m_totalPlayTime : 애니메이션 총 반복 횟수
 m_curPlayTime = m_aniStart * 0.03334f : 왜 이 수치로 곱하냐면 해당 프레임의 시간을 구하기 위해
 (만약 all 3으로 하면 m_curPlayFrame = (int)(m_curPlayTime * 30.f)에서 '0'으로 될수도 있기 때문)
 
-bonemgr클래스에 setaniloop함수, getanistate함수 추가
-model클래스에 setaniloop함수 추가
-bonenode클래스에 getanistate함수 추가
+graphic의 bonemgr클래스에 setaniloop함수, getanistate함수 추가
+graphic의 model클래스에 setaniloop함수 추가
+graphic의 bonenode클래스에 getanistate함수 추가
 
-model클래스 move에 m_bone 결과를 리턴하는 코드 추가
-bonenode생성자에 m_incPlayTime를 초기화하는 코드 추가
+graphic의 model클래스 move에 m_bone 결과를 리턴하는 코드 추가
+graphic의 bonenode생성자에 m_incPlayTime를 초기화하는 코드 추가
 
 
 140729
-character클래스 업데이트
+graphic의 character클래스 업데이트
 common.h에 unsigned short typedef 추가
 
 
@@ -109,8 +110,19 @@ common.h에 unsigned short typedef 추가
 ★ update
 character클래스 업데이트
 
-character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거의 일치시킴
+graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거의 일치시킴
 
 ＠ question
 부호값 얻는 방법 (카메라 방향벡터 정규화 값이 소수점으로 나오기 때문)
 무기 본을 캐릭터 무기 본으로 실시간 공유 가능 여부
+
+
+140731
+★ update
+무기 장착 완료 : 캐릭터 팔레트와 위치를 실시간 복사
+-> graphic의 bonemgr클래스에 setpalette함수 추가
+
+새로운 game소스로 전부 교체함
+
+코드 수정 : 선생님 소스 코드대로 하면 애니 적용시 카메라 look위치가 이상해짐
+-> graphic의 bonenode클래스 생성자

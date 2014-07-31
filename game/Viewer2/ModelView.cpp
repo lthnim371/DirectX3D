@@ -6,20 +6,17 @@
 #include "ModelView.h"
 
 
-
 // CModelView
 
 CModelView::CModelView()
 {
 	m_LButtonDown = false;
 	m_RButtonDown = false;
-	m_MButtonDown = false;
-	
+	m_MButtonDown = false;	
 }
 
 CModelView::~CModelView()
 {
-
 }
 
 BEGIN_MESSAGE_MAP(CModelView, CView)
@@ -72,15 +69,19 @@ void CModelView::Init()
 
 	const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
 	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
-	Matrix44 proj;
-	proj.SetProjection(D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
-	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
+	m_matProj.SetProjection(D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
+	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_matProj) ;
 
 	graphic::GetDevice()->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
 	graphic::GetDevice()->LightEnable (
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
+
+	
+
+	//m_shader.Create( "../media/shader/hlsl_skinning_using_color.fx", "TShader" );
+	m_shader.Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
 }
 
 
@@ -114,7 +115,13 @@ void CModelView::Render()
 		{
 			character->SetTM(m_rotateTm);
 		}
-		cController::Get()->Render();
+
+		m_shader.SetMatrix( "mVP", m_matView * m_matProj);
+		m_shader.SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_shader.SetVector( "vEyePos", m_camPos);
+
+		cController::Get()->RenderShader(m_shader);
+		//cController::Get()->Render();
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
@@ -126,11 +133,10 @@ void CModelView::Render()
 
 void CModelView::UpdateCamera()
 {
-	Matrix44 V;
 	Vector3 dir = m_lookAtPos - m_camPos;
 	dir.Normalize();
-	V.SetView(m_camPos, dir, Vector3(0,1,0));
-	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&V);
+	m_matView.SetView(m_camPos, dir, Vector3(0,1,0));
+	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_matView);
 }
 
 
@@ -273,16 +279,7 @@ bool CModelView::LoadFile(const string &fileName)
 
 	cController::Get()->LoadFile(fileName);
 	graphic::cCharacter *character = cController::Get()->GetCharacter();
-
-	if( graphic::RESOURCE_TYPE::MESH == graphic::cResourceManager::Get()->GetFileKind(fileName) )
-	//	character->LoadWeapon( "../media/weapon.dat");
-		character->LoadWeapon( "../media/valle_weapon1.dat");
-	//	character->LoadWeapon( "../media/test_weapon.dat");
-	//	character->LoadWeapon( "../media/test_weapon2.dat");
-	//	character->LoadWeapon( "../media/test_weapon3.dat");
-	//	character->LoadWeapon( "../media/valle_weapon3.dat");
+	character->LoadWeapon( "../media/weapon.dat");
 
 	return false;
 }
-
-

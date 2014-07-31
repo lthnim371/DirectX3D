@@ -24,10 +24,11 @@ namespace graphic
 		cBoneNode* FindBone(const string &name);
 		vector<Matrix44>& GetPalette();
 
-	//test
-		void SwapBone(cBoneMgr* weaponBone);
+	//추가
+	//	void SwapBone(cBoneMgr* weaponBone);
 		void SetAniLoop(const bool loop);
 		bool GetAniState() const;
+		void SetPalette(const vector<Matrix44>& palette);
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );
@@ -42,7 +43,7 @@ namespace graphic
 		vector<Matrix44> m_palette;
 		vector<cCube> m_boundingBox;
 
-	//test
+	//추가
 		bool m_aniLoop;
 	};
 
@@ -51,7 +52,8 @@ namespace graphic
 	inline vector<Matrix44>& cBoneMgr::GetPalette() { return m_palette; }
 	inline vector<cBoneNode*>& cBoneMgr::GetAllBoneNode() { return m_bones; }
 
-//test
+//추가
 	inline void cBoneMgr::SetAniLoop(const bool loop) { m_aniLoop = loop; }
 //	inline bool cBoneMgr::GetAniState() const { return m_root->GetAniState(); }
+	inline void cBoneMgr::SetPalette(const vector<Matrix44>& palette) { m_palette = palette; }
 }

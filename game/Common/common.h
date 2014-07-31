@@ -32,6 +32,7 @@
 
 
 typedef unsigned int    u_int;
+//추가
 typedef unsigned short	u_short;
 
 // 포함 파일들.
@@ -61,5 +62,3 @@ using std::wstringstream;
 #include "etc/dbg.h"
 #include "etc/observer.h"
 #include "etc/rect.h"
-
-#include "number.h"

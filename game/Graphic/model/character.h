@@ -18,6 +18,7 @@ namespace graphic
 		void LoadWeapon(const string &fileName);
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
+		virtual void RenderShader(cShader &shader);
 		
 	//추가
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경

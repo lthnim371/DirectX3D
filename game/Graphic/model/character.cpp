@@ -58,6 +58,15 @@ void cCharacter::LoadWeapon(const string &fileName)
 //	GetBoneMgr()->SwapBone( m_weapon->GetBoneMgr() );
 
 //	m_weapon->SetAnimation("..\\media\\valle(new)\\forward.ani");
+//	m_weapon->SetBoneMgr( GetBoneMgr() );
+	if(m_weapon)
+	{
+		m_weapon->GetBoneMgr()->SetPalette(m_bone->GetPalette());
+		m_weapon->SetTM( GetTM() );
+	}
+
+//debug용	
+	m_weapon->SetRenderBoundingBox(true);
 }
 
 
@@ -65,16 +74,24 @@ bool cCharacter::Move(const float elapseTime)
 {	
 	bool bAniState = cModel::Move(elapseTime);  //애니메이션 결과 저장
 
+/*
 	if (m_weapon)// && m_weaponNode)
 	{
 	//	const Matrix44 mat = m_weaponNode->GetAccTM();
 	//	m_weapon->SetTM(mat * m_matTM);
 		m_weapon->Move(elapseTime);
 	}
+*/
 
 	if(m_mode >= LATTACK)  //공격 상태 확인
 	{
 		Attack(bAniState);
+	}
+
+	if(m_weapon)
+	{
+		m_weapon->GetBoneMgr()->SetPalette(m_bone->GetPalette());
+		m_weapon->SetTM( GetTM() );
 	}
 
 	return true;
@@ -89,7 +106,16 @@ void cCharacter::Render()
 		m_weapon->Render();
 }
 
-void cCharacter::Update(const short state, const float x, const float y)
+void cCharacter::RenderShader(cShader &shader)
+{
+	cModel::RenderShader(shader);
+
+	//if (m_weapon)
+	//	m_weapon->RenderShader(shader);
+
+}
+
+void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
 {
 	if(m_mode >= LATTACK)  //공격 상태 확인
 	{
@@ -226,15 +252,19 @@ void cCharacter::Update(const short state, const float x, const float y)
 			}
 		break;
 	}
+
+	if(m_weapon)
+		m_weapon->SetTM( GetTM() );
 }
 
 bool cCharacter::Attack(bool bAniState)
 {
 	Vector3 camRight( GetCamera()->GetRight() );  //카메라 우방벡터 가져오기
-	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0)) );  //방향벡터 구하기
+	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0));  //방향벡터 구하기
 	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
 //	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
 	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
+//	dbg::Print( "%f = %f - %f", fCurrPos, fAniPos, m_prevAniPos);
 	m_prevAniPos = fAniPos;
 	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
 	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우

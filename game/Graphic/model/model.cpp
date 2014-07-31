@@ -16,7 +16,7 @@ cModel::cModel(const int id) :
 ,	m_bone(NULL)
 ,	m_isRenderMesh(true)
 ,	m_isRenderBone(false)
-,	m_isRenderBoundingBox(true)
+,	m_isRenderBoundingBox(false)
 ,	m_type(MODEL_TYPE::RIGID)
 {
 	
@@ -71,7 +71,7 @@ void cModel::SetAnimation( const string &aniFileName)
 {
 	if (sRawAniGroup *rawAnies = cResourceManager::Get()->LoadAnimation(aniFileName))
 	{
-		if (m_bone)
+		if (m_bone) // skinning model
 		{
 			m_bone->SetAnimation(*rawAnies, 0);
 		}
@@ -92,8 +92,8 @@ bool cModel::Move(const float elapseTime)
 		node->Move(elapseTime);
 
 	if (m_bone)
-//		m_bone->Move(elapseTime);
-		return m_bone->Move(elapseTime);
+		return m_bone->Move(elapseTime);  //추가
+//		m_bone->Move(elapseTime);  //원본		
 
 	return true;
 }
@@ -115,6 +115,35 @@ void cModel::Render()
 
 	if (m_bone && m_isRenderBoundingBox)
 		m_bone->RenderBoundingBox(m_matTM);
+}
+
+
+void cModel::RenderShader(cShader &shader)
+{
+	//Matrix44 identity;
+	//GetDevice()->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&identity);
+
+	if (m_isRenderMesh)
+	{
+		BOOST_FOREACH (auto node, m_meshes)
+			node->RenderShader(shader, m_matTM);
+	}
+
+	//if (m_isRenderBone && m_bone)
+	//	m_bone->Render(m_matTM);
+
+	//if (m_bone && m_isRenderBoundingBox)
+	//	m_bone->RenderBoundingBox(m_matTM);
+}
+
+
+void cModel::RenderShadow(cShader &shader)
+{
+	if (m_isRenderMesh)
+	{
+		BOOST_FOREACH (auto node, m_meshes)
+			node->RenderShadow(shader, m_matTM);
+	}
 }
 
 
@@ -197,7 +226,7 @@ void cModel::Collision( int testNum, ICollisionable *obj )
 }
 
 
-//test
+//추가
 void cModel::SetAniLoop(const bool loop)
 {
 	m_bone->SetAniLoop(loop);

@@ -8,7 +8,7 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,250, 250), m_look(0,0,0), m_up(0,1,0)
+	: m_pos(0,300,300), m_look(0,0,0), m_up(0,1,0)
 {		
 	SetView();  //set view
 	
@@ -56,7 +56,7 @@ void cCamera::SetTranslation(const Vector3& pos)
 }
 
 
-void cCamera::SetRotation(const float x, const float y)
+void cCamera::SetRotation(const float x, const float y)  //x = 0, y = 0
 //void cCamera::SetRotation(const POINT& ptMouse)
 {
 	{  // rotate Y-Axis

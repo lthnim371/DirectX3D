@@ -104,6 +104,12 @@
       <Filter>base</Filter>
     </ClInclude>
     <ClInclude Include="camera.h" />
+    <ClInclude Include="base\sphere.h">
+      <Filter>base</Filter>
+    </ClInclude>
+    <ClInclude Include="terrain\terrain.h">
+      <Filter>terrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -195,6 +201,12 @@
       <Filter>base</Filter>
     </ClCompile>
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="base\sphere.cpp">
+      <Filter>base</Filter>
+    </ClCompile>
+    <ClCompile Include="terrain\terrain.cpp">
+      <Filter>terrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="model">
@@ -214,6 +226,9 @@
     </Filter>
     <Filter Include="collision">
       <UniqueIdentifier>{da54e64d-e3e6-4ae6-b8d9-8e2a500dd94e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="terrain">
+      <UniqueIdentifier>{ab9e8818-9abf-41ba-a00a-136bd99ad8be}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

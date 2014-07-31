@@ -9,6 +9,7 @@ cMesh::cMesh(const int id, const sRawMesh &rawMesh) :
 	cNode(id)
 {
 	CreateMesh(rawMesh.vertices, rawMesh.normals, rawMesh.tex, rawMesh.indices);
+	CreateBoneWeight(rawMesh.weights);
 	CreateMaterials(rawMesh);
 	CreateAttributes(rawMesh);
 }
@@ -33,9 +34,9 @@ void cMesh::CreateMesh( const vector<Vector3> &vertices,
 	const bool isTexture = !tex.empty();
 
 	// 버텍스 버퍼 생성.
-	if (m_vtxBuff.Create(vertices.size(), sizeof(sVertexNormTex), sVertexNormTex::FVF))
+	if (m_vtxBuff.Create(vertices.size(), sizeof(sVertexNormTexSkin), sVertexNormTexSkin::FVF))
 	{
-		sVertexNormTex* pv = (sVertexNormTex*)m_vtxBuff.Lock();
+		sVertexNormTexSkin* pv = (sVertexNormTexSkin*)m_vtxBuff.Lock();
 		for (u_int i = 0; i < vertices.size(); i++)
 		{
 			pv[ i].p = vertices[ i];
@@ -62,6 +63,46 @@ void cMesh::CreateMesh( const vector<Vector3> &vertices,
 }
 
 
+// 본 인덱스, 가중치를 설정한다.s
+void cMesh::CreateBoneWeight( const vector<sVertexWeight> &weights )
+{
+
+	if (sVertexNormTexSkin* pv = (sVertexNormTexSkin*)m_vtxBuff.Lock())
+	{
+		for (u_int i=0; i <weights.size(); ++i)
+		{
+			const sVertexWeight &weight = weights[ i];
+			const int vtxIdx = weight.vtxIdx;
+
+			ZeroMemory(pv[ vtxIdx].weights, sizeof(float)*4);
+			ZeroMemory(pv[ vtxIdx].matrixIndices, sizeof(float)*4);
+			//pv[ vtxIdx].matrixIndices = 0;
+
+			for (int k=0; (k < weight.size) && (k < 4); ++k)
+			{
+				const sWeight *w = &weight.w[ k];
+				if (k < 3)
+				{
+					pv[ vtxIdx].weights[ k] = w->weight;
+				}
+				else // k == 3 (마지막 가중치)
+				{
+					pv[ vtxIdx].weights[ k] = 
+						1.f - (pv[ vtxIdx].weights[ 0] + pv[ vtxIdx].weights[ 1] + pv[ vtxIdx].weights[ 2]);
+				}
+
+				pv[ vtxIdx].matrixIndices[ k] = w->bone;
+				//const int boneIdx = (w->bone << (8*(3-k)));
+				//pv[ vtxIdx].matrixIndices |= boneIdx;
+			}
+		}
+
+		m_vtxBuff.Unlock();
+	}
+
+}
+
+
 // 매터리얼 생성.
 void cMesh::CreateMaterials(const sRawMesh &rawMesh)
 {
@@ -73,7 +114,7 @@ void cMesh::CreateMaterials(const sRawMesh &rawMesh)
 		m_mtrls.push_back(cMaterial());
 		m_mtrls.back().Init(mtrl);
 
-		m_textures.push_back( cResourceManager::Get()->LoadTexture(mtrl.texture) );
+		m_textures.push_back( cResourceManager::Get()->LoadTexture(mtrl.directoryPath, mtrl.texture) );
 	}
 }
 
@@ -136,7 +177,138 @@ void cMesh::Render(const Matrix44 &parentTm)
 		}
 	}
 
-	RenderBoundingBox(parentTm);
+	//RenderBoundingBox(parentTm);
+}
+
+
+// 셰이더를 통해 화면을 그린다.
+void cMesh::RenderShader( cShader &shader, const Matrix44 &parentTm )
+{
+	if (m_attributes.empty())
+	{
+		const Matrix44 tm = m_localTM * m_aniTM * m_TM * parentTm;
+		shader.SetMatrix("mWorld", tm);
+		
+		Matrix44 wit = tm.Inverse();
+		wit.Transpose();
+		shader.SetMatrix("mWIT", wit);
+
+		if (!m_mtrls.empty())
+			m_mtrls[ 0].Bind(shader);
+		if (!m_textures.empty())
+			m_textures[ 0]->Bind(shader, "Tex");
+
+		m_vtxBuff.Bind();
+		m_idxBuff.Bind();
+
+		shader.Begin();
+		shader.BeginPass();
+
+		GetDevice()->DrawIndexedPrimitive( 
+			D3DPT_TRIANGLELIST, 0, 0, 
+			m_vtxBuff.GetVertexCount(), 0, m_idxBuff.GetFaceCount());
+
+		shader.End();
+		shader.EndPass();
+	}
+	else
+	{
+		const Matrix44 tm = m_localTM * m_aniTM * m_TM * parentTm;
+		shader.SetMatrix("mWorld", tm);
+
+		Matrix44 wit = tm.Inverse();
+		wit.Transpose();
+		shader.SetMatrix("mWIT", wit);
+
+		shader.Begin();
+
+		m_vtxBuff.Bind();
+		m_idxBuff.Bind();
+
+		for (u_int i=0; i < m_attributes.size(); ++i)
+		{
+			const int mtrlId = m_attributes[ i].attribId;
+			if ((int)m_mtrls.size() <= mtrlId)
+				continue;
+
+			m_mtrls[ mtrlId].Bind(shader);
+			if (m_textures[ mtrlId])
+				m_textures[ mtrlId]->Bind(shader, "Tex");
+
+			shader.BeginPass();
+
+			GetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 
+				m_vtxBuff.GetVertexCount(), 
+				m_attributes[ i].faceStart*3, m_attributes[ i].faceCount);
+
+			shader.EndPass();
+		}
+
+		shader.End();
+	}
+}
+
+
+void cMesh::RenderShadow(cShader &shader, const Matrix44 &parentTm)
+{
+	if (m_attributes.empty())
+	{
+		//const Matrix44 tm = m_localTM * m_aniTM * m_TM * parentTm;
+		//shader.SetMatrix("mWorld", tm);
+		//Matrix44 wit = tm.Inverse();
+		//wit.Transpose();
+		//shader.SetMatrix("mWIT", wit);
+		//if (!m_mtrls.empty())
+		//	m_mtrls[ 0].Bind(shader);
+		//if (!m_textures.empty())
+		//	m_textures[ 0]->Bind(shader, "Tex");
+
+		m_vtxBuff.Bind();
+		m_idxBuff.Bind();
+
+		shader.Begin();
+		shader.BeginPass();
+
+		GetDevice()->DrawIndexedPrimitive( 
+			D3DPT_TRIANGLELIST, 0, 0, 
+			m_vtxBuff.GetVertexCount(), 0, m_idxBuff.GetFaceCount());
+
+		shader.End();
+		shader.EndPass();
+	}
+	else
+	{
+		//const Matrix44 tm = m_localTM * m_aniTM * m_TM * parentTm;
+		//shader.SetMatrix("mWorld", tm);
+		//Matrix44 wit = tm.Inverse();
+		//wit.Transpose();
+		//shader.SetMatrix("mWIT", wit);
+
+		shader.Begin();
+		m_vtxBuff.Bind();
+		m_idxBuff.Bind();
+
+		for (u_int i=0; i < m_attributes.size(); ++i)
+		{
+			const int mtrlId = m_attributes[ i].attribId;
+			if ((int)m_mtrls.size() <= mtrlId)
+				continue;
+
+			//m_mtrls[ mtrlId].Bind(shader);
+			//if (m_textures[ mtrlId])
+			//	m_textures[ mtrlId]->Bind(shader, "Tex");
+
+			shader.BeginPass();
+
+			GetDevice()->DrawIndexedPrimitive( D3DPT_TRIANGLELIST, 0, 0, 
+				m_vtxBuff.GetVertexCount(), 
+				m_attributes[ i].faceStart*3, m_attributes[ i].faceCount);
+
+			shader.EndPass();
+		}
+
+		shader.End();
+	}
 }
 
 
@@ -152,7 +324,7 @@ void cMesh::CreateBoundingBox(OUT cCube &out)
 {
 	sMinMax mm;
 
-	sVertexNormTex* pv = (sVertexNormTex*)m_vtxBuff.Lock();
+	sVertexNormTexSkin* pv = (sVertexNormTexSkin*)m_vtxBuff.Lock();
 	for (int i = 0; i < m_vtxBuff.GetVertexCount(); i++)
 	{
 		const Vector3 pos = pv[ i].p;

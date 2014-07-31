@@ -38,7 +38,9 @@ bool cGameApp::OnInit()
 		true); // true = 활성화 ， false = 비활성화
 
 	character->Create( "..\\media\\valle\\valle_character2.dat" );
-//	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
+	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
+//debug용	
+//	character->SetRenderBoundingBox(true);
 
 	character->SetAnimation( "..\\media\\valle\\valle_backward.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_forward.ani" );

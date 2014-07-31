@@ -15,11 +15,15 @@ namespace graphic
 		void Create( const int rowCellCount, const int colCellCount, const float cellSize, 
 			const float textureUVFactor=8.f);
 		void Render(const int stage=0);
+		void RenderShader(cShader &shader);
+
+		void CalculateNormals();
+		bool Pick( const Vector3 &orig, const Vector3 &dir, Vector3 &out );
 
 		cVertexBuffer& GetVertexBuffer();
 		cIndexBuffer& GetIndexBuffer();
 		cTexture& GetTexture();
-		cMaterial& GetMaterial();
+		cMaterial& GetMaterial();		
 
 
 	private:

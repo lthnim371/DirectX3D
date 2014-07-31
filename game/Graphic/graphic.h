@@ -43,11 +43,13 @@ using namespace common;
 
 #include "sprite/sprite.h"
 
+#include "terrain/terrain.h"
+
 #include "manager/Renderer.h"
 #include "manager/resourcemanager.h"
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
 
-
+//Ãß°¡
 #include "camera.h"
