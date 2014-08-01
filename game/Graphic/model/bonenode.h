@@ -24,6 +24,7 @@ namespace graphic
 		bool GetAniState() const;
 		Vector3 GetAniTM() const;
 		void SetAccTM(const Matrix44& accTM);
+		int GetEndFrame() const;
 
 	private:
 		cTrack *m_track;
@@ -53,4 +54,5 @@ namespace graphic
 	inline bool cBoneNode::GetAniState() const { return m_isAni; }
 	inline Vector3 cBoneNode::GetAniTM() const { return m_aniTM.GetPosition(); }
 	inline void cBoneNode::SetAccTM(const Matrix44& accTM) { m_accTM = accTM; }
+	inline int cBoneNode::GetEndFrame() const { return m_aniEnd; }
 }

@@ -8,7 +8,8 @@ namespace graphic
 		enum STATE
 		{
 			NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
-			DASH, LATTACK, RATTACK
+			DASH, JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
+			LATTACK, RATTACK,
 		};
 
 		cCharacter(const int id);
@@ -22,7 +23,8 @@ namespace graphic
 		
 	//추가
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
-		bool Attack(bool bAniState);
+		bool UpdateAttack(const bool bAniState);
+		void UpdateJump(const bool bAniState);
 		void FindWeapon();  //현재 무기bone 이름과 같은 캐릭터의 무기bone 찾기
 		void UpdateWeapon();  //
 
@@ -36,16 +38,16 @@ namespace graphic
 		cBoneNode *m_weaponNode; // reference
 
 	//추가
-//		bool m_animode;
 //		short m_state;
 		short m_attackCnt;  //공격 횟수(공격 상태 확인 가능)
-	//	short m_countL;  //공격 횟수(공격 상태 확인 가능)
-	//	short m_countR;
+		short m_jumpCnt;
 		bool m_reserveL;  //마우스 왼클릭 예약
 		bool m_reserveR;  //마우스 오른클릭 예약
 		short m_mode;
 //		Vector3 m_prevAniPos;
-		float m_prevAniPos;  //애니 적용시 이동한 값 보관
+		float m_prevAniPos;  //애니 적용시 이동한 값 보관 (추후 vector로 바꾸기로 고려)
 		vector<cBoneNode*> m_characterWeapon;  //캐릭터의 무기bone 주소 보관
+		u_short m_prevFrame;
+		bool m_jumpAttack;
 	};
 }

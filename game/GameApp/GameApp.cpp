@@ -38,8 +38,7 @@ bool cGameApp::OnInit()
 		true); // true = 활성화 ， false = 비활성화
 
 	character->Create( "..\\media\\valle\\valle_character2.dat" );
-//	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
-	character->LoadWeapon( "..\\media\\test_valle_weapon.dat" );
+	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
 //debug용	
 //	character->SetRenderBoundingBox(true);
 
@@ -53,6 +52,10 @@ bool cGameApp::OnInit()
 	character->SetAnimation( "..\\media\\valle\\valle_RA.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_jump1.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_jump3.ani" );
+	character->SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_normal.ani" );
 
 	::GetCursorPos( &m_currMouse );
@@ -97,6 +100,10 @@ void cGameApp::OnInput(const float elapseT)
 	else if( InputMgr->isStayKey('D') )
 	{	
 		character->Update( character->RIGHTWARD );
+	}
+	else if( InputMgr->isStayKey(VK_SPACE) )
+	{	
+		character->Update( character->JUMP );
 	}
 	else if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
