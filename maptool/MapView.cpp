@@ -6,9 +6,14 @@
 #include "MapView.h"
 
 #include "etc\Utility.h"
+#include "MainPanel.h"
 
 using namespace graphic;
 // CMapView
+
+CMapView* g_mapView = NULL;
+
+vector<graphic::cCube*> g_cubes;
 
 const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
 const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
@@ -19,7 +24,7 @@ CMapView::CMapView()
 	, m_RButtonDown(false)
 	, m_MButtonDown(false)
 {
-
+	g_mapView = this;
 }
 
 CMapView::~CMapView()
@@ -137,6 +142,11 @@ void CMapView::Render()
 		mat.SetTranslate( m_mouseRay );
 		m_cube.SetTransform( mat );
 		m_cube.Render( Matrix44() );
+		
+		for(auto it = g_cubes.begin(); it < g_cubes.end(); ++it)
+		{
+			(*it)->Render( Matrix44() );
+		}
 
 		GetDevice()->SetRenderState(D3DRS_LIGHTING, false);  //노말벡터가 없으므로 라이트 기능을 끈다
 
@@ -159,6 +169,20 @@ void CMapView::UpdateCamera()
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+	Vector3 pickPos;
+	m_ray.Create(point.x, point.y, WINSIZE_X, WINSIZE_Y, m_proj, m_view);
+	if( m_grid.Pick(m_ray.orig, m_ray.dir, pickPos) )
+	{
+		graphic::cCube* newCube = new graphic::cCube();
+		newCube->SetCube(Vector3(-10,-10,-10), Vector3(10,10,10));
+		newCube->SetColor(0xFFFF00FF);
+		//Matrix44 mat;
+		//mat.SetTranslate(pickPos);
+		newCube->SetTransform(m_cube.GetTransform());
+		g_cubes.push_back(newCube);
+		g_mainPanel->InsertCube( *newCube );
+	}
+
 
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -279,4 +303,9 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+void CMapView::SelectCube(int index)
+{
+	g_cubes[index]->SetColor(0xFFFF0000);
 }

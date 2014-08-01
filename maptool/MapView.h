@@ -14,6 +14,7 @@ public:
 	void Update(float elapseT);
 	void Render();
 	void UpdateCamera();
+	void SelectCube(int index);
 
 public:
 	virtual void OnDraw(CDC* pDC);      // 이 뷰를 그리기 위해 재정의되었습니다.

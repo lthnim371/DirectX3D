@@ -2,8 +2,8 @@
 //	Vector3 test( GetTM().GetPosition() );
 //	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
 
-//#include "stdafx.h"
-#include "..\stdafx.h"
+#include "stdafx.h"
+//#include "..\stdafx.h"
 #include "character.h"
 
 using namespace graphic;
@@ -407,7 +407,7 @@ void cCharacter::UpdateJump(const bool bAniState)
 	if( !bAniState )
 	{
 		m_bone->SetAniLoop(false);
-
+		/*
 		if(m_jumpAttack)
 		{
 			m_jumpAttack = false;
@@ -425,7 +425,7 @@ void cCharacter::UpdateJump(const bool bAniState)
 
 			return;
 		}		
-
+		*/
 		switch(m_jumpCnt)
 		{
 			case 1:
