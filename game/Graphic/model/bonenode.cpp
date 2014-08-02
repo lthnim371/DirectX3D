@@ -166,6 +166,7 @@ void cBoneNode::Render(const Matrix44 &parentTm)
 void cBoneNode::SetCurrentFrame(const int curFrame) 
 { 
 	m_curPlayTime = curFrame / 30.f;
+//	m_curPlayTime = curFrame * 0.03334f;
 	m_curPlayFrame = curFrame; 
 	if (m_track)
 		m_track->SetCurrentFramePos(curFrame);
