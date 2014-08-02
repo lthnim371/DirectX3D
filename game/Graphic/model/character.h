@@ -49,6 +49,8 @@ namespace graphic
 		vector<cBoneNode*> m_characterWeapon;  //캐릭터의 무기bone 주소 보관
 		u_short m_prevLastFrame;
 		u_short m_prevEndFrame;
-		bool m_jumpAttack;
+		bool m_currJumpAttack;
+		bool m_prevJumpAttack;
+		float m_jumpSpeed;
 	};
 }

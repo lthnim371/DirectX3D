@@ -8,7 +8,7 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,200,-200), m_look(0,0,0), m_up(0,1,0)
+	: m_pos(0,300,300), m_look(0,0,0), m_up(0,1,0)
 {		
 	SetView();  //set view
 	
