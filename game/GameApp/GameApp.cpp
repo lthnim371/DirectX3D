@@ -81,25 +81,35 @@ void cGameApp::OnInput(const float elapseT)
 		character->Update( character->ROTATION, ptMouse.x, ptMouse.y );
 	}
 		
-	if( InputMgr->isStayKey('W') && InputMgr->isStayKey(VK_SHIFT) )
-	{		
-		character->Update( character->DASH );
-	}
-	else if( InputMgr->isStayKey('W') )
-	{		
-		character->Update( character->FORWARD );
+	if( InputMgr->isStayKey('W') )
+	{	
+		if( InputMgr->isStayKey(VK_SHIFT) )
+			character->Update( character->DASH );
+		else if( InputMgr->isStayKey(VK_SPACE) )
+			character->Update( character->FRONTJUMP );
+		else
+			character->Update( character->FORWARD );
 	}
 	else if( InputMgr->isStayKey('S') )
 	{	
-		character->Update( character->BACKWARD );
+		if( InputMgr->isStayKey(VK_SPACE) )
+			character->Update( character->BACKJUMP );
+		else
+			character->Update( character->BACKWARD );
 	}
 	else if( InputMgr->isStayKey('A') )
 	{	
-		character->Update( character->LEFTWARD );
+		if( InputMgr->isStayKey(VK_SPACE) )
+			character->Update( character->LEFTJUMP );
+		else
+			character->Update( character->LEFTWARD );
 	}
 	else if( InputMgr->isStayKey('D') )
 	{	
-		character->Update( character->RIGHTWARD );
+		if( InputMgr->isStayKey(VK_SPACE) )
+			character->Update( character->RIGHTJUMP );
+		else
+			character->Update( character->RIGHTWARD );
 	}
 	else if( InputMgr->isStayKey(VK_SPACE) )
 	{	

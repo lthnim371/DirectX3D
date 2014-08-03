@@ -275,7 +275,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = state;
 				m_jumpCnt++;
 
-				m_jumpSpeed = 15.f;
+				m_jumpSpeed = 10.f;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
 		//	mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
@@ -400,8 +400,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 void cCharacter::UpdateJump(const bool bAniState)
 {
-//	Vector3 camDir( GetCamera()->GetDirection() );
-//	Vector3 camRight( GetCamera()->GetRight() );
+	Vector3 camDir( GetCamera()->GetDirection().Normal() );
+	Vector3 camRight( GetCamera()->GetRight() );
 	Matrix44 mat;
 		
 	if( bAniState == false )
@@ -409,11 +409,17 @@ void cCharacter::UpdateJump(const bool bAniState)
 		if( m_currJumpAttack )
 		{
 			m_currJumpAttack = false;
-			m_prevJumpAttack = true;
+			m_prevJumpAttack = true;			
+			m_bone->SetAniLoop(true);
+			if(m_jumpSpeed > -7.5f)
+				SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
 		}
-		else		
+		else if( m_jumpCnt == 1)
 		{
-			switch(m_jumpCnt)
+			m_bone->SetAniLoop(true);
+			SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
+			m_jumpCnt++;
+			/*switch(m_jumpCnt)
 			{
 				case 1:
 					m_bone->SetAniLoop(true);
@@ -435,12 +441,12 @@ void cCharacter::UpdateJump(const bool bAniState)
 					m_prevJumpAttack = false;
 					m_jumpSpeed = 0.f;
 				return;
-			}
+			}*/
 		}
 	}
 	
-	if( m_jumpCnt == 2 && m_jumpSpeed <= -14.0f )
-	{
+	if( m_jumpCnt == 2 && m_jumpSpeed <= -7.5f )
+	{		
 		switch( m_currJumpAttack )
 		{
 			case false:
@@ -450,15 +456,61 @@ void cCharacter::UpdateJump(const bool bAniState)
 			break;
 
 			case true:
-				return;
+				mat = GetTM();
+				float y = mat.GetPosition().y;
+
+				if(y <= 10.f)
+					return;
+				else if(y > 10.f)
+					m_jumpSpeed += 0.2f;
 			break;
 		}
 	}
 	
-	m_jumpSpeed -= 0.5f;			
-	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );				
+	switch(m_mode)
+	{
+		case FRONTJUMP:
+			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+			MultiplyTM( mat );
+		break;
+		case BACKJUMP:
+			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+			MultiplyTM( mat );
+		break;
+		case LEFTJUMP:
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
+			MultiplyTM( mat );
+		break;
+		case RIGHTJUMP:
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
+			MultiplyTM( mat );
+		break;
+	}
+
+	m_jumpSpeed -= 0.2f;
+	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
+//	dbg::Print( "speed : %f  /  pos.y : %f", m_jumpSpeed, GetTM().GetPosition().y );
+
+	mat = GetTM();
+	float y = mat.GetPosition().y;
+	if(y <= 0.f)
+	{
+		mat._42 = 0.f;
+		SetTM(mat);
+		GetCamera()->SetPosition( GetTM() );
+		m_jumpCnt = 0;
+		m_bone->SetAniLoop(true);
+		SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+		m_mode = NORMAL;
+				
+		m_currJumpAttack = false;
+		m_prevJumpAttack = false;
+		m_jumpSpeed = 0.f;
+
+		return;
+	}
 }
 
 void cCharacter::FindWeapon()

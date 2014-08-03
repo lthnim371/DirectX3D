@@ -129,3 +129,11 @@ graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거�
 
 무기 경계박스 정상 적용 : 캐릭터의 무기에 해당하는 본을 찾아서 무기 본에 적용
 -> graphic의 character클래스에 find~, update~ 함수 추가
+
+
+140803
+★ update
+최적의 캐릭터 점프 수치 - start = 10.f / speed = -0.2f / end = -4.6f  ==>  middle(top) = 245.000214f / final = 0.000543f
+
+캐릭터 점프 및 점프 공격 완료 : 점프높이와 속도의 리얼감은 추후에 수정하도록.
+-> gameapp업데이트 및 graphic의 character클래스에 jump관련 코드 추가 및 updatejump함수 추가
