@@ -40,7 +40,6 @@ namespace graphic
 	//추가
 //		short m_state;
 		short m_attackCnt;  //공격 횟수(공격 상태 확인 가능)
-		short m_jumpCnt;
 		bool m_reserveL;  //마우스 왼클릭 예약
 		bool m_reserveR;  //마우스 오른클릭 예약
 		short m_mode;
@@ -49,8 +48,15 @@ namespace graphic
 		vector<cBoneNode*> m_characterWeapon;  //캐릭터의 무기bone 주소 보관
 		u_short m_prevLastFrame;
 		u_short m_prevEndFrame;
+		short m_jumpCnt;
 		bool m_currJumpAttack;
 		bool m_prevJumpAttack;
 		float m_jumpSpeed;
+		cCube* m_cube;
+		u_short m_cubeStartFrame;
+		u_short m_cubeMaximumFrame;
+		bool m_cubeCheck;
+		Vector3 m_cubePos;
+//		short m_cubeKeepCnt;
 	};
 }

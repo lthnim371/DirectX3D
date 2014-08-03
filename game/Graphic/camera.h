@@ -22,6 +22,7 @@ namespace graphic
 //		void SetRotation(const POINT& ptMouse);  //카메라 회전 연산
 		void SetRotation(const float x = 0, const float y = 0);  //카메라 회전 연산
 		void SetView();
+		void SetHeight(const float number);  //프로그램 테스트용
 		
 		Vector3 GetPosition() const;
 		Vector3 GetDirection() const;
@@ -36,10 +37,12 @@ namespace graphic
 		Vector3 m_dir;
 	};
 
-	inline cCamera* GetCamera() { return cCamera::Get(); };  //this
-	inline Vector3 cCamera::GetPosition() const { return m_pos; };
-	inline Vector3 cCamera::GetDirection() const { return m_dir; };
-	inline Vector3 cCamera::GetRight() const { return m_right; };
-	inline Vector3 cCamera::GetLook() const { return m_look; };
+//	inline void  cCamera::SetHeight(const float number) { m_pos.y += number; }
+
+	inline cCamera* GetCamera() { return cCamera::Get(); }  //graphic의 함수. this(camera)
+	inline Vector3 cCamera::GetPosition() const { return m_pos; }
+	inline Vector3 cCamera::GetDirection() const { return m_dir; }
+	inline Vector3 cCamera::GetRight() const { return m_right; }
+	inline Vector3 cCamera::GetLook() const { return m_look; }
 
 }

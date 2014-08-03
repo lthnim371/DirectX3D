@@ -80,38 +80,48 @@ void cGameApp::OnInput(const float elapseT)
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
 		character->Update( character->ROTATION, ptMouse.x, ptMouse.y );
 	}
-		
+	
+	//프로그램 테스트용
+	else if( InputMgr->isOnceKeyDown('1') )
+	{
+		graphic::GetCamera()->SetHeight(-10.f);
+	}
+	else if( InputMgr->isOnceKeyDown('2') )
+	{
+		graphic::GetCamera()->SetHeight(10.f);
+	}
+
 	if( InputMgr->isStayKey('W') )
 	{	
 		if( InputMgr->isStayKey(VK_SHIFT) )
 			character->Update( character->DASH );
-		else if( InputMgr->isStayKey(VK_SPACE) )
+		else if( InputMgr->isOnceKeyDown(VK_SPACE) )
 			character->Update( character->FRONTJUMP );
 		else
 			character->Update( character->FORWARD );
 	}
 	else if( InputMgr->isStayKey('S') )
 	{	
-		if( InputMgr->isStayKey(VK_SPACE) )
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
 			character->Update( character->BACKJUMP );
 		else
 			character->Update( character->BACKWARD );
 	}
 	else if( InputMgr->isStayKey('A') )
 	{	
-		if( InputMgr->isStayKey(VK_SPACE) )
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
 			character->Update( character->LEFTJUMP );
 		else
 			character->Update( character->LEFTWARD );
 	}
 	else if( InputMgr->isStayKey('D') )
 	{	
-		if( InputMgr->isStayKey(VK_SPACE) )
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
 			character->Update( character->RIGHTJUMP );
 		else
 			character->Update( character->RIGHTWARD );
 	}
-	else if( InputMgr->isStayKey(VK_SPACE) )
+	else if( InputMgr->isOnceKeyDown(VK_SPACE) )
 	{	
 		character->Update( character->JUMP );
 	}

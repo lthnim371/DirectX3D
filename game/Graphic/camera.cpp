@@ -8,7 +8,7 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,300,300), m_look(0,0,0), m_up(0,1,0)
+	: m_pos(0,200,200), m_look(0,0,0), m_up(0,1,0)
 {		
 	SetView();  //set view
 	
@@ -90,4 +90,13 @@ void cCamera::SetView()  //set view
 	Matrix44 view;
 	view.SetView( m_pos, m_dir.Normal(), m_up );
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&view);
+}
+
+//프로그램 테스트용
+void cCamera::SetHeight(const float number)
+{
+	if( 100.f <= m_pos.y && m_pos.y <= 500.f )
+		m_pos.y += number;
+	else
+		return;
 }
