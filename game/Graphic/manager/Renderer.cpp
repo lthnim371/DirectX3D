@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+//#include "..\stdafx.h"
 #include "Renderer.h"
 #include "../base/DxInit.h"
 #include "resourcemanager.h"
@@ -89,8 +90,18 @@ void cRenderer::RenderFPS()
 {
 	RET(!m_font);
 
-	RECT rc = {10,10,200,200};
+	sRect rc(10,10,200,200);
 	m_font->DrawTextA( NULL, m_fpsText.c_str(), -1, &rc,
+		DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
+	
+	char camY[16];
+	::itoa( GetCamera()->GetPosition().y, camY, 10 );
+//	::_gcvt_s(camY, sizeof(camY), GetCamera()->GetPosition().y, 1);
+//	::strcat_s(buff, _countof(buff), camY);
+	string str("camHeight : ");
+	str.append( format(camY) );
+	sRect rect(10,30,50,50);
+	m_font->DrawTextA( NULL, str.c_str(), -1, &rect,
 		DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
 }
 

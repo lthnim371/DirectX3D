@@ -29,11 +29,14 @@ cCharacter::cCharacter(const int id) :
 	m_currJumpAttack = false;
 	m_prevJumpAttack = false;
 	m_jumpSpeed = 0.f;
-	m_cube = NULL;
+	m_weaponCube = NULL;
 	m_cubeCheck = false;
 	m_cubeStartFrame = 0;
 	m_cubeMaximumFrame = 0;
 //	m_cubeKeepCnt = 0;
+	m_hp = 100;
+	m_sp = 100;
+//	m_characterCube = new cCube;
 }
 
 cCharacter::~cCharacter()
@@ -45,7 +48,11 @@ cCharacter::~cCharacter()
 bool cCharacter::Create(const string &modelName)
 {
 	m_weaponNode = NULL;
-	return cModel::Create(modelName);
+	bool bResult = cModel::Create(modelName);
+	if(!bResult)
+		return bResult;
+
+	return bResult;
 }
 
 
@@ -82,6 +89,15 @@ bool cCharacter::Move(const float elapseTime)
 {	
 	bool bAniState = cModel::Move(elapseTime);  //애니메이션 결과 저장
 
+	/*
+	cBoneNode* foundBone = m_bone->FindBone("Bip01-L-Clavicle");
+	Matrix44 mat = foundBone->GetAccTM();
+	Vector3 up = mat.GetPosition();
+	foundBone = m_bone->FindBone("Bip01-R-Foot");
+	mat = foundBone->GetAccTM();
+	Vector3 down = mat.GetPosition();
+	m_characterCube->SetCube( Vector3(down.x, down.y, -50.f), Vector3(up.x, up.y, -50.f) );
+	*/
 /*
 	if (m_weapon)// && m_weaponNode)
 	{
@@ -110,8 +126,10 @@ void cCharacter::Render()
 	if (m_weapon)
 		m_weapon->Render();
 
-	if( m_cube != NULL && m_cubeCheck == true )
-		m_cube->Render( Matrix44() );
+	if( m_weaponCube != NULL && m_cubeCheck == true )
+		m_weaponCube->Render( Matrix44() );
+
+	GetCamera()->Render( m_hp, m_sp );
 }
 
 void cCharacter::RenderShader(cShader &shader)
@@ -235,17 +253,23 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
 					m_mode = LATTACK;
 
-					m_cube = new cCube( Vector3(-50,0,-25), Vector3(50,200,25) );
+					m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,175,50) );
 					m_cubeStartFrame = 10;
 					m_cubeMaximumFrame = 13;
 					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-					m_cubePos *= 50.f;
+					m_cubePos *= 100.f;
 				}
 				else if( m_jumpCnt == 2 )
 				{
 					m_currJumpAttack = true;
 					m_bone->SetAniLoop(false);
 					SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
+
+					m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,200,150) );
+					m_cubeStartFrame = 8;
+					m_cubeMaximumFrame = 11;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				else //한번 이상 공격하는 상태라면..
 				{
@@ -266,11 +290,11 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
 					m_mode = RATTACK;
 
-					m_cube = new cCube( Vector3(-50,0,-50), Vector3(50,200,50) );
+					m_weaponCube = new cCube( Vector3(-125,0,0), Vector3(125,175,125) );
 					m_cubeStartFrame = 15;
 					m_cubeMaximumFrame = 18;
 					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-					m_cubePos *= 50.f;
+					m_cubePos *= 100.f;
 				}
 				else if(m_attackCnt == 0 && m_currJumpAttack == false)
 				{
@@ -347,11 +371,11 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
 				m_attackCnt++;
 
-				m_cube->SetCube( Vector3(-50,0,-75), Vector3(50,100,75) );
+				m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 				m_cubeStartFrame = 8;
 				m_cubeMaximumFrame = 11;
 				m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-				m_cubePos *= 50.f;
+				m_cubePos *= 100.f;
 
 		//		m_weapon->SetAniLoop(false);
 		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
@@ -362,11 +386,11 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
 				m_attackCnt++;
 
-				m_cube->SetCube( Vector3(-50,0,-75), Vector3(50,100,75) );
+				m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 				m_cubeStartFrame = 18;
 				m_cubeMaximumFrame = 21;
 				m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-				m_cubePos *= 50.f;
+				m_cubePos *= 100.f;
 
 		//		m_reserveL = false;
 		//		m_weapon->SetAniLoop(false);
@@ -389,18 +413,22 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				{
 					SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
 				
-					m_cube->SetCube( Vector3(-125,-125,0), Vector3(125,125,75) );
+					m_weaponCube->SetCube( Vector3(-175,0,0), Vector3(175,175,175) );
 					m_cubeStartFrame = 4;
 					m_cubeMaximumFrame = 10;
 					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-					m_cubePos *= 0.f;
+					m_cubePos *= 100.f;
 				}
 				else if(m_mode == LATTACK)
 				{
 					SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
 					m_attackCnt = 10;  //이 애니동작까지만 실행
 
-
+					m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
+					m_cubeStartFrame = 11;
+					m_cubeMaximumFrame = 14;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				m_attackCnt++;
 				
@@ -414,14 +442,22 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				{
 					SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
 
-					m_cube->SetCube( Vector3(-125,-125,0), Vector3(125,125,75) );
+					m_weaponCube->SetCube( Vector3(-200,0,0), Vector3(200,175,200) );
 					m_cubeStartFrame = 3;
 					m_cubeMaximumFrame = 20;
 					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-					m_cubePos *= 0.f;
+					m_cubePos *= 100.f;
 				}
 				else if(m_mode == LATTACK)
+				{
 					SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
+					
+					m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
+					m_cubeStartFrame = 21;
+					m_cubeMaximumFrame = 24;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
+				}
 				m_attackCnt++;
 		//		m_reserveR = false;
 		//		m_weapon->SetAniLoop(false);
@@ -447,11 +483,12 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 	//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 
 	//	m_cubeCheck = false;
-	//	m_cubeStartFrame = 0;
-		if(m_cube)
+		m_cubeStartFrame = 0;
+		m_cubeMaximumFrame = 0;
+		if(m_weaponCube)
 		{
-			delete m_cube;
-			m_cube = NULL;
+			delete m_weaponCube;
+			m_weaponCube = NULL;
 		}
 		return true;
 	}
@@ -469,79 +506,12 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 			mat._41 = currPos.x;
 			mat._43 = currPos.z;
 		//	mat.SetTranslate( currPos + m_cubePos );
-			m_cube->SetTransform( mat );
+			m_weaponCube->SetTransform( mat );
 		}
 		else if( currFrame >= m_cubeMaximumFrame )
 		{
 			m_cubeCheck = false;
 		}
-		
-		/*
-		if(m_mode == LATTACK)
-		{
-			switch(m_attackCnt)
-			{
-				case 1:
-
-				break;
-			}
-		}
-		else if(m_mode == RATTACK)
-		{
-			switch(m_attackCnt)
-			{
-				case 1:
-
-				break;
-			}
-		}
-		*/
-		
-		/*
-		switch(m_attackCnt)
-		{
-			case 1:
-				if( m_cube != NULL && m_bone->GetRoot()->GetCurrentFrame() >= 13)
-				{
-					m_cubeCheck = false;
-				}
-				else if( m_bone->GetRoot()->GetCurrentFrame() >= 10 )
-				{
-					m_cubeCheck = true;
-					mat.SetTranslate( currPos + test );
-					m_cube->SetTransform( mat );
-				}
-			break;
-			case 2:
-				if( m_cube != NULL && m_bone->GetRoot()->GetCurrentFrame() >= 11)
-				{
-					m_cubeCheck = true;
-					delete m_cube;
-					m_cube = NULL;
-				}
-				else if( m_cubeCheck == false && m_bone->GetRoot()->GetCurrentFrame() >= 9 )
-				{
-					m_cube = new cCube( Vector3(-40,-40,-20), Vector3(40,40,20) );
-					mat.SetTranslate( currPos + test );
-					m_cube->SetTransform( mat );
-				}
-			break;
-			case 3:
-				if( m_cube != NULL && m_bone->GetRoot()->GetCurrentFrame() >= 21)
-				{
-					m_cubeCheck = true;
-					delete m_cube;
-					m_cube = NULL;
-				}
-				else if( m_cubeCheck == false && m_bone->GetRoot()->GetCurrentFrame() >= 18 )
-				{
-					m_cube = new cCube( Vector3(-40,-40,-20), Vector3(40,40,20) );
-					mat.SetTranslate( currPos + test );
-					m_cube->SetTransform( mat );
-				}
-			break;
-		}
-		*/
 	}
 	
 	return false;
@@ -568,32 +538,48 @@ void cCharacter::UpdateJump(const bool bAniState)
 			m_bone->SetAniLoop(true);
 			SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
 			m_jumpCnt++;
-			/*switch(m_jumpCnt)
-			{
-				case 1:
-					m_bone->SetAniLoop(true);
-					SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
-					m_jumpCnt++;
-				break;
-
-				case 3:
-					mat = GetTM();
-					mat._42 = 0.f;
-					SetTM(mat);
-					GetCamera()->SetPosition( GetTM() );
-					m_jumpCnt = 0;
-					m_bone->SetAniLoop(true);
-					SetAnimation( "..\\media\\valle\\valle_normal.ani" );
-					m_mode = NORMAL;
+		}
+	}
+	else if( m_currJumpAttack == true )
+	{
+		short currFrame = m_bone->GetRoot()->GetCurrentFrame();
 				
-					m_currJumpAttack = false;
-					m_prevJumpAttack = false;
-					m_jumpSpeed = 0.f;
-				return;
-			}*/
+		if( m_cubeStartFrame <= currFrame && currFrame < m_cubeMaximumFrame )
+		{
+			m_cubeCheck = true;
+			Matrix44 mat;
+			mat.SetTranslate( m_cubePos );
+			m_weaponCube->SetTransform( GetTM() * mat );
+		}
+		else if( currFrame >= m_cubeMaximumFrame )
+		{
+			m_cubeCheck = false;
 		}
 	}
 	
+	if( m_mode != JUMP )
+	{
+		switch(m_mode)
+		{
+			case FRONTJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+				MultiplyTM( mat );
+			break;
+			case BACKJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+				MultiplyTM( mat );
+			break;
+			case LEFTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
+				MultiplyTM( mat );
+			break;
+			case RIGHTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
+				MultiplyTM( mat );
+			break;
+		}
+	}
+
 	if( m_jumpCnt == 2 && m_jumpSpeed <= -7.5f )
 	{		
 		switch( m_currJumpAttack )
@@ -615,27 +601,6 @@ void cCharacter::UpdateJump(const bool bAniState)
 			break;
 		}
 	}
-	
-	switch(m_mode)
-	{
-		case FRONTJUMP:
-			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
-			MultiplyTM( mat );
-		break;
-		case BACKJUMP:
-			mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
-			MultiplyTM( mat );
-		break;
-		case LEFTJUMP:
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
-			MultiplyTM( mat );
-		break;
-		case RIGHTJUMP:
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
-			MultiplyTM( mat );
-		break;
-	}
-
 	m_jumpSpeed -= 0.2f;
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
@@ -657,6 +622,14 @@ void cCharacter::UpdateJump(const bool bAniState)
 		m_currJumpAttack = false;
 		m_prevJumpAttack = false;
 		m_jumpSpeed = 0.f;
+
+		m_cubeStartFrame = 0;
+		m_cubeMaximumFrame = 0;
+		if(m_weaponCube)
+		{
+			delete m_weaponCube;
+			m_weaponCube = NULL;
+		}
 
 		return;
 	}

@@ -15,6 +15,7 @@ namespace graphic
 		~cCamera();
 		
 		void Update();  //카메라 방향벡터, 우방벡터 업데이트
+		void Render(const int hp, const int sp);
 
 		void SetPosition(const Matrix44& pos);  //카메라 look, pos 갱신
 		void SetTranslation(const Vector3& pos);  //카메라 look, pos 이동
@@ -35,6 +36,7 @@ namespace graphic
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
+		ID3DXFont* m_font;
 	};
 
 //	inline void  cCamera::SetHeight(const float number) { m_pos.y += number; }

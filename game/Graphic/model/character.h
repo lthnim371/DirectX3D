@@ -52,11 +52,14 @@ namespace graphic
 		bool m_currJumpAttack;
 		bool m_prevJumpAttack;
 		float m_jumpSpeed;
-		cCube* m_cube;
+		cCube* m_weaponCube;
 		u_short m_cubeStartFrame;
 		u_short m_cubeMaximumFrame;
 		bool m_cubeCheck;
 		Vector3 m_cubePos;
 //		short m_cubeKeepCnt;
+		int m_hp;
+		int m_sp;
+//		cCube* m_characterCube;
 	};
 }

@@ -8,8 +8,8 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,200,200), m_look(0,0,0), m_up(0,1,0)
-{		
+	: m_pos(0,300,300), m_look(0,0,0), m_up(0,1,0)
+{
 	SetView();  //set view
 	
 	//set projection
@@ -19,9 +19,15 @@ cCamera::cCamera()
 	Matrix44 proj;
 	proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 1000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
+
+	m_font = NULL;
+	HRESULT hr = D3DXCreateFontA( ::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
+		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
 }
 cCamera::~cCamera()
-{}
+{
+	SAFE_RELEASE(m_font);
+}
 
 void cCamera::Update()
 {
@@ -30,6 +36,27 @@ void cCamera::Update()
 //	m_dir.Normalize();  //dir의 크기가 필요한 곳이 있으므로 정규화하지 않음
 	m_right = m_up.CrossProduct( m_dir.Normal() );
 	m_right.Normalize();
+}
+
+void cCamera::Render(const int hp, const int sp)
+{
+	RET(!m_font);
+
+	char buff[32];
+	::_itoa_s( hp, buff, sizeof(buff), 10 );
+	string str("HP : ");
+	str.append( buff );
+	sRect rect(10,740,110,840);
+	m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+		DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+	::_itoa_s( sp, buff, sizeof(buff), 10 );
+	str.assign("SP : ");
+	str.append( buff );
+	rect.SetX(1050);
+	rect.SetY(740);
+	m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+		DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
 }
 
 void cCamera::SetPosition(const Matrix44& pos)
@@ -95,8 +122,10 @@ void cCamera::SetView()  //set view
 //프로그램 테스트용
 void cCamera::SetHeight(const float number)
 {
-	if( 100.f <= m_pos.y && m_pos.y <= 500.f )
-		m_pos.y += number;
+	if( m_pos.y <= 100.f )
+		m_pos.y += 10.f;
+	else if( m_pos.y >= 500.f )
+		m_pos.y -= 10.f;
 	else
-		return;
+		m_pos.y += number;	
 }

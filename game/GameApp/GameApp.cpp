@@ -91,7 +91,15 @@ void cGameApp::OnInput(const float elapseT)
 		graphic::GetCamera()->SetHeight(10.f);
 	}
 
-	if( InputMgr->isStayKey('W') )
+	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
+	{
+		character->Update( character->LATTACK );
+	}
+	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
+	{
+		character->Update( character->RATTACK );
+	}
+	else if( InputMgr->isStayKey('W') )
 	{	
 		if( InputMgr->isStayKey(VK_SHIFT) )
 			character->Update( character->DASH );
@@ -124,14 +132,6 @@ void cGameApp::OnInput(const float elapseT)
 	else if( InputMgr->isOnceKeyDown(VK_SPACE) )
 	{	
 		character->Update( character->JUMP );
-	}
-	else if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
-	{
-		character->Update( character->LATTACK );
-	}
-	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
-	{
-		character->Update( character->RATTACK );
 	}
 	else
 	{
