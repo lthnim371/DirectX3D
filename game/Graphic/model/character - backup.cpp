@@ -29,7 +29,7 @@ cCharacter::cCharacter(const int id) :
 	m_currJumpAttack = false;
 	m_prevJumpAttack = false;
 	m_jumpSpeed = 0.f;
-//	m_weaponCube = NULL;
+	m_weaponCube = NULL;
 	m_cubeCheck = false;
 	m_cubeStartFrame = 0;
 	m_cubeMaximumFrame = 0;
@@ -126,8 +126,8 @@ void cCharacter::Render()
 	if (m_weapon)
 		m_weapon->Render();
 
-//	if( m_weaponCube != NULL && m_cubeCheck == true )
-//		m_weaponCube->Render( Matrix44() );
+	if( m_weaponCube != NULL && m_cubeCheck == true )
+		m_weaponCube->Render( Matrix44() );
 
 	GetCamera()->Render( m_hp, m_sp );
 }
@@ -249,17 +249,15 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 					m_bone->SetAniLoop(false);  //애니 반복 상태 끄기
 					SetAnimation( "..\\media\\valle\\valle_LA.ani" );  //한번만 셋팅
 					m_attackCnt++;  //공격 횟수 증가
-					m_mode = LATTACK;
-
-					m_cubeStartFrame = 10;
-					m_cubeMaximumFrame = 13;
-
 				//	m_weapon->SetAniLoop(false);
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
+					m_mode = LATTACK;
 
-		//			m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,175,50) );
-		//			m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-		//			m_cubePos *= 100.f;
+					m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,175,50) );
+					m_cubeStartFrame = 10;
+					m_cubeMaximumFrame = 13;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				else if( m_jumpCnt == 2 )
 				{
@@ -267,11 +265,11 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 					m_bone->SetAniLoop(false);
 					SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
 
+					m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,200,150) );
 					m_cubeStartFrame = 8;
 					m_cubeMaximumFrame = 11;
-		//			m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,200,150) );
-		//			m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-		//			m_cubePos *= 100.f;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				else //한번 이상 공격하는 상태라면..
 				{
@@ -288,16 +286,15 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 					m_bone->SetAniLoop(false);  //애니 반복 상태 끄기
 					SetAnimation( "..\\media\\valle\\valle_RA.ani" );  //한번만 셋팅
 					m_attackCnt++;  //공격 횟수 증가
+				//	m_weapon->SetAniLoop(false);
+				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
 					m_mode = RATTACK;
 
+					m_weaponCube = new cCube( Vector3(-125,0,0), Vector3(125,175,125) );
 					m_cubeStartFrame = 15;
 					m_cubeMaximumFrame = 18;
-			//	m_weapon->SetAniLoop(false);
-			//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
-
-			//		m_weaponCube = new cCube( Vector3(-125,0,0), Vector3(125,175,125) );
-			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-			//		m_cubePos *= 100.f;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				else if(m_attackCnt == 0 && m_currJumpAttack == false)
 				{
@@ -342,6 +339,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
 //	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
 	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
+//	dbg::Print( "%f = %f - %f", fCurrPos, fAniPos, m_prevAniPos);
 	m_prevAniPos = fAniPos;
 	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
 	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우
@@ -349,9 +347,17 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		//카메라가 바라보는 방향으로 (카메라 look을)차이값만큼 이동
 		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
 	}
-
+//		MultiplyTM( mat );
+//		bool baniState = m_bone->GetAniState();
+//		if(m_bone->GetAniState() == false)
 	if(bAniState == false)
 	{
+				//	m_prevAniPos = Vector3(0.f,0.f,0.f);
+		
+	//	mat = GetTM();
+	//	mat.SetIdentity();
+		
+	//	test *= Vector3( camDir.x, 0.f, camDir.z );		
 		if(m_reserveL)
 		{
 			m_bone->SetAniLoop(false);
@@ -365,24 +371,28 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
 				m_attackCnt++;
 
+				m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 				m_cubeStartFrame = 8;
 				m_cubeMaximumFrame = 11;
-		//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
-		//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-		//		m_cubePos *= 100.f;
+				m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+				m_cubePos *= 100.f;
+
 		//		m_weapon->SetAniLoop(false);
 		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLA.ani");
 				return true;
 			break;
 			case 2:
+		//		m_bone->SetAniLoop(false);
 				SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
 				m_attackCnt++;
 
+				m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 				m_cubeStartFrame = 18;
 				m_cubeMaximumFrame = 21;
-		//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
-		//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-		//		m_cubePos *= 100.f;
+				m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+				m_cubePos *= 100.f;
+
+		//		m_reserveL = false;
 		//		m_weapon->SetAniLoop(false);
 		//		m_weapon->SetAnimation("..\\media\\valle\\valle_LLLA.ani");
 				return true;
@@ -397,28 +407,29 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 			switch(m_attackCnt)
 			{
-				case 1:
-					if(m_mode == RATTACK)
-					{
-						SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
+			case 1:
+				
+				if(m_mode == RATTACK)
+				{
+					SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
+				
+					m_weaponCube->SetCube( Vector3(-175,0,0), Vector3(175,175,175) );
+					m_cubeStartFrame = 4;
+					m_cubeMaximumFrame = 10;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
+				}
+				else if(m_mode == LATTACK)
+				{
+					SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
+					m_attackCnt = 10;  //이 애니동작까지만 실행
 
-						m_cubeStartFrame = 4;
-						m_cubeMaximumFrame = 10;
-				//		m_weaponCube->SetCube( Vector3(-175,0,0), Vector3(175,175,175) );
-				//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-				//		m_cubePos *= 100.f;
-					}
-					else if(m_mode == LATTACK)
-					{
-						SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
-						m_attackCnt = 10;  //이 애니동작까지만 실행
-
-						m_cubeStartFrame = 11;
-						m_cubeMaximumFrame = 14;
-				//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
-				//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-				//		m_cubePos *= 100.f;
-					}
+					m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
+					m_cubeStartFrame = 11;
+					m_cubeMaximumFrame = 14;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
+				}
 				m_attackCnt++;
 				
 		//		m_weapon->SetAniLoop(false);
@@ -426,25 +437,26 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				return true;
 			break;
 			case 2:
+		//		m_bone->SetAniLoop(false);
 				if(m_mode == RATTACK)
 				{
 					SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
 
+					m_weaponCube->SetCube( Vector3(-200,0,0), Vector3(200,175,200) );
 					m_cubeStartFrame = 3;
 					m_cubeMaximumFrame = 20;
-			//		m_weaponCube->SetCube( Vector3(-200,0,0), Vector3(200,175,200) );
-			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-			//		m_cubePos *= 100.f;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				else if(m_mode == LATTACK)
 				{
 					SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
 					
+					m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 					m_cubeStartFrame = 21;
 					m_cubeMaximumFrame = 24;
-			//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
-			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
-			//		m_cubePos *= 100.f;
+					m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
+					m_cubePos *= 100.f;
 				}
 				m_attackCnt++;
 		//		m_reserveR = false;
@@ -468,19 +480,16 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		m_mode = NORMAL;
 		m_reserveL = false;
 		m_reserveR = false;
+	//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 
+	//	m_cubeCheck = false;
 		m_cubeStartFrame = 0;
 		m_cubeMaximumFrame = 0;
-
-	//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
-/*
-		m_cubeCheck = false;
 		if(m_weaponCube)
 		{
 			delete m_weaponCube;
 			m_weaponCube = NULL;
 		}
-*/
 		return true;
 	}
 	else if(bAniState == true)
@@ -490,7 +499,6 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		if( m_cubeStartFrame <= currFrame && currFrame < m_cubeMaximumFrame )
 		{
 			m_cubeCheck = true;
-	/*
 			Vector3 currPos = GetCamera()->GetLook();
 			currPos += m_cubePos;
 			Matrix44 mat;
@@ -499,7 +507,6 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 			mat._43 = currPos.z;
 		//	mat.SetTranslate( currPos + m_cubePos );
 			m_weaponCube->SetTransform( mat );
-	*/
 		}
 		else if( currFrame >= m_cubeMaximumFrame )
 		{
@@ -540,11 +547,9 @@ void cCharacter::UpdateJump(const bool bAniState)
 		if( m_cubeStartFrame <= currFrame && currFrame < m_cubeMaximumFrame )
 		{
 			m_cubeCheck = true;
-/*
 			Matrix44 mat;
 			mat.SetTranslate( m_cubePos );
 			m_weaponCube->SetTransform( GetTM() * mat );
-*/
 		}
 		else if( currFrame >= m_cubeMaximumFrame )
 		{
@@ -600,6 +605,7 @@ void cCharacter::UpdateJump(const bool bAniState)
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
+//	dbg::Print( "speed : %f  /  pos.y : %f", m_jumpSpeed, GetTM().GetPosition().y );
 
 	mat = GetTM();
 	float y = mat.GetPosition().y;
@@ -619,13 +625,12 @@ void cCharacter::UpdateJump(const bool bAniState)
 
 		m_cubeStartFrame = 0;
 		m_cubeMaximumFrame = 0;
-/*
 		if(m_weaponCube)
 		{
 			delete m_weaponCube;
 			m_weaponCube = NULL;
 		}
-*/
+
 		return;
 	}
 }

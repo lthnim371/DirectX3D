@@ -18,6 +18,7 @@ cModel::cModel(const int id) :
 ,	m_isRenderBone(false)
 ,	m_isRenderBoundingBox(false)
 ,	m_type(MODEL_TYPE::RIGID)
+,	m_curAni(NULL)
 {
 	
 }
@@ -28,7 +29,8 @@ cModel::~cModel()
 }
 
 
-bool cModel::Create(const string &modelName)
+bool cModel::Create(const string &modelName, MODEL_TYPE::TYPE type )
+	// type = MODEL_TYPE::AUTO
 {
 	sRawMeshGroup *rawMeshes = cResourceManager::Get()->LoadModel(modelName);
 	RETV(!rawMeshes, false);
@@ -38,9 +40,24 @@ bool cModel::Create(const string &modelName)
 	const bool isSkinnedMesh = !rawMeshes->bones.empty();
 
 	// 스키닝 애니메이션이면 Bone을 생성한다.
-	if (isSkinnedMesh)
+	switch (type)
 	{
-		m_bone = new cBoneMgr(0, *rawMeshes);
+	case MODEL_TYPE::RIGID:
+		m_type = MODEL_TYPE::RIGID;
+		break;
+
+	case MODEL_TYPE::AUTO:
+	case MODEL_TYPE::SKIN:
+		if (isSkinnedMesh)
+		{
+			m_bone = new cBoneMgr(0, *rawMeshes);
+			m_type = MODEL_TYPE::SKIN;
+		}
+		else
+		{
+			m_type = MODEL_TYPE::RIGID;
+		}
+		break;
 	}
 
 	// 메쉬 생성.
@@ -48,7 +65,7 @@ bool cModel::Create(const string &modelName)
 	BOOST_FOREACH (auto &mesh, rawMeshes->meshes)
 	{
 		cMesh *p = NULL;
-		if (isSkinnedMesh)
+		if (MODEL_TYPE::SKIN == m_type)
 		{
 			p = new cSkinnedMesh(id++, m_bone->GetPalette(), mesh);
 		}
@@ -61,17 +78,18 @@ bool cModel::Create(const string &modelName)
 			m_meshes.push_back(p);
 	}
 
-	m_type = isSkinnedMesh? MODEL_TYPE::SKIN : MODEL_TYPE::RIGID;
-
 	return true;
 }
 
 
+// 애니메이션 시작.
 void cModel::SetAnimation( const string &aniFileName)
 {
 	if (sRawAniGroup *rawAnies = cResourceManager::Get()->LoadAnimation(aniFileName))
 	{
-		if (m_bone) // skinning model
+		m_curAni = rawAnies;
+
+		if (MODEL_TYPE::SKIN == m_type)
 		{
 			m_bone->SetAnimation(*rawAnies, 0);
 		}
@@ -119,21 +137,19 @@ void cModel::Render()
 
 
 void cModel::RenderShader(cShader &shader)
-{
-	//Matrix44 identity;
-	//GetDevice()->SetTransform(D3DTS_WORLD, (D3DXMATRIX*)&identity);
-
+{	
 	if (m_isRenderMesh)
 	{
 		BOOST_FOREACH (auto node, m_meshes)
 			node->RenderShader(shader, m_matTM);
 	}
 
-	//if (m_isRenderBone && m_bone)
-	//	m_bone->Render(m_matTM);
+	// 셰이더 쓰지 않고 그냥 출력.
+	if (m_isRenderBone && m_bone)
+		m_bone->Render(m_matTM);
 
-	//if (m_bone && m_isRenderBoundingBox)
-	//	m_bone->RenderBoundingBox(m_matTM);
+	if (m_bone && m_isRenderBoundingBox) 
+		m_bone->RenderBoundingBox(m_matTM);
 }
 
 
@@ -155,6 +171,7 @@ void cModel::Clear()
 		SAFE_DELETE(mesh);
 	}
 	m_meshes.clear();
+	m_curAni = NULL;
 
 	SAFE_DELETE(m_bone);
 }

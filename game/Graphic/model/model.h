@@ -14,7 +14,7 @@ namespace graphic
 		cModel(const int id);
 		virtual ~cModel();
 
-		virtual bool Create(const string &modelName);
+		virtual bool Create(const string &modelName, MODEL_TYPE::TYPE type = MODEL_TYPE::AUTO);
 		void SetAnimation( const string &aniFileName);
 		virtual bool Move(const float elapseTime);
 		virtual void Render();
@@ -28,6 +28,7 @@ namespace graphic
 		const Matrix44& GetTM() const;
 		cBoneMgr* GetBoneMgr();
 		cMesh* FindMesh(const string &meshName);
+		sRawAniGroup* GetCurrentAnimation();
 
 		// ICollisionable Interface
 		virtual bool IsTest( int testNum ) override;
@@ -52,11 +53,12 @@ namespace graphic
 		cBoneMgr *m_bone;
 		Matrix44 m_matTM;
 		cBoundingBox m_boundingBox; // only rigid mesh model
+		sRawAniGroup *m_curAni; // reference, 애니메이션 정보.
 
 		// debug 용.
 		bool m_isRenderMesh; // default = true
 		bool m_isRenderBone; // default = false
-		bool m_isRenderBoundingBox; // default = true
+		bool m_isRenderBoundingBox; // default = false
 	};
 
 
@@ -65,6 +67,7 @@ namespace graphic
 	inline void cModel::MultiplyTM(const Matrix44 &tm) { m_matTM *= tm; }
 	inline const Matrix44& cModel::GetTM() const { return m_matTM; }
 	inline cBoneMgr* cModel::GetBoneMgr() { return m_bone; }
+	inline sRawAniGroup* cModel::GetCurrentAnimation() { return m_curAni; }
 
 //추가
 //	inline void cModel::SetAniLoop(const bool loop) { m_bone->SetAniLoop(loop); }

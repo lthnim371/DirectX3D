@@ -1,3 +1,5 @@
+//캐릭터가 공격할 때 경계박스(큐브) 생성
+
 #pragma once
 
 namespace graphic
@@ -52,7 +54,7 @@ namespace graphic
 		bool m_currJumpAttack;
 		bool m_prevJumpAttack;
 		float m_jumpSpeed;
-//		cCube* m_weaponCube;
+		cCube* m_weaponCube;
 		u_short m_cubeStartFrame;
 		u_short m_cubeMaximumFrame;
 		bool m_cubeCheck;
