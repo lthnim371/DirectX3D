@@ -16,13 +16,14 @@ cCamera::cCamera()
 	const int WINSIZE_X = 1024;	//초기 윈도우 가로 크기
 	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
 	
-	Matrix44 proj;
-	proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 5000.0f) ;
-	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&proj) ;
+	m_proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 5000.0f) ;
+	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_proj) ;
 
 	m_font = NULL;
 	HRESULT hr = D3DXCreateFontA( ::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
+
+	m_shader.Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
 }
 cCamera::~cCamera()
 {
@@ -114,9 +115,14 @@ void cCamera::SetView()  //set view
 {
 	Update();
 	
-	Matrix44 view;
-	view.SetView( m_pos, m_dir.Normal(), m_up );
-	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&view);
+	m_view.SetView( m_pos, m_dir.Normal(), m_up );
+	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_view);
+
+	Matrix44 VP;
+	VP = m_view * m_proj;
+	m_shader.SetMatrix( "mVP", VP );
+	m_shader.SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl에 디폴트 값으로 되어있음
+	m_shader.SetVector( "vEyePos", m_pos);
 }
 
 //프로그램 테스트용

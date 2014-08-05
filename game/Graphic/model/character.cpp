@@ -24,8 +24,8 @@ cCharacter::cCharacter(const int id) :
 //	m_countL = 0;
 //	m_countR = 0;
 	m_mode = NORMAL;
-	m_prevLastFrame = 0;
-	m_prevEndFrame = 0;
+//	m_prevLastFrame = 0;
+//	m_prevEndFrame = 0;
 	m_currJumpAttack = false;
 	m_prevJumpAttack = false;
 	m_jumpSpeed = 0.f;
@@ -37,6 +37,7 @@ cCharacter::cCharacter(const int id) :
 	m_hp = 100;
 	m_sp = 100;
 	m_characterCube = NULL;
+	m_weaponCubeNumber = 0;
 }
 
 cCharacter::~cCharacter()
@@ -53,7 +54,8 @@ bool cCharacter::Create(const string &modelName)
 		return bResult;
 
 	m_characterCube = new cCube( Vector3(-25.f, 0.f, -25.f), Vector3(25.f, 175.f, 25.f) );
-	
+//	SetRenderMesh(false);
+
 	return bResult;
 }
 
@@ -87,6 +89,7 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 //test
 //	m_weapon->SetRenderBoundingBox(true);
+//	m_weapon->SetRenderMesh(false);
 }
 
 
@@ -163,9 +166,14 @@ void cCharacter::RenderShader(cShader &shader)
 {
 	cModel::RenderShader(shader);
 
-	//if (m_weapon)
-	//	m_weapon->RenderShader(shader);
+	if (m_weapon)
+		m_weapon->RenderShader(shader);
 
+//test
+	if(m_characterCube)
+		m_characterCube->Render( Matrix44() );
+	if(m_weaponCube)
+		m_weaponCube->Render( Matrix44() );
 }
 
 void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
@@ -191,7 +199,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case NORMAL:  //기본 동작
 			if( m_mode != NORMAL )  //현재 다른 애니모션 상태라면..
 			{	//기본모션으로 한번만 셋팅
-				SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 				m_mode = NORMAL;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 			}
@@ -210,7 +218,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case FORWARD:  //앞으로 이동
 			if( m_mode != FORWARD )  //입력키가 처음 눌러졌다면..
 			{	//한번만 셋팅
-				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
 				m_mode = FORWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
@@ -222,7 +230,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case BACKWARD:  //뒤로 이동
 			if( m_mode != BACKWARD )
 			{
-				SetAnimation( "..\\media\\valle\\valle_backward.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
 				m_mode = BACKWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_backward.ani");
 			}
@@ -234,7 +242,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case LEFTWARD:  //왼쪽 이동
 			if( m_mode != LEFTWARD )
 			{
-				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
 				m_mode = LEFTWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
@@ -247,7 +255,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case RIGHTWARD:  //오른쪽 이동
 			if( m_mode != RIGHTWARD )
 			{
-				SetAnimation( "..\\media\\valle\\valle_forward.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
 				m_mode = RIGHTWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
@@ -260,7 +268,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		case DASH:
 			if( m_mode != DASH )  //입력키가 처음 눌러졌다면..
 			{	//한번만 셋팅
-				SetAnimation( "..\\media\\valle\\valle_dash.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
 				m_mode = DASH;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
@@ -274,7 +282,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				if(m_attackCnt == 0 && m_jumpCnt == 0)  //첫 공격이라면..
 				{
 					m_bone->SetAniLoop(false);  //애니 반복 상태 끄기
-					SetAnimation( "..\\media\\valle\\valle_LA.ani" );  //한번만 셋팅
+					SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );  //한번만 셋팅
 					m_attackCnt++;  //공격 횟수 증가
 					m_mode = LATTACK;
 
@@ -292,7 +300,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				{
 					m_currJumpAttack = true;
 					m_bone->SetAniLoop(false);
-					SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
+					SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
 
 					m_cubeStartFrame = 8;
 					m_cubeMaximumFrame = 11;
@@ -313,7 +321,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				if(m_attackCnt == 0 && m_jumpCnt == 0)  //첫 공격이라면..
 				{
 					m_bone->SetAniLoop(false);  //애니 반복 상태 끄기
-					SetAnimation( "..\\media\\valle\\valle_RA.ani" );  //한번만 셋팅
+					SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );  //한번만 셋팅
 					m_attackCnt++;  //공격 횟수 증가
 					m_mode = RATTACK;
 
@@ -345,7 +353,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			if( m_mode != state )  //입력키가 처음 눌러졌다면..
 			{	
 				m_bone->SetAniLoop(false);
-				SetAnimation( "..\\media\\valle\\valle_jump1.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
 				m_mode = state;
 				m_jumpCnt++;
 
@@ -389,7 +397,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 			{
 			case 1:
 				
-				SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
 				m_attackCnt++;
 
 				m_cubeStartFrame = 8;
@@ -402,7 +410,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				return true;
 			break;
 			case 2:
-				SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
 				m_attackCnt++;
 
 				m_cubeStartFrame = 18;
@@ -427,7 +435,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				case 1:
 					if(m_mode == RATTACK)
 					{
-						SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
+						SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
 
 						m_cubeStartFrame = 4;
 						m_cubeMaximumFrame = 10;
@@ -437,7 +445,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 					}
 					else if(m_mode == LATTACK)
 					{
-						SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
+						SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
 						m_attackCnt = 10;  //이 애니동작까지만 실행
 
 						m_cubeStartFrame = 11;
@@ -455,7 +463,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 			case 2:
 				if(m_mode == RATTACK)
 				{
-					SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
+					SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
 
 					m_cubeStartFrame = 3;
 					m_cubeMaximumFrame = 20;
@@ -465,7 +473,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				}
 				else if(m_mode == LATTACK)
 				{
-					SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
+					SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
 					
 					m_cubeStartFrame = 21;
 					m_cubeMaximumFrame = 24;
@@ -491,7 +499,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		
 		m_attackCnt = 0;
 		m_bone->SetAniLoop(true);
-		SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+		SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 		m_mode = NORMAL;
 		m_reserveL = false;
 		m_reserveR = false;
@@ -551,12 +559,12 @@ void cCharacter::UpdateJump(const bool bAniState)
 			m_prevJumpAttack = true;			
 			m_bone->SetAniLoop(true);
 			if(m_jumpSpeed > -7.5f)
-				SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
 		}
 		else if( m_jumpCnt == 1)
 		{
 			m_bone->SetAniLoop(true);
-			SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
+			SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
 			m_jumpCnt++;
 		}
 	}
@@ -586,7 +594,7 @@ void cCharacter::UpdateJump(const bool bAniState)
 			case false:
 				m_jumpCnt++;
 				m_bone->SetAniLoop(false);
-				SetAnimation( "..\\media\\valle\\valle_jump3.ani" );
+				SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
 			break;
 
 			case true:
@@ -637,7 +645,7 @@ void cCharacter::UpdateJump(const bool bAniState)
 		GetCamera()->SetPosition( GetTM() );
 		m_jumpCnt = 0;
 		m_bone->SetAniLoop(true);
-		SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+		SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 		m_mode = NORMAL;
 				
 		m_currJumpAttack = false;
@@ -679,7 +687,7 @@ void cCharacter::UpdateWeapon()
 	//무기 bone의 node, palette 정보 가져오기
 	vector<cBoneNode*>& weaponNode = m_weapon->GetBoneMgr()->GetAllBoneNode();
 	vector<Matrix44>& weaponPalette = m_weapon->GetBoneMgr()->GetPalette();
-
+	
 	for( int i = 0; i < (int)weaponNode.size(); ++i )  //무기 bone accTM 갱신
 	{
 		if( m_characterWeapon[i] != NULL )
@@ -695,20 +703,22 @@ void cCharacter::UpdateWeapon()
 	
 	m_weapon->SetTM( GetTM() );  //현재 캐릭터 위치로 무기 위치 갱신
 
-
-//	m_weaponCube.SetTransform( 
+	m_weaponCube->SetTransform( ( weaponNode[m_weaponCubeNumber]->GetAccTM() ) * ( m_weapon->GetTM() ) );
 }
 
 void cCharacter::GetWeaponBoundingBox()
 {
-	vector<cCube>& weapon = m_weapon->GetBoneMgr()->GetBoundingBox();
-
-	for( auto it = weapon.begin(); it != weapon.end(); ++it )
+	vector<cCube>& weaponCube = m_weapon->GetBoneMgr()->GetCube();
+	
+	for( int i = 0; i< (int)weaponCube.size(); ++i )
 	{
-		Vector3 min = it->GetMin();
-		Vector3 max = it->GetMin();
+		Vector3 min = weaponCube[i].GetMin();
+		Vector3 max = weaponCube[i].GetMax();
 		if( min.IsEmpty() == false || max.IsEmpty() == false )
-			m_weaponCube = &(*it);
+		{
+			m_weaponCube = &(weaponCube[i]);
+			m_weaponCubeNumber = i;
+		}
 	}
 }
 

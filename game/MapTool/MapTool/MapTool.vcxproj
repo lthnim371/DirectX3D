@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{37A60E43-6F45-4438-ABB4-D634D128D23F}</ProjectGuid>
-    <RootNamespace>Viewer2</RootNamespace>
+    <ProjectGuid>{42827706-569B-4DB6-9D37-2EBF6E9D8805}</ProjectGuid>
+    <RootNamespace>MapTool</RootNamespace>
     <Keyword>MFCProj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -95,56 +95,45 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
-    <None Include="res\Viewer2.ico" />
-    <None Include="res\Viewer2.rc2" />
+    <None Include="res\MapTool.ico" />
+    <None Include="res\MapTool.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AnimationController2.h" />
-    <ClInclude Include="AnimationPanel.h" />
-    <ClInclude Include="FilePanel.h" />
-    <ClInclude Include="InputDlg.h" />
-    <ClInclude Include="LoadingDialog.h" />
-    <ClInclude Include="MainPanel.h" />
-    <ClInclude Include="ModelPanel.h" />
-    <ClInclude Include="ModelView.h" />
-    <ClInclude Include="Model\Controller.h" />
-    <ClInclude Include="PanelBase.h" />
+    <ClInclude Include="HeightMapPanel.h" />
+    <ClInclude Include="MapController.h" />
+    <ClInclude Include="MapTool.h" />
+    <ClInclude Include="MapToolDlg.h" />
+    <ClInclude Include="MapView.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="TabPanel.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Viewer2.h" />
-    <ClInclude Include="Viewer2Dlg.h" />
+    <ClInclude Include="TopPanel.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AnimationController2.cpp" />
-    <ClCompile Include="AnimationPanel.cpp" />
-    <ClCompile Include="FilePanel.cpp" />
-    <ClCompile Include="InputDlg.cpp" />
-    <ClCompile Include="LoadingDialog.cpp" />
-    <ClCompile Include="MainPanel.cpp" />
-    <ClCompile Include="MainPanelTab.cpp" />
-    <ClCompile Include="ModelPanel.cpp" />
-    <ClCompile Include="ModelView.cpp" />
-    <ClCompile Include="Model\Controller.cpp" />
-    <ClCompile Include="PanelBase.cpp" />
+    <ClCompile Include="HeightMapPanel.cpp" />
+    <ClCompile Include="MapController.cpp" />
+    <ClCompile Include="MapTool.cpp" />
+    <ClCompile Include="MapToolDlg.cpp" />
+    <ClCompile Include="MapView.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Viewer2.cpp" />
-    <ClCompile Include="Viewer2Dlg.cpp" />
+    <ClCompile Include="TabPanel.cpp" />
+    <ClCompile Include="TopPanel.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Viewer2.rc" />
+    <ResourceCompile Include="MapTool.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.vcxproj">
+    <ProjectReference Include="..\..\Common\Common.vcxproj">
       <Project>{ef9ca22d-0c8f-42e9-ab66-98bc1a640f10}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Graphic\Graphic.vcxproj">
+    <ProjectReference Include="..\..\Graphic\Graphic.vcxproj">
       <Project>{3a91e3aa-18df-4733-9f41-ed09a61f97e3}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj">
+    <ProjectReference Include="..\..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj">
       <Project>{937b4bdb-2bc4-43de-9e32-ba36aee888eb}</Project>
     </ProjectReference>
   </ItemGroup>
@@ -153,7 +142,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties RESOURCE_FILE="Viewer2.rc" />
+      <UserProperties RESOURCE_FILE="MapTool.rc" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

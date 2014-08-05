@@ -13,6 +13,7 @@ CModelView::CModelView()
 	m_LButtonDown = false;
 	m_RButtonDown = false;
 	m_MButtonDown = false;	
+	m_showSkybox = false;
 }
 
 CModelView::~CModelView()
@@ -29,15 +30,6 @@ BEGIN_MESSAGE_MAP(CModelView, CView)
 	ON_WM_MBUTTONDOWN()
 	ON_WM_MBUTTONUP()
 END_MESSAGE_MAP()
-
-
-// CModelView 그리기입니다.
-
-void CModelView::OnDraw(CDC* pDC)
-{
-	CDocument* pDoc = GetDocument();
-	// TODO: 여기에 그리기 코드를 추가합니다.
-}
 
 
 // CModelView 진단입니다.
@@ -61,16 +53,11 @@ void CModelView::Dump(CDumpContext& dc) const
 
 void CModelView::Init()
 {
-	m_filePath = "../media/data.dat";
-
-	m_camPos = Vector3(100,100,-500);
-	m_lookAtPos = Vector3(0,0,0);
-	UpdateCamera();
-
 	const int WINSIZE_X = 1024;		//초기 윈도우 가로 크기
 	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
-	m_matProj.SetProjection(D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
-	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_matProj) ;
+	m_camera.SetCamera(Vector3(100,300,-500), Vector3(0,0,0), Vector3(0,1,0));
+	m_camera.SetProjection( D3DX_PI / 4.f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 10000.0f) ;
+
 
 	graphic::GetDevice()->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
@@ -79,9 +66,11 @@ void CModelView::Init()
 		true); // true = 활성화 ， false = 비활성화
 
 	
-
 	//m_shader.Create( "../media/shader/hlsl_skinning_using_color.fx", "TShader" );
 	m_shader.Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
+	m_skybox.Create( "../media/skybox" );
+
+	cController::Get()->AddObserver(this);
 }
 
 
@@ -107,6 +96,8 @@ void CModelView::Render()
 		//화면 청소가 성공적으로 이루어 졌다면... 랜더링 시작
 		graphic::GetDevice()->BeginScene();
 
+		if (m_showSkybox)
+			m_skybox.Render();
 		graphic::GetRenderer()->RenderFPS();
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
@@ -116,9 +107,10 @@ void CModelView::Render()
 			character->SetTM(m_rotateTm);
 		}
 
-		m_shader.SetMatrix( "mVP", m_matView * m_matProj);
+
+		m_shader.SetMatrix( "mVP", m_camera.GetViewProjectionMatrix() );
 		m_shader.SetVector( "vLightDir", Vector3(0,-1,0) );
-		m_shader.SetVector( "vEyePos", m_camPos);
+		m_shader.SetVector( "vEyePos", m_camera.GetEyePos());
 
 		cController::Get()->RenderShader(m_shader);
 		//cController::Get()->Render();
@@ -128,15 +120,6 @@ void CModelView::Render()
 		//랜더링이 끝났으면 랜더링된 내용 화면으로 전송
 		graphic::GetDevice()->Present( NULL, NULL, NULL, NULL );
 	}
-}
-
-
-void CModelView::UpdateCamera()
-{
-	Vector3 dir = m_lookAtPos - m_camPos;
-	dir.Normalize();
-	m_matView.SetView(m_camPos, dir, Vector3(0,1,0));
-	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_matView);
 }
 
 
@@ -162,54 +145,30 @@ void CModelView::OnMouseMove(UINT nFlags, CPoint point)
 {
 	if (m_LButtonDown)
 	{
-		CPoint pos = point  - m_curPos;
+		const CPoint pos = point  - m_curPos;
 		m_curPos = point;
 
-		Matrix44 mat1;
-		mat1.SetRotationY( -pos.x * 0.01f );
-		Matrix44 mat2;
-		mat2.SetRotationX( -pos.y * 0.01f );
+		Quaternion q1(m_camera.GetRight(), -pos.y * 0.01f);
+		Quaternion q2(m_camera.GetUpVector(), -pos.x * 0.01f);
 
-		m_rotateTm *= (mat1 * mat2);
+		m_rotateTm *= (q2.GetMatrix() * q1.GetMatrix());
 	}	
 	else if (m_RButtonDown)
 	{
-		CPoint pos = point  - m_curPos;
+		const CPoint pos = point  - m_curPos;
 		m_curPos = point;
 
-		{ // rotate Y-Axis
-			Quaternion q(Vector3(0,1,0), pos.x * 0.005f); 
-			Matrix44 m = q.GetMatrix();
-			m_camPos *= m;
-		}
-
-		{ // rotate X-Axis
-			Quaternion q(Vector3(1,0,0), pos.y * 0.005f); 
-			Matrix44 m = q.GetMatrix();
-			m_camPos *= m;
-		}
-
-		UpdateCamera();
+		m_camera.Yaw2( pos.x * 0.005f );
+		m_camera.Pitch2( pos.y * 0.005f );
 	}
 	else if (m_MButtonDown)
 	{
-		CPoint pos = point  - m_curPos;
+		const CPoint pos = point  - m_curPos;
 		m_curPos = point;
 
-		Vector3 v = m_lookAtPos - m_camPos;
-		const float len = v.Length();
-		v.Normalize();
-
-		Vector3 up = Vector3(0,1,0);
-		Vector3 right = up.CrossProduct(v);
-		right.Normalize();
-
-		m_lookAtPos += right * pos.x * (len * -0.001f);
-		m_camPos += right * pos.x * (len * -0.001f);
-		m_lookAtPos += up * pos.y * (len * 0.001f);
-		m_camPos += up * pos.y * (len * 0.001f);
-		
-		UpdateCamera();
+		const float len = m_camera.GetDistance();
+		m_camera.MoveRight( -pos.x * len * 0.001f );
+		m_camera.MoveUp( pos.y * len * 0.001f );
 	}
 
 	CView::OnMouseMove(nFlags, point);
@@ -220,17 +179,12 @@ BOOL CModelView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	dbg::Print( "%d %d", nFlags, zDelta);
 
-	Vector3 dir = m_lookAtPos - m_camPos;
-	const float len = dir.Length();
-	dir.Normalize();
-
+	const float len = m_camera.GetDistance();
 	float zoomLen = (len > 100)? 50 : (len/4.f);
 	if (nFlags & 0x4)
 		zoomLen = zoomLen/10.f;
 
-	m_camPos += (zDelta<0)? dir*-zoomLen : dir*zoomLen;
-
-	UpdateCamera();
+	m_camera.Zoom( (zDelta<0)? -zoomLen : zoomLen );
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
@@ -238,8 +192,8 @@ BOOL CModelView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 
 void CModelView::OnRButtonDown(UINT nFlags, CPoint point)
 {
-	SetFocus();  //마우스 위치 이벤트를 받을 윈도우창
-	SetCapture();  //윈도우창 밖으로 마우스 위치가 적용 가능. 단, 볼일을 다 보고 나면 ReleaseCapture를 꼭 해줘야 한다.
+	SetFocus();
+	SetCapture();
 	m_RButtonDown = true;
 	m_curPos = point;
 	CView::OnRButtonDown(nFlags, point);
@@ -272,14 +226,12 @@ void CModelView::OnMButtonUp(UINT nFlags, CPoint point)
 }
 
 
-bool CModelView::LoadFile(const string &fileName)
+void CModelView::Update()
 {
 	m_rotateTm.SetIdentity();
-	m_filePath = fileName;
 
-	cController::Get()->LoadFile(fileName);
-	graphic::cCharacter *character = cController::Get()->GetCharacter();
-	character->LoadWeapon( "../media/weapon.dat");
-
-	return false;
+	//// 무기 재 로딩.
+	//graphic::cCharacter *character = cController::Get()->GetCharacter();
+	//if (character)
+	//	character->LoadWeapon( "../media/max script/valle_weapon4.dat");
 }

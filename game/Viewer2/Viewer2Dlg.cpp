@@ -11,6 +11,7 @@
 #include "MainPanel.h"
 #include "AnimationController2.h"
 
+
 #pragma comment( lib, "winmm.lib" )
 
 
@@ -35,12 +36,14 @@ CViewer2Dlg::CViewer2Dlg(CWnd* pParent /*=NULL*/)
 , m_RenderBone(FALSE)
 , m_RenderMesh(TRUE)
 , m_RenderBoundingBox(FALSE)
+, m_ShowSkyBox(FALSE)
 {
 //	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
 
 CViewer2Dlg::~CViewer2Dlg()
 {
+	DestroyLoadingDialog();
 	m_aniController->DestroyWindow();
 	delete m_aniController;
 }
@@ -52,6 +55,7 @@ void CViewer2Dlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_CHECK_BONE, m_RenderBone);
 	DDX_Check(pDX, IDC_CHECK_MESH, m_RenderMesh);
 	DDX_Check(pDX, IDC_CHECK_BOUNDINGBOX, m_RenderBoundingBox);
+	DDX_Check(pDX, IDC_CHECK_SKYBOX, m_ShowSkyBox);
 }
 
 BEGIN_MESSAGE_MAP(CViewer2Dlg, CDialogEx)
@@ -65,6 +69,7 @@ BEGIN_MESSAGE_MAP(CViewer2Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CHECK_BONE, &CViewer2Dlg::OnBnClickedCheckBone)
 	ON_BN_CLICKED(IDC_CHECK_MESH, &CViewer2Dlg::OnBnClickedCheckMesh)
 	ON_BN_CLICKED(IDC_CHECK_BOUNDINGBOX, &CViewer2Dlg::OnBnClickedCheckBoundingbox)
+	ON_BN_CLICKED(IDC_CHECK_SKYBOX, &CViewer2Dlg::OnBnClickedCheckSkybox)
 END_MESSAGE_MAP()
 
 
@@ -120,6 +125,7 @@ BOOL CViewer2Dlg::OnInitDialog()
 	m_modelView->Init();
 	m_modelView->ShowWindow(SW_SHOW);
 
+
 	// Create Main Panel
 	{
 		const int PANEL_WIDTH = 400;
@@ -159,6 +165,12 @@ BOOL CViewer2Dlg::OnInitDialog()
 		m_aniController->ShowWindow(SW_SHOW);
 		cController::Get()->AddObserver(m_aniController);
 	}
+
+	// Loading Dialog 초기화.
+	InitLoadingDialog(this);
+
+
+	cController::Get()->AddObserver(this);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -273,17 +285,8 @@ void CViewer2Dlg::OnDropFiles(HDROP hDropInfo)
 	if (size == 0) 
 		return;// handle error...
 
-	m_modelView->LoadFile(filePath);
+	cController::Get()->LoadFile(filePath);
 	
-	// 애니메이션 파일을 열었다면 윈도우 크기를 늘인다.
-	const graphic::RESOURCE_TYPE::TYPE type = graphic::cResourceManager::Get()->GetFileKind(filePath);
-	if (graphic::RESOURCE_TYPE::ANIMATION == type)
-	{
-		CRect wr;
-		GetWindowRect(wr);
-		MoveWindow(wr.left,wr.top,REAL_WINDOW_WIDTH,REAL_WINDOW_HEIGHT+60);
-	}
-
 	CDialogEx::OnDropFiles(hDropInfo);
 }
 
@@ -323,4 +326,28 @@ void CViewer2Dlg::OnBnClickedCheckBoundingbox()
 	RET(!character);
 
 	character->SetRenderBoundingBox(m_RenderBoundingBox? true : false);
+}
+
+
+void CViewer2Dlg::OnBnClickedCheckSkybox()
+{
+	UpdateData();
+	if (m_modelView)
+		m_modelView->ShowSkybox(m_ShowSkyBox? true : false);
+}
+
+
+// Observer Update
+void CViewer2Dlg::Update()
+{
+	// 업데이트 된 모델이 애니메이션 상태라면 AnimationController 를 출력시킨다.
+	if (graphic::cCharacter *character = cController::Get()->GetCharacter())
+	{
+		if (character->GetCurrentAnimation())
+		{
+			CRect wr;
+			GetWindowRect(wr);
+			MoveWindow(wr.left,wr.top,REAL_WINDOW_WIDTH,REAL_WINDOW_HEIGHT+60);
+		}
+	}
 }

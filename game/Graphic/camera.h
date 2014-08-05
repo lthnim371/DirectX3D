@@ -25,10 +25,13 @@ namespace graphic
 		void SetView();
 		void SetHeight(const float number);  //프로그램 테스트용
 		
-		Vector3 GetPosition() const;
-		Vector3 GetDirection() const;
-		Vector3 GetRight() const;
-		Vector3 GetLook() const;
+		const Vector3& GetPosition() const;
+		const Vector3& GetDirection() const;
+		const Vector3& GetRight() const;
+		const Vector3& GetLook() const;
+		const Matrix44& GetView() const;
+		const Matrix44& GetProjection() const;
+		cShader& GetShader();
 
 	private:
 		Vector3 m_pos;
@@ -36,15 +39,22 @@ namespace graphic
 		Vector3 m_up;
 		Vector3 m_right;
 		Vector3 m_dir;
+		Matrix44 m_view;
+		Matrix44 m_proj;
+	
+	//카메라와 별개
 		ID3DXFont* m_font;
+		cShader m_shader;
 	};
 
 //	inline void  cCamera::SetHeight(const float number) { m_pos.y += number; }
 
 	inline cCamera* GetCamera() { return cCamera::Get(); }  //graphic의 함수. this(camera)
-	inline Vector3 cCamera::GetPosition() const { return m_pos; }
-	inline Vector3 cCamera::GetDirection() const { return m_dir; }
-	inline Vector3 cCamera::GetRight() const { return m_right; }
-	inline Vector3 cCamera::GetLook() const { return m_look; }
-
+	inline const Vector3& cCamera::GetPosition() const { return m_pos; }
+	inline const Vector3& cCamera::GetDirection() const { return m_dir; }
+	inline const Vector3& cCamera::GetRight() const { return m_right; }
+	inline const Vector3& cCamera::GetLook() const { return m_look; }
+	inline const Matrix44& cCamera::GetView() const { return m_view; }
+	inline const Matrix44& cCamera::GetProjection() const { return m_proj; }
+	inline cShader& cCamera::GetShader() { return m_shader; }
 }

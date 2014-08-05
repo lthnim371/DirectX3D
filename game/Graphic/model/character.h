@@ -50,8 +50,8 @@ namespace graphic
 //		Vector3 m_prevAniPos;
 		float m_prevAniPos;  //애니 적용시 이동한 값 보관 (추후 vector로 바꾸기로 고려)
 		vector<cBoneNode*> m_characterWeapon;  //캐릭터의 무기bone 주소 보관
-		u_short m_prevLastFrame;
-		u_short m_prevEndFrame;
+//		u_short m_prevLastFrame;
+//		u_short m_prevEndFrame;
 		short m_jumpCnt;
 		bool m_currJumpAttack;
 		bool m_prevJumpAttack;
@@ -65,6 +65,7 @@ namespace graphic
 		int m_hp;
 		int m_sp;
 		cCube* m_characterCube;
+		short m_weaponCubeNumber;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }

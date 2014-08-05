@@ -40,26 +40,27 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-	character->Create( "..\\media\\valle\\valle_character2.dat" );
-	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
+	character->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
+	character->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
 //test
 //	character->SetRenderBoundingBox(true);
 
-	character->SetAnimation( "..\\media\\valle\\valle_backward.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_forward.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_LA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_LLA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_LLLA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_LRA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_LLRA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_RA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_RRA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_RRRA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_jump1.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_jump2.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_jump3.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
-	character->SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 
 //test
 	character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
@@ -192,8 +193,12 @@ void cGameApp::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
 
-		character->Render();
-		character2->Render();
+//		character->Render();
+//		character2->Render();
+
+	//test
+		character->RenderShader( graphic::GetCamera()->GetShader() );
+		character2->RenderShader( graphic::GetCamera()->GetShader() );
 
 	//test
 		graphic::GetCamera()->Render( character->GetHP(), character2->GetHP() );

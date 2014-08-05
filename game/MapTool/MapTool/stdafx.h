@@ -57,9 +57,17 @@
 
 
 
-#include "../Common/common.h"
-using namespace common;
-#include "../Graphic/graphic.h"
-#include "model/Controller.h"
-#include "LoadingDialog.h"
+#pragma comment( lib, "winmm.lib" )
 
+#include "../../Common/common.h"
+#include "../../Graphic/graphic.h"
+#include "../../wxMemMonitorLib/wxMemMonitor.h"
+using namespace common;
+
+
+#include <objidl.h>
+#include <gdiplus.h> 
+#pragma comment( lib, "gdiplus.lib" ) 
+using namespace Gdiplus;
+
+#include "MapController.h"

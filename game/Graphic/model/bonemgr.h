@@ -31,7 +31,7 @@ namespace graphic
 		void SetAniLoop(const bool loop);
 		bool GetAniState() const;
 		void SetPalette(const vector<Matrix44>& palette);
-		vector<cCube>& GetBoundingBox();
+		vector<cCube>& GetCube();
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );
@@ -59,5 +59,5 @@ namespace graphic
 	inline void cBoneMgr::SetAniLoop(const bool loop) { m_aniLoop = loop; }
 //	inline bool cBoneMgr::GetAniState() const { return m_root->GetAniState(); }
 	inline void cBoneMgr::SetPalette(const vector<Matrix44>& palette) { m_palette = palette; }
-	inline vector<cCube>& cBoneMgr::GetBoundingBox() { return m_boundingBox; }
+	inline vector<cCube>& cBoneMgr::GetCube() { return m_boundingBox; }
 }

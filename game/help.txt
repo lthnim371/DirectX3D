@@ -143,3 +143,17 @@ graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거�
 충돌 미완성
 웨폰큐브의 업데이트를 해주어야 한다...해당본매트릭스 * 웨폰매트릭스
 -> character클래스 UpdateWeapon함수
+
+★ update
+충돌 처리 완료
+ : 무기, 캐릭터로 두개의 큐브만 사용
+-> graphic의 bonemgr클래스에 getcube함수 추가
+-> graphic의 character클래스 업데이트 : 캐릭터 cube는 임의의 수치로 적용하였고 무기 cube는 minmax정보가 있는 본의 cube주소 및 인덱스를 가져와 보관함)
+
+스키닝셰이더 적용 완료
+ : 임시로 전역적인 camera클래스에서 shader클래스를 멤버로 소유하고 있음
+-> graphic의 character클래스 업데이트 : mesh render하는 부분을 rendershader 로 바꿈
+-> graphic의 camera클래스 업데이트 : shader에 필요한 변수들 값을 넘김
+
+※ trouble
+스키닝셰이더를 적용할려면 메쉬의 본이 64개 이하인 메쉬만 가능한 거 같음...
