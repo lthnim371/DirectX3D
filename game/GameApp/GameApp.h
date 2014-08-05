@@ -30,4 +30,6 @@ private:
 	bool m_bMouse;
 
 	graphic::cCharacter* character;
+
+	graphic::cCharacter* character2;
 };

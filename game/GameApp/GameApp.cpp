@@ -13,10 +13,13 @@ cGameApp::cGameApp()
 	m_windowRect = r;
 
 	character = new graphic::cCharacter(0);
+	character2 = new graphic::cCharacter(1);
 }
 
 cGameApp::~cGameApp()
 {
+	SAFE_DELETE(character);
+	SAFE_DELETE(character2);
 }
 
 
@@ -39,7 +42,7 @@ bool cGameApp::OnInit()
 
 	character->Create( "..\\media\\valle\\valle_character2.dat" );
 	character->LoadWeapon( "..\\media\\valle\\valle_weapon2.dat" );
-//debug용	
+//test
 //	character->SetRenderBoundingBox(true);
 
 	character->SetAnimation( "..\\media\\valle\\valle_backward.ani" );
@@ -57,6 +60,15 @@ bool cGameApp::OnInit()
 	character->SetAnimation( "..\\media\\valle\\valle_jump3.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_jump_LA.ani" );
 	character->SetAnimation( "..\\media\\valle\\valle_normal.ani" );
+
+//test
+	character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
+	character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );	
+	Matrix44 pos;
+	pos.SetTranslate( Vector3( 0, 0, 500.f) );
+	character2->MultiplyTM( pos );
+
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );
@@ -144,7 +156,18 @@ void cGameApp::OnUpdate(const float elapseT)
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
 	
 	character->Move(elapseT);
+	character2->Move(elapseT);
 //	graphic::GetCamera()->SetPosition( character->GetTM() );
+
+	if( character->GetCubeCheck() == true )
+	{
+		character2->CollisionCheck( *( character->GetWeaponCube() ) );
+	}
+	else if( character2->GetCubeCheck() == true )
+	{
+		character->CollisionCheck( *( character2->GetWeaponCube() ) );
+	}
+
 	graphic::GetCamera()->SetView();
 }
 
@@ -170,6 +193,10 @@ void cGameApp::OnRender(const float elapseT)
 		graphic::GetRenderer()->RenderAxis();
 
 		character->Render();
+		character2->Render();
+
+	//test
+		graphic::GetCamera()->Render( character->GetHP(), character2->GetHP() );
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();

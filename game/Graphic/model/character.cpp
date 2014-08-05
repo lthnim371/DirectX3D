@@ -29,14 +29,14 @@ cCharacter::cCharacter(const int id) :
 	m_currJumpAttack = false;
 	m_prevJumpAttack = false;
 	m_jumpSpeed = 0.f;
-//	m_weaponCube = NULL;
+	m_weaponCube = NULL;
 	m_cubeCheck = false;
 	m_cubeStartFrame = 0;
 	m_cubeMaximumFrame = 0;
 //	m_cubeKeepCnt = 0;
 	m_hp = 100;
 	m_sp = 100;
-//	m_characterCube = new cCube;
+	m_characterCube = NULL;
 }
 
 cCharacter::~cCharacter()
@@ -52,6 +52,8 @@ bool cCharacter::Create(const string &modelName)
 	if(!bResult)
 		return bResult;
 
+	m_characterCube = new cCube( Vector3(-25.f, 0.f, -25.f), Vector3(25.f, 175.f, 25.f) );
+	
 	return bResult;
 }
 
@@ -73,14 +75,17 @@ void cCharacter::LoadWeapon(const string &fileName)
 
 	if (!m_weapon->Create(fileName))
 		return;
+	else if(m_weapon)
+	{
+		FindWeapon();
+		GetWeaponBoundingBox();
+	}
 
 //	GetBoneMgr()->SwapBone( m_weapon->GetBoneMgr() );
 //	m_weapon->SetBoneMgr( GetBoneMgr() );
 
-	if(m_weapon)
-		FindWeapon();
 
-//debug용	
+//test
 //	m_weapon->SetRenderBoundingBox(true);
 }
 
@@ -89,15 +94,33 @@ bool cCharacter::Move(const float elapseTime)
 {	
 	bool bAniState = cModel::Move(elapseTime);  //애니메이션 결과 저장
 
-	/*
-	cBoneNode* foundBone = m_bone->FindBone("Bip01-L-Clavicle");
-	Matrix44 mat = foundBone->GetAccTM();
-	Vector3 up = mat.GetPosition();
-	foundBone = m_bone->FindBone("Bip01-R-Foot");
-	mat = foundBone->GetAccTM();
-	Vector3 down = mat.GetPosition();
-	m_characterCube->SetCube( Vector3(down.x, down.y, -50.f), Vector3(up.x, up.y, -50.f) );
-	*/
+	if(m_characterCube)
+	{
+/*
+		cBoneNode* foundBone = m_bone->FindBone("Bip01-L-Clavicle");
+		Matrix44 mat = foundBone->GetAccTM();
+		Vector3 up = mat.GetPosition();
+		foundBone = m_bone->FindBone("Bip01-R-Thigh");
+		mat = foundBone->GetAccTM();
+		Vector3 down = mat.GetPosition();
+*/
+		if( m_mode == LATTACK || m_mode == RATTACK )
+		{
+			Vector3 camLook( GetCamera()->GetLook() );
+			Matrix44 currPos;
+			currPos = GetTM();
+			currPos._41 = camLook.x;
+			currPos._42 = camLook.y;
+			currPos._43 = camLook.z;
+			m_characterCube->SetTransform( currPos );
+		}
+		else
+			m_characterCube->SetTransform( GetTM() );
+	}
+
+	//	m_boundingBox.SetBoundingBox( Vector3(down.x, down.y, -50.f), Vector3(up.x, up.y, -50.f) );
+//	m_boundingBox.SetTransform( GetTM() );
+
 /*
 	if (m_weapon)// && m_weaponNode)
 	{
@@ -129,7 +152,11 @@ void cCharacter::Render()
 //	if( m_weaponCube != NULL && m_cubeCheck == true )
 //		m_weaponCube->Render( Matrix44() );
 
-	GetCamera()->Render( m_hp, m_sp );
+//test
+	if(m_characterCube)
+		m_characterCube->Render( Matrix44() );
+	if(m_weaponCube)
+		m_weaponCube->Render( Matrix44() );
 }
 
 void cCharacter::RenderShader(cShader &shader)
@@ -552,29 +579,6 @@ void cCharacter::UpdateJump(const bool bAniState)
 		}
 	}
 	
-	if( m_mode != JUMP )
-	{
-		switch(m_mode)
-		{
-			case FRONTJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
-				MultiplyTM( mat );
-			break;
-			case BACKJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
-				MultiplyTM( mat );
-			break;
-			case LEFTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
-				MultiplyTM( mat );
-			break;
-			case RIGHTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
-				MultiplyTM( mat );
-			break;
-		}
-	}
-
 	if( m_jumpCnt == 2 && m_jumpSpeed <= -7.5f )
 	{		
 		switch( m_currJumpAttack )
@@ -600,6 +604,29 @@ void cCharacter::UpdateJump(const bool bAniState)
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
+
+	if( m_mode != JUMP )
+	{
+		switch(m_mode)
+		{
+			case FRONTJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
+				MultiplyTM( mat );
+			break;
+			case BACKJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
+				MultiplyTM( mat );
+			break;
+			case LEFTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
+				MultiplyTM( mat );
+			break;
+			case RIGHTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
+				MultiplyTM( mat );
+			break;
+		}
+	}
 
 	mat = GetTM();
 	float y = mat.GetPosition().y;
@@ -667,4 +694,34 @@ void cCharacter::UpdateWeapon()
 	}
 	
 	m_weapon->SetTM( GetTM() );  //현재 캐릭터 위치로 무기 위치 갱신
+
+
+	m_weaponCube.SetTransform( 
+}
+
+void cCharacter::GetWeaponBoundingBox()
+{
+	vector<cCube>& weapon = m_weapon->GetBoneMgr()->GetBoundingBox();
+
+	for( auto it = weapon.begin(); it != weapon.end(); ++it )
+	{
+		Vector3 min = it->GetMin();
+		Vector3 max = it->GetMin();
+		if( min.IsEmpty() == false || max.IsEmpty() == false )
+			m_weaponCube = &(*it);
+	}
+}
+
+bool cCharacter::CollisionCheck( cCube& sourCube )
+{
+	cBoundingBox dest( *m_characterCube );
+	cBoundingBox sour( sourCube );
+	
+	if( dest.Collision( sour ) )
+	{
+		m_hp -= 10;
+		return true;
+	}
+
+	return false;
 }

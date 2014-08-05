@@ -15,23 +15,27 @@ namespace graphic
 		cCharacter(const int id);
 		virtual ~cCharacter();
 
-		virtual bool Create(const string &modelName) override;
+		bool Create(const string &modelName);
 		void LoadWeapon(const string &fileName);
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
 		virtual void RenderShader(cShader &shader);
 		
-	//추가
+//추가
+	public:
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
+		bool GetCubeCheck() const;
+		bool CollisionCheck( cCube& sourCube );
+		int GetHP() const;
+		cCube* GetWeaponCube() const;
+		cCube* GetCharacterCube() const;
+
+	protected:
 		bool UpdateAttack(const bool bAniState);
 		void UpdateJump(const bool bAniState);
 		void FindWeapon();  //현재 무기bone 이름과 같은 캐릭터의 무기bone 찾기
-		void UpdateWeapon();  //
-
-//		void SetRotation(const float x, const POINT& ptMouse);
-
-	protected:
-		void Test();
+		void UpdateWeapon();  //캐릭터 무기 bone위치를 실시간 공유 받음
+		void GetWeaponBoundingBox();
 
 	private:
 		cModel *m_weapon;
@@ -52,7 +56,7 @@ namespace graphic
 		bool m_currJumpAttack;
 		bool m_prevJumpAttack;
 		float m_jumpSpeed;
-//		cCube* m_weaponCube;
+		cCube* m_weaponCube;
 		u_short m_cubeStartFrame;
 		u_short m_cubeMaximumFrame;
 		bool m_cubeCheck;
@@ -60,6 +64,11 @@ namespace graphic
 //		short m_cubeKeepCnt;
 		int m_hp;
 		int m_sp;
-//		cCube* m_characterCube;
+		cCube* m_characterCube;
 	};
+
+	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }
+	inline int cCharacter::GetHP() const { return m_hp; }
+	inline cCube* cCharacter::GetWeaponCube() const { return m_weaponCube; }
+	inline cCube* cCharacter::GetCharacterCube() const { return m_characterCube; }
 }

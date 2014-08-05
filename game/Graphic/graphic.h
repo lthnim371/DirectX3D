@@ -24,7 +24,7 @@ using namespace common;
 #include "base/line.h"
 #include "base/cube.h"
 #include "base/shader.h"
-#include "base/camera.h"
+//#include "base/camera.h"  //카메라 헤더 중복 에러 발생
 #include "base/skybox.h"
 #include "model/node.h"
 

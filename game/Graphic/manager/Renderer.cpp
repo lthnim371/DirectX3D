@@ -67,7 +67,8 @@ void cRenderer::RenderAxis()
 	RET(!m_pDevice);
 
 	if (m_axis.empty())
-		MakeAxis(500.f,  D3DXCOLOR(1,0,0,0),  D3DXCOLOR(0,1,0,0),  D3DXCOLOR(0,0,1,0), m_axis);
+		MakeAxis(1000.f,  D3DXCOLOR(1,0,0,0),  D3DXCOLOR(0,1,0,0),  D3DXCOLOR(0,0,1,0), m_axis);
+//		MakeAxis(500.f,  D3DXCOLOR(1,0,0,0),  D3DXCOLOR(0,1,0,0),  D3DXCOLOR(0,0,1,0), m_axis);
 
 
 	// 가장 위에 출력되기 위해서 zbuffer 를 끈다.
@@ -115,7 +116,8 @@ void cRenderer::RenderGrid()
 	static int gridSize = 0;
 	if (m_grid.empty())
 	{
-		MakeGrid(50, 20, D3DXCOLOR(0.8f,0.8f,0.8f,1), m_grid);
+//		MakeGrid(50, 20, D3DXCOLOR(0.8f,0.8f,0.8f,1), m_grid);
+		MakeGrid(50, 100, D3DXCOLOR(0.8f,0.8f,0.8f,1), m_grid);
 		gridSize = m_grid.size() / 2;
 	}
 

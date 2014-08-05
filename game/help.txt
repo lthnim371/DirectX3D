@@ -137,3 +137,9 @@ graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거�
 
 캐릭터 점프 및 점프 공격 완료 : 점프높이와 속도의 리얼감은 추후에 수정하도록.
 -> gameapp업데이트 및 graphic의 character클래스에 jump관련 코드 추가 및 updatejump함수 추가
+
+
+140805
+충돌 미완성
+웨폰큐브의 업데이트를 해주어야 한다...해당본매트릭스 * 웨폰매트릭스
+-> character클래스 UpdateWeapon함수
