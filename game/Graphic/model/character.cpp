@@ -696,7 +696,7 @@ void cCharacter::UpdateWeapon()
 	m_weapon->SetTM( GetTM() );  //현재 캐릭터 위치로 무기 위치 갱신
 
 
-	m_weaponCube.SetTransform( 
+//	m_weaponCube.SetTransform( 
 }
 
 void cCharacter::GetWeaponBoundingBox()
