@@ -52,6 +52,12 @@
     <ClInclude Include="math\ray.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="utility\BaseType.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="utility\Utility.h">
+      <Filter>utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -91,6 +97,9 @@
     <ClCompile Include="math\ray.cpp">
       <Filter>math</Filter>
     </ClCompile>
+    <ClCompile Include="utility\BaseType.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="math">
@@ -101,6 +110,9 @@
     </Filter>
     <Filter Include="container">
       <UniqueIdentifier>{5fbca98c-399a-486a-a487-cad45a0e473d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{a85697e4-93e0-40d1-ba6e-74e0ab77bbc0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

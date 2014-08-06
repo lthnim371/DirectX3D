@@ -55,3 +55,4 @@ using namespace common;
 
 //Ãß°¡
 #include "camera.h"
+#include "Image.h"

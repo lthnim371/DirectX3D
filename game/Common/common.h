@@ -62,3 +62,7 @@ using std::wstringstream;
 #include "etc/dbg.h"
 #include "etc/observer.h"
 #include "etc/rect.h"
+
+//Ãß°¡
+#include "utility\BaseType.h"
+#include "utility\Utility.h"

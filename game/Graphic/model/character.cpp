@@ -2,8 +2,8 @@
 //	Vector3 test( GetTM().GetPosition() );
 //	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
 
-#include "stdafx.h"
-//#include "..\stdafx.h"
+//#include "stdafx.h"
+#include "..\stdafx.h"
 #include "character.h"
 
 using namespace graphic;
@@ -38,11 +38,14 @@ cCharacter::cCharacter(const int id) :
 	m_sp = 100;
 	m_characterCube = NULL;
 	m_weaponCubeNumber = 0;
+	m_targetAttackCheck = false;
+//	m_img = new cImage();
 }
 
 cCharacter::~cCharacter()
 {
 	SAFE_DELETE(m_weapon);
+//	SAFE_DELETE(m_img);
 }
 
 
@@ -178,7 +181,9 @@ void cCharacter::RenderShader(cShader &shader)
 
 void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
 {
-	if(m_mode >= JUMP)  //공격 상태 확인
+	if( m_mode == BEHIT )
+		return;
+	else if(m_mode >= JUMP)  //공격 상태 확인
 	{
 		if( (state != LATTACK && state != RATTACK) )  //공격 이외의 키 입력시 무시
 			return;
@@ -387,11 +392,13 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 	if(bAniState == false)
 	{
+		m_cubeCheck = false;
+		m_targetAttackCheck = false;
+
 		if(m_reserveL)
 		{
 			m_bone->SetAniLoop(false);
 			m_reserveL = false;
-			m_cubeCheck = false;
 
 			switch(m_attackCnt)
 			{
@@ -428,7 +435,6 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		{
 			m_bone->SetAniLoop(false);
 			m_reserveR = false;
-			m_cubeCheck = false;
 
 			switch(m_attackCnt)
 			{
@@ -518,7 +524,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 */
 		return true;
 	}
-	else if(bAniState == true)
+	else if( m_targetAttackCheck == false )
 	{
 		short currFrame = m_bone->GetRoot()->GetCurrentFrame();
 				
@@ -665,6 +671,22 @@ void cCharacter::UpdateJump(const bool bAniState)
 	}
 }
 
+void cCharacter::UpdateBeHit(const bool bAniState)
+{
+	Vector3 camRight( GetCamera()->GetRight() );  //카메라 우방벡터 가져오기
+	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0));  //방향벡터 구하기
+	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
+//	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
+	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
+	m_prevAniPos = fAniPos;
+	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
+	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우
+	{
+		//카메라가 바라보는 방향으로 (카메라 look을)차이값만큼 이동
+		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
+	}
+}
+
 void cCharacter::FindWeapon()
 {
 	//무기 bone 정보 가져오기
@@ -722,14 +744,46 @@ void cCharacter::GetWeaponBoundingBox()
 	}
 }
 
-bool cCharacter::CollisionCheck( cCube& sourCube )
+bool cCharacter::CollisionCheck( cCube& sourCube, Matrix44& sourTM )
 {
-	cBoundingBox dest( *m_characterCube );
-	cBoundingBox sour( sourCube );
+	cBoundingBox destBox( *m_characterCube );
+	cBoundingBox sourBox( sourCube );
 	
-	if( dest.Collision( sour ) )
+	if( destBox.Collision( sourBox ) )
 	{
+		/*
+		Vector3 destPos( GetTM().GetPosition() );
+		Vector3 sourPos( sourTM.GetPosition() );
+
+		{
+			m_mode = BEHIT;
+		
+			m_prevAniPos = 0.f;
+			m_attackCnt = 0;
+			m_cubeStartFrame = 0;
+			m_cubeMaximumFrame = 0;
+			m_reserveL = false;
+			m_reserveR = false;
+
+			Vector3 finalPos = GetCamera()->GetLook();
+			Matrix44 mat;
+			mat.SetTranslate( finalPos - destPos );
+			MultiplyTM( mat );
+		}
+		
+		if( destPos.Normal().DotProduct( sourPos.Normal() ) >= 0.f )
+		{
+			m_bone->SetAniLoop(false);
+			SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
+		}
+		else
+		{
+			m_bone->SetAniLoop(false);
+			SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+		}
+		*/
 		m_hp -= 10;
+
 		return true;
 	}
 

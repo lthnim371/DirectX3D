@@ -60,12 +60,20 @@ bool cGameApp::OnInit()
 	character->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
 	character->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
 	character->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
+	character->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
 	character->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 
 //test
 	character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 	character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );	
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
+	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 	Matrix44 pos;
 	pos.SetTranslate( Vector3( 0, 0, 500.f) );
 	character2->MultiplyTM( pos );
@@ -162,11 +170,17 @@ void cGameApp::OnUpdate(const float elapseT)
 
 	if( character->GetCubeCheck() == true )
 	{
-		character2->CollisionCheck( *( character->GetWeaponCube() ) );
+		if( true == character2->CollisionCheck( *(character->GetWeaponCube()) ) )
+		{
+			character->SetAttackSuccess();
+		}
 	}
 	else if( character2->GetCubeCheck() == true )
 	{
-		character->CollisionCheck( *( character2->GetWeaponCube() ) );
+		if ( true == character->CollisionCheck( *(character2->GetWeaponCube()) ) )
+		{
+			character2->SetAttackSuccess();
+		}
 	}
 
 	graphic::GetCamera()->SetView();
@@ -198,7 +212,7 @@ void cGameApp::OnRender(const float elapseT)
 
 	//test
 		character->RenderShader( graphic::GetCamera()->GetShader() );
-		character2->RenderShader( graphic::GetCamera()->GetShader() );
+		character2->RenderShader( graphic::GetCamera()->GetShader() );				
 
 	//test
 		graphic::GetCamera()->Render( character->GetHP(), character2->GetHP() );

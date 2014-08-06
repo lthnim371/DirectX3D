@@ -54,7 +54,7 @@ void cCamera::Render(const int hp, const int sp)
 	::_itoa_s( sp, buff, sizeof(buff), 10 );
 	str.assign("target HP : ");
 	str.append( buff );
-	rect.SetX(900);
+	rect.SetX(800);
 	rect.SetY(740);
 	m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
 		DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );

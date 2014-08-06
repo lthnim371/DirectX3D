@@ -9,7 +9,7 @@ namespace graphic
 		{
 			NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
 			DASH, JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
-			LATTACK, RATTACK,
+			LATTACK, RATTACK, BEHIT,
 		};
 
 		cCharacter(const int id);
@@ -25,14 +25,16 @@ namespace graphic
 	public:
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool GetCubeCheck() const;
-		bool CollisionCheck( cCube& sourCube );
+		bool CollisionCheck( cCube& sourCube, Matrix44& sourTM );
 		int GetHP() const;
 		cCube* GetWeaponCube() const;
 		cCube* GetCharacterCube() const;
+		void SetAttackSuccess();
 
 	protected:
 		bool UpdateAttack(const bool bAniState);
 		void UpdateJump(const bool bAniState);
+		void UpdateBeHit(const bool bAniState);
 		void FindWeapon();  //현재 무기bone 이름과 같은 캐릭터의 무기bone 찾기
 		void UpdateWeapon();  //캐릭터 무기 bone위치를 실시간 공유 받음
 		void GetWeaponBoundingBox();
@@ -66,10 +68,13 @@ namespace graphic
 		int m_sp;
 		cCube* m_characterCube;
 		short m_weaponCubeNumber;
+		bool m_targetAttackCheck;
+	//	cImage* m_img;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }
 	inline int cCharacter::GetHP() const { return m_hp; }
 	inline cCube* cCharacter::GetWeaponCube() const { return m_weaponCube; }
 	inline cCube* cCharacter::GetCharacterCube() const { return m_characterCube; }
+	inline void cCharacter::SetAttackSuccess() { m_cubeCheck = false; m_targetAttackCheck = true; }
 }
