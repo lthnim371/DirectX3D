@@ -25,7 +25,7 @@ namespace graphic
 	public:
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool GetCubeCheck() const;
-		bool CollisionCheck( cCube& sourCube, Matrix44& sourTM );
+		bool CollisionCheck( cCube& sourCube, const Matrix44& sourTM );
 		int GetHP() const;
 		cCube* GetWeaponCube() const;
 		cCube* GetCharacterCube() const;
@@ -70,6 +70,7 @@ namespace graphic
 		short m_weaponCubeNumber;
 		bool m_targetAttackCheck;
 	//	cImage* m_img;
+	//	Image* m_img;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }

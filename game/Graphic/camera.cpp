@@ -88,7 +88,7 @@ void cCamera::SetRotation(const float x, const float y)  //x = 0, y = 0
 //void cCamera::SetRotation(const POINT& ptMouse)
 {
 	{  // rotate Y-Axis
-		Quaternion q( m_up, -x * 0.005f ); 
+		Quaternion q( m_up, x * 0.005f ); 
 		Matrix44 m = q.GetMatrix();
 		Vector3 currDir(m_pos - m_look);
 		currDir *= m;

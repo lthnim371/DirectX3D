@@ -2,8 +2,8 @@
 //	Vector3 test( GetTM().GetPosition() );
 //	dbg::Print( "%f,%f,%f", test.x,test.y,test.z);
 
-//#include "stdafx.h"
-#include "..\stdafx.h"
+#include "stdafx.h"
+//#include "..\stdafx.h"
 #include "character.h"
 
 using namespace graphic;
@@ -212,7 +212,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 
 		case ROTATION:  //캐릭터 회전
 			{
-				Quaternion q( Vector3(0,1,0), -x * 0.005f ); 
+				Quaternion q( Vector3(0,1,0), x * 0.005f ); 
 				Matrix44 m = q.GetMatrix();
 				SetTM( m * GetTM() );  //R * T (이동한 뒤 회전하는걸 방지)
 				GetCamera()->SetPosition( GetTM() );
@@ -744,7 +744,7 @@ void cCharacter::GetWeaponBoundingBox()
 	}
 }
 
-bool cCharacter::CollisionCheck( cCube& sourCube, Matrix44& sourTM )
+bool cCharacter::CollisionCheck( cCube& sourCube, const Matrix44& sourTM )
 {
 	cBoundingBox destBox( *m_characterCube );
 	cBoundingBox sourBox( sourCube );

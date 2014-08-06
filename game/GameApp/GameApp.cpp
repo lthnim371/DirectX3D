@@ -170,14 +170,14 @@ void cGameApp::OnUpdate(const float elapseT)
 
 	if( character->GetCubeCheck() == true )
 	{
-		if( true == character2->CollisionCheck( *(character->GetWeaponCube()) ) )
+		if( true == character2->CollisionCheck( *(character->GetWeaponCube()), character->GetTM() ) )
 		{
 			character->SetAttackSuccess();
 		}
 	}
 	else if( character2->GetCubeCheck() == true )
 	{
-		if ( true == character->CollisionCheck( *(character2->GetWeaponCube()) ) )
+		if ( true == character->CollisionCheck( *(character2->GetWeaponCube()), character2->GetTM() ) )
 		{
 			character2->SetAttackSuccess();
 		}
