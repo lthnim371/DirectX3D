@@ -57,6 +57,7 @@ public:
 	CEditChat m_ChatInput;
 public:
 	afx_msg void OnBnClickedButtonSend();
+	CString m_id;
 };
 
 
@@ -108,6 +109,7 @@ CClientDlg::CClientDlg(CWnd* pParent /*=NULL*/)
 	, m_Port(10000)
 	, m_socket(0)
 	, m_loop(true)
+	, m_id(_T(""))
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -119,6 +121,7 @@ void CClientDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT_PORT, m_Port);
 	DDX_Control(pDX, IDC_LIST_CHAT, m_ChatList);
 	DDX_Control(pDX, IDC_EDIT_CHAT, m_ChatInput);
+	DDX_Text(pDX, IDC_EDIT_ID, m_id);
 }
 
 BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
@@ -216,11 +219,11 @@ void CClientDlg::PacketProcess()
 	FD_ZERO(&readSockets);
 	FD_SET(m_socket, &readSockets);
 
-	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );
+	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );  //서버로부터 패킷이 왔는지 판단 (= peekmessage와 비슷)
 	if (ret != 0 && ret != SOCKET_ERROR)
 	{
 		char buff[ 128];
-		const int result = recv( readSockets.fd_array[ 0], buff, sizeof(buff), 0);
+		const int result = recv( readSockets.fd_array[ 0], buff, sizeof(buff), 0);  //서버로부터 정보를 받는다. 만약 오는 정보가 없으면 계속 기다린다 //readSockets(소켓)가 있으면 어떤 서버 혹은 클라이언트와 연결되었는지 알 수 있다.
 		if (result == SOCKET_ERROR || result == 0) // 받은 패킷사이즈가 0이면 서버와 접속이 끊겼다는 의미다.
 		{
 			m_ChatList.InsertString(m_ChatList.GetCount(), L"서버와 연결이 끊김" );
@@ -228,7 +231,7 @@ void CClientDlg::PacketProcess()
 		}
 		else
 		{
-			ParsePacket(buff);
+			ParsePacket(buff);  //패킷이 왔다면 호출
 		}
 	}
 }
@@ -237,11 +240,16 @@ void CClientDlg::PacketProcess()
 void CClientDlg::ParsePacket(char buff[128])
 {
 	using namespace network;
-	sPacketHeader *header = (sPacketHeader*)buff;
+	sPacketHeader *header = (sPacketHeader*)buff;  //(enum)타입을 받아와서
 
-	switch (header->protocol)
+	switch (header->protocol)  //타입별로 처리
 	{
 	case PROTOCOL::LOGIN:
+		{
+			const sLoginProtocol *protocol = (sLoginProtocol*)buff;
+			const wstring wstr = str2wstr(protocol->name);
+			m_ChatList.InsertString(m_ChatList.GetCount(), wstr.c_str());
+		}
 		break;
 
 	case PROTOCOL::CHATTING:
@@ -273,6 +281,25 @@ void CClientDlg::OnBnClickedButtonConnect()
 	if (network::LaunchClient(ip, m_Port, m_socket))
 	{
 		m_ChatList.InsertString(m_ChatList.GetCount(), L"접속 성공");
+
+		network::sLoginProtocol login;
+		ZeroMemory(&login, sizeof(login));
+		login.header.protocol = network::PROTOCOL::LOGIN;
+		
+		wstring wid = m_id;
+		string str = wstr2str(wid);
+		strcpy_s(login.name, sizeof(login.name), str.c_str());
+
+	//맵핑
+		char buff[ 128];
+		ZeroMemory(buff, sizeof(buff));
+		memcpy(buff, &login, sizeof(login));  //메모리 복사
+		
+		const int result = send(m_socket, buff, sizeof(buff), 0);
+		if (result == INVALID_SOCKET)
+		{	
+			m_ChatList.InsertString(m_ChatList.GetCount(), L"서버와 접속이 끊김");
+		}
 	}
 	else
 	{
@@ -296,9 +323,9 @@ void CClientDlg::OnBnClickedButtonSend()
 	chat.header.protocol = network::PROTOCOL::CHATTING;
 	strcpy_s(chat.msg, sizeof(chat.msg), str.c_str());
 
-	char buff[ 128];
+	char buff[ 128];  //배열 크기는 미리 정해진 약속이어야 한다. 즉, 채우려는 데이터가 적어도 배열크기로 다 채워야한다.
 	ZeroMemory(buff, sizeof(buff));
-	memcpy(buff, &chat, sizeof(chat));
+	memcpy(buff, &chat, sizeof(chat));  //데이터 채우기
 
 	const int result = send(m_socket, buff, sizeof(buff), 0);
 	if (result == INVALID_SOCKET)

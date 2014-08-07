@@ -1,4 +1,7 @@
-﻿
+﻿//resive : 받는 것
+//send : 보내는 것
+
+
 #pragma once
 
 
@@ -18,7 +21,7 @@ namespace network
 	struct sPacketHeader
 	{
 		PROTOCOL::TYPE protocol;
-//		int size;
+//		int size;  //패킷 길이가 어는정도가 되는지 파악하는 용도(필드)
 	};
 
 
@@ -26,7 +29,7 @@ namespace network
 	{
 		sPacketHeader header;
 		char name[ 32];
-		char pass[ 8];
+		//char pass[ 8];
 	};
 
 
