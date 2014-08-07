@@ -1,4 +1,4 @@
-
+ï»¿
 #pragma once
 
 
@@ -14,7 +14,7 @@ namespace network
 		};
 	}
 
-#pragma pack(4)  //°¡·Î ¾È¿¡ ³ÖÀº Å©±â·Î µ¥ÀÌÅÍ¸¦ Á¤·ÄÇÏ°Ú´Ù´Â ÀÇ¹Ì
+#pragma pack(4)  //ê°€ë¡œ ì•ˆì— ë„£ì€ í¬ê¸°ë¡œ ë°ì´í„°ë¥¼ ì •ë ¬í•˜ê² ë‹¤ëŠ” ì˜ë¯¸
 	struct sPacketHeader
 	{
 		PROTOCOL::TYPE protocol;
@@ -35,6 +35,6 @@ namespace network
 		sPacketHeader header;
 		char msg[ 64];
 	};
-#pragma pack()  //³¡³¯¶§ ´Ù½Ã ±âº»À¸·Î µÇµ¹¸®±â
+#pragma pack()  //ëë‚ ë•Œ ë‹¤ì‹œ ê¸°ë³¸ìœ¼ë¡œ ë˜ëŒë¦¬ê¸°
 
 }

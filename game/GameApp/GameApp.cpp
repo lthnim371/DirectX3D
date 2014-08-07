@@ -78,6 +78,14 @@ bool cGameApp::OnInit()
 	pos.SetTranslate( Vector3( 0, 0, 500.f) );
 	character2->MultiplyTM( pos );
 
+	sRect rc;
+	::GetClientRect(m_hWnd, &rc);
+	POINT lt = {rc.left, rc.top};
+	POINT rb = {rc.right, rc.bottom};
+	::ClientToScreen(m_hWnd, &lt);
+	::ClientToScreen(m_hWnd, &rb);
+	rc = sRect(lt.x, lt.y, rb.x, rb.y);
+	::ClipCursor( &rc );
 
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( m_hWnd, &m_currMouse );
@@ -164,23 +172,34 @@ void cGameApp::OnUpdate(const float elapseT)
 {
 //	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
 	
-	character->Move(elapseT);
-	character2->Move(elapseT);
+	bool bAniState = character->Move(elapseT);
+	bool bAniState2 = character2->Move(elapseT);
 //	graphic::GetCamera()->SetPosition( character->GetTM() );
 
 	if( character->GetCubeCheck() == true )
 	{
-		if( true == character2->CollisionCheck( *(character->GetWeaponCube()), character->GetTM() ) )
+		if( true == character2->CollisionCheck( *(character->GetWeaponCube()), graphic::GetCamera()->GetLook() ) )
 		{
 			character->SetAttackSuccess();
 		}
 	}
 	else if( character2->GetCubeCheck() == true )
 	{
-		if ( true == character->CollisionCheck( *(character2->GetWeaponCube()), character2->GetTM() ) )
+		if ( true == character->CollisionCheck( *(character2->GetWeaponCube()), graphic::GetCamera()->GetLook() ) )
 		{
 			character2->SetAttackSuccess();
 		}
+	}
+
+	if( character->GetMode() == character->BEHIT )
+	{
+		if( true == character->CollisionCheck( *(character2->GetCharacterCube()), graphic::GetCamera()->GetLook(), graphic::GetCamera()->GetDirection() ) )
+			character->UpdateBeHit( bAniState, graphic::GetCamera()->GetDirection(), character2->GetAniPosGap()  );
+	}
+	else if( character2->GetMode() == character2->BEHIT )
+	{
+		if( true == character2->CollisionCheck( *(character->GetCharacterCube()), graphic::GetCamera()->GetLook(), graphic::GetCamera()->GetDirection() ) )
+			character2->UpdateBeHit( bAniState2, graphic::GetCamera()->GetDirection(), character->GetAniPosGap() );
 	}
 
 	graphic::GetCamera()->SetView();

@@ -1,4 +1,4 @@
-
+ï»¿
 #include "stdafx.h"
 #include "launcher.h"
 
@@ -12,13 +12,13 @@ using namespace network;
 //------------------------------------------------------------------------
 bool	network::LaunchClient(const std::string &ip, const int port, OUT SOCKET &out)
 {
-	// À©¼Ó ¹öÀüÀ» È®ÀÎ ÇÕ´Ï´Ù.
+	// ìœˆì† ë²„ì „ì„ í™•ì¸ í•©ë‹ˆë‹¤.
 	WORD wVersionRequested = MAKEWORD(1,1);
 	WSADATA wsaData;
 	int nRet = WSAStartup(wVersionRequested, &wsaData);
 	if (wsaData.wVersion != wVersionRequested)
 	{
-		//clog::Error( clog::ERROR_CRITICAL, "À©¼Ó ¹öÀüÀÌ Æ²·È½À´Ï´Ù\n" );
+		//clog::Error( clog::ERROR_CRITICAL, "ìœˆì† ë²„ì „ì´ í‹€ë ¸ìŠµë‹ˆë‹¤\n" );
 		return false;
 	}
 
@@ -30,8 +30,8 @@ bool	network::LaunchClient(const std::string &ip, const int port, OUT SOCKET &ou
 		return false;
 	}
 
-	// TCP/IP ½ºÆ®¸² ¼ÒÄÏÀ» »ı¼ºÇÕ´Ï´Ù.
-	// socket(ÁÖ¼Ò °è¿­, ¼ÒÄÏ ÇüÅÂ, ÇÁ·ÎÅäÄİ
+	// TCP/IP ìŠ¤íŠ¸ë¦¼ ì†Œì¼“ì„ ìƒì„±í•©ë‹ˆë‹¤.
+	// socket(ì£¼ì†Œ ê³„ì—´, ì†Œì¼“ í˜•íƒœ, í”„ë¡œí† ì½œ
 	SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (clientSocket == INVALID_SOCKET)
 	{
@@ -39,14 +39,14 @@ bool	network::LaunchClient(const std::string &ip, const int port, OUT SOCKET &ou
 		return false;
 	}
 
-	// ÁÖ¼Ò ±¸Á¶Ã¼¸¦ Ã¤¿ó´Ï´Ù.
+	// ì£¼ì†Œ êµ¬ì¡°ì²´ë¥¼ ì±„ì›ë‹ˆë‹¤.
 	SOCKADDR_IN saServer;
 	saServer.sin_family = AF_INET;
-	saServer.sin_addr = *((LPIN_ADDR)*lpHostEntry->h_addr_list); // ¼­¹ö ÁÖ¼Ò
+	saServer.sin_addr = *((LPIN_ADDR)*lpHostEntry->h_addr_list); // ì„œë²„ ì£¼ì†Œ
 	saServer.sin_port = htons(port);
 
-	// ¼­¹ö·Î Á¢¼ÓÇÕ´Ï´Ù
-	// connect(¼ÒÄÏ, ¼­¹ö ÁÖ¼Ò, ¼­¹ö ÁÖ¼ÒÀÇ ±æÀÌ
+	// ì„œë²„ë¡œ ì ‘ì†í•©ë‹ˆë‹¤
+	// connect(ì†Œì¼“, ì„œë²„ ì£¼ì†Œ, ì„œë²„ ì£¼ì†Œì˜ ê¸¸ì´
 	nRet = connect(clientSocket, (LPSOCKADDR)&saServer, sizeof(struct sockaddr) );
 	if (nRet == SOCKET_ERROR)
 	{
@@ -63,21 +63,21 @@ bool	network::LaunchClient(const std::string &ip, const int port, OUT SOCKET &ou
 
 
 //------------------------------------------------------------------------
-// ¼­¹ö ½ÃÀÛ
+// ì„œë²„ ì‹œì‘
 //------------------------------------------------------------------------
 bool network::LaunchServer(const int port, OUT SOCKET &out)
 {
-	// À©¼ÓÀ» ½ÃÀÛÇÏ°í ¹öÀüÀ» È®ÀÎÇÕ´Ï´Ù
+	// ìœˆì†ì„ ì‹œì‘í•˜ê³  ë²„ì „ì„ í™•ì¸í•©ë‹ˆë‹¤
 	WORD wVersionRequested = MAKEWORD(1, 1);
 	WSADATA wsaData;
 	int nRet = WSAStartup(wVersionRequested, &wsaData);
 	if (wsaData.wVersion != wVersionRequested)
 	{
-		//clog::Error( clog::ERROR_CRITICAL,  "À©¼Ó ¹öÀüÀÌ Æ²·È½À´Ï´Ù\n" );
+		//clog::Error( clog::ERROR_CRITICAL,  "ìœˆì† ë²„ì „ì´ í‹€ë ¸ìŠµë‹ˆë‹¤\n" );
 		return false;
 	}
 
-	// socket(ÁÖ¼Ò°è¿­, ¼ÒÄÏ Çü½Ä, ÇÁ·ÎÅäÄİ)
+	// socket(ì£¼ì†Œê³„ì—´, ì†Œì¼“ í˜•ì‹, í”„ë¡œí† ì½œ)
 	SOCKET svrSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(svrSocket == INVALID_SOCKET)
 	{
@@ -85,14 +85,14 @@ bool network::LaunchServer(const int port, OUT SOCKET &out)
 		return false;
 	}
 
-	// ÁÖ¼Ò ±¸Á¶Ã¼¸¦ Ã¤¿ó´Ï´Ù.
+	// ì£¼ì†Œ êµ¬ì¡°ì²´ë¥¼ ì±„ì›ë‹ˆë‹¤.
 	SOCKADDR_IN saServer;
 	saServer.sin_family = AF_INET;
-	saServer.sin_addr.s_addr = INADDR_ANY;    // À©¼ÓÀÌ Á¦°øÇÏ°Ô µÓ´Ï´Ù.
-	saServer.sin_port = htons(port);		// ¸í·ÉÁÙ¿¡¼­ ¹ŞÀº Æ÷Æ®¸¦ ³Ö½À´Ï´Ù.
+	saServer.sin_addr.s_addr = INADDR_ANY;    // ìœˆì†ì´ ì œê³µí•˜ê²Œ ë‘¡ë‹ˆë‹¤.
+	saServer.sin_port = htons(port);		// ëª…ë ¹ì¤„ì—ì„œ ë°›ì€ í¬íŠ¸ë¥¼ ë„£ìŠµë‹ˆë‹¤.
 
-	// ¼ÒÄÏ°ú listensocket À» bind(¹­½À) ÇÕ´Ï´Ù.
-	// bind(¼ÒÄÏ, ¼­¹ö ÁÖ¼Ò, ÁÖ¼Ò ±¸Á¶Ã¼ÀÇ ±æÀÌ
+	// ì†Œì¼“ê³¼ listensocket ì„ bind(ë¬¶ìŠµ) í•©ë‹ˆë‹¤.
+	// bind(ì†Œì¼“, ì„œë²„ ì£¼ì†Œ, ì£¼ì†Œ êµ¬ì¡°ì²´ì˜ ê¸¸ì´
 	nRet = bind(svrSocket, (LPSOCKADDR)&saServer, sizeof(struct sockaddr) );
 	if (nRet == SOCKET_ERROR)
 	{
@@ -110,7 +110,7 @@ bool network::LaunchServer(const int port, OUT SOCKET &out)
 		return false;
 	}
 
-	// listen(¿À´Â ¼ÒÄÏ, ¿äÃ» ¼ö¿ë °¡´ÉÇÑ ¿ë·®)
+	// listen(ì˜¤ëŠ” ì†Œì¼“, ìš”ì²­ ìˆ˜ìš© ê°€ëŠ¥í•œ ìš©ëŸ‰)
 	nRet = listen(svrSocket, SOMAXCONN);
 
 	if (nRet == SOCKET_ERROR)

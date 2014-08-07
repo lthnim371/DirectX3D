@@ -1,5 +1,5 @@
-
-// Client.cpp : ÀÀ¿ë ÇÁ·Î±×·¥¿¡ ´ëÇÑ Å¬·¡½º µ¿ÀÛÀ» Á¤ÀÇÇÕ´Ï´Ù.
+ï»¿
+// Client.cpp : ì‘ìš© í”„ë¡œê·¸ë¨ì— ëŒ€í•œ í´ë˜ìŠ¤ ë™ì‘ì„ ì •ì˜í•©ë‹ˆë‹¤.
 //
 
 #include "stdafx.h"
@@ -29,7 +29,7 @@ extern CClientApp theApp;
 class CClientDlg : public CDialogEx
 {
 public:
-	CClientDlg(CWnd* pParent = NULL);	// Ç¥ÁØ »ı¼ºÀÚÀÔ´Ï´Ù.
+	CClientDlg(CWnd* pParent = NULL);	// í‘œì¤€ ìƒì„±ìì…ë‹ˆë‹¤.
 	enum { IDD = IDD_CLIENT_DIALOG };
 
 	SOCKET m_socket;
@@ -38,13 +38,13 @@ public:
 protected:
 	void PacketProcess();
 	void ParsePacket(char buff[128]);
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Áö¿øÀÔ´Ï´Ù.
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV ì§€ì›ì…ë‹ˆë‹¤.
 
 protected:
 	HICON m_hIcon;
 	bool m_loop;
 
-	// »ı¼ºµÈ ¸Ş½ÃÁö ¸Ê ÇÔ¼ö
+	// ìƒì„±ëœ ë©”ì‹œì§€ ë§µ í•¨ìˆ˜
 	virtual BOOL OnInitDialog();
 	DECLARE_MESSAGE_MAP()
 public:
@@ -71,7 +71,7 @@ BEGIN_MESSAGE_MAP(CClientApp, CWinApp)
 END_MESSAGE_MAP()
 
 
-// CClientApp »ı¼º
+// CClientApp ìƒì„±
 
 CClientApp::CClientApp()
 {
@@ -129,22 +129,22 @@ BEGIN_MESSAGE_MAP(CClientDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CClientDlg ¸Ş½ÃÁö Ã³¸®±â
+// CClientDlg ë©”ì‹œì§€ ì²˜ë¦¬ê¸°
 
 BOOL CClientDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
-	SetIcon(m_hIcon, TRUE);			// Å« ¾ÆÀÌÄÜÀ» ¼³Á¤ÇÕ´Ï´Ù.
-	SetIcon(m_hIcon, FALSE);		// ÀÛÀº ¾ÆÀÌÄÜÀ» ¼³Á¤ÇÕ´Ï´Ù.
+	SetIcon(m_hIcon, TRUE);			// í° ì•„ì´ì½˜ì„ ì„¤ì •í•©ë‹ˆë‹¤.
+	SetIcon(m_hIcon, FALSE);		// ì‘ì€ ì•„ì´ì½˜ì„ ì„¤ì •í•©ë‹ˆë‹¤.
 	m_Ip.SetAddress(127, 0, 0, 1);
 
-	return TRUE;  // Æ÷Ä¿½º¸¦ ÄÁÆ®·Ñ¿¡ ¼³Á¤ÇÏÁö ¾ÊÀ¸¸é TRUE¸¦ ¹İÈ¯ÇÕ´Ï´Ù.
+	return TRUE;  // í¬ì»¤ìŠ¤ë¥¼ ì»¨íŠ¸ë¡¤ì— ì„¤ì •í•˜ì§€ ì•Šìœ¼ë©´ TRUEë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.
 }
 
 
 //------------------------------------------------------------------------
-// ¸ÖÆ¼¹ÙÀÌÆ® ¹®ÀÚ¸¦ À¯´ÏÄÚµå·Î º¯È¯
+// ë©€í‹°ë°”ì´íŠ¸ ë¬¸ìë¥¼ ìœ ë‹ˆì½”ë“œë¡œ ë³€í™˜
 //------------------------------------------------------------------------
 std::wstring str2wstr(const std::string &str)
 {
@@ -159,7 +159,7 @@ std::wstring str2wstr(const std::string &str)
 }
 
 //------------------------------------------------------------------------
-// À¯´ÏÄÚµå¸¦ ¸ÖÆ¼¹ÙÀÌÆ® ¹®ÀÚ·Î º¯È¯
+// ìœ ë‹ˆì½”ë“œë¥¼ ë©€í‹°ë°”ì´íŠ¸ ë¬¸ìë¡œ ë³€í™˜
 //------------------------------------------------------------------------
 std::string wstr2str(const std::wstring &wstr)
 {
@@ -188,18 +188,18 @@ void CClientDlg::OnBnClickedCancel()
 
 void CClientDlg::MainLoop()
 {
-	//¸Ş½ÃÁö ±¸Á¶Ã¼
+	//ë©”ì‹œì§€ êµ¬ì¡°ì²´
 	MSG msg;		
 	ZeroMemory( &msg, sizeof( MSG ) );
 
 	while (m_loop)
 	{
-		//PeekMessage ´Â ¸Ş½ÃÁö Å¥¿¡ ¸Ş½ÃÁö°¡ ¾ø¾îµµ ÇÁ·Î±×·¥ÀÌ ¸ØÃß±â ¾Ê°í ÁøÇàÀÌ µÈ´Ù.
-		//ÀÌ¶§ ¸Ş½ÃÁöÅ¥¿¡ ¸Ş½ÃÁö°¡ ¾øÀ¸¸é false °¡ ¸®ÅÏµÇ°í ¸Ş½ÃÁö°¡ ÀÖÀ¸¸é true °¡ ¸®ÅÏÀÌµÈ´Ù.
+		//PeekMessage ëŠ” ë©”ì‹œì§€ íì— ë©”ì‹œì§€ê°€ ì—†ì–´ë„ í”„ë¡œê·¸ë¨ì´ ë©ˆì¶”ê¸° ì•Šê³  ì§„í–‰ì´ ëœë‹¤.
+		//ì´ë•Œ ë©”ì‹œì§€íì— ë©”ì‹œì§€ê°€ ì—†ìœ¼ë©´ false ê°€ ë¦¬í„´ë˜ê³  ë©”ì‹œì§€ê°€ ìˆìœ¼ë©´ true ê°€ ë¦¬í„´ì´ëœë‹¤.
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
-			TranslateMessage( &msg ); //´­¸° Å°º¸µå ÀÇ ¹®ÀÚ¸¦ ¹ø¿ªÇÏ¿© WM_CHAR ¸Ş½ÃÁö¸¦ ¹ß»ı½ÃÅ²´Ù.
-			DispatchMessage( &msg );  //¹Ş¾Æ¿Â ¸Ş½ÃÁö Á¤º¸·Î À©µµ¿ì ÇÁ·Î½ÃÁ® ÇÔ¼ö¸¦ ½ÇÇà½ÃÅ²´Ù.
+			TranslateMessage( &msg ); //ëˆŒë¦° í‚¤ë³´ë“œ ì˜ ë¬¸ìë¥¼ ë²ˆì—­í•˜ì—¬ WM_CHAR ë©”ì‹œì§€ë¥¼ ë°œìƒì‹œí‚¨ë‹¤.
+			DispatchMessage( &msg );  //ë°›ì•„ì˜¨ ë©”ì‹œì§€ ì •ë³´ë¡œ ìœˆë„ìš° í”„ë¡œì‹œì ¸ í•¨ìˆ˜ë¥¼ ì‹¤í–‰ì‹œí‚¨ë‹¤.
 		}
 		else
 		{
@@ -221,9 +221,9 @@ void CClientDlg::PacketProcess()
 	{
 		char buff[ 128];
 		const int result = recv( readSockets.fd_array[ 0], buff, sizeof(buff), 0);
-		if (result == SOCKET_ERROR || result == 0) // ¹ŞÀº ÆĞÅ¶»çÀÌÁî°¡ 0ÀÌ¸é ¼­¹ö¿Í Á¢¼ÓÀÌ ²÷°å´Ù´Â ÀÇ¹Ì´Ù.
+		if (result == SOCKET_ERROR || result == 0) // ë°›ì€ íŒ¨í‚·ì‚¬ì´ì¦ˆê°€ 0ì´ë©´ ì„œë²„ì™€ ì ‘ì†ì´ ëŠê²¼ë‹¤ëŠ” ì˜ë¯¸ë‹¤.
 		{
-			m_ChatList.InsertString(m_ChatList.GetCount(), L"¼­¹ö¿Í ¿¬°áÀÌ ²÷±è" );
+			m_ChatList.InsertString(m_ChatList.GetCount(), L"ì„œë²„ì™€ ì—°ê²°ì´ ëŠê¹€" );
 			closesocket(m_socket);
 		}
 		else
@@ -272,11 +272,11 @@ void CClientDlg::OnBnClickedButtonConnect()
 	
 	if (network::LaunchClient(ip, m_Port, m_socket))
 	{
-		m_ChatList.InsertString(m_ChatList.GetCount(), L"Á¢¼Ó ¼º°ø");
+		m_ChatList.InsertString(m_ChatList.GetCount(), L"ì ‘ì† ì„±ê³µ");
 	}
 	else
 	{
-		m_ChatList.InsertString(m_ChatList.GetCount(), L"Á¢¼Ó ½ÇÆĞ");
+		m_ChatList.InsertString(m_ChatList.GetCount(), L"ì ‘ì† ì‹¤íŒ¨");
 	}
 }
 
@@ -303,6 +303,6 @@ void CClientDlg::OnBnClickedButtonSend()
 	const int result = send(m_socket, buff, sizeof(buff), 0);
 	if (result == INVALID_SOCKET)
 	{	
-		m_ChatList.InsertString(m_ChatList.GetCount(), L"¼­¹ö¿Í Á¢¼ÓÀÌ ²÷±è");
+		m_ChatList.InsertString(m_ChatList.GetCount(), L"ì„œë²„ì™€ ì ‘ì†ì´ ëŠê¹€");
 	}
 }

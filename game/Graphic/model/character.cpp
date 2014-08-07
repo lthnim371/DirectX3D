@@ -24,6 +24,8 @@ cCharacter::cCharacter(const int id) :
 //	m_countL = 0;
 //	m_countR = 0;
 	m_mode = NORMAL;
+	m_aniPosGap = 0.f;
+	m_prevAniPos = 0.f;
 //	m_prevLastFrame = 0;
 //	m_prevEndFrame = 0;
 	m_currJumpAttack = false;
@@ -39,13 +41,11 @@ cCharacter::cCharacter(const int id) :
 	m_characterCube = NULL;
 	m_weaponCubeNumber = 0;
 	m_targetAttackCheck = false;
-//	m_img = new cImage();
 }
 
 cCharacter::~cCharacter()
 {
 	SAFE_DELETE(m_weapon);
-//	SAFE_DELETE(m_img);
 }
 
 
@@ -56,7 +56,7 @@ bool cCharacter::Create(const string &modelName)
 	if(!bResult)
 		return bResult;
 
-	m_characterCube = new cCube( Vector3(-25.f, 0.f, -25.f), Vector3(25.f, 175.f, 25.f) );
+	m_characterCube = new cCube( Vector3(-35.f, 0.f, -35.f), Vector3(35.f, 175.f, 35.f) );
 //	SetRenderMesh(false);
 
 	return bResult;
@@ -139,12 +139,18 @@ bool cCharacter::Move(const float elapseTime)
 	if(m_mode == LATTACK || m_mode == RATTACK)  //공격 상태 확인
 		UpdateAttack(bAniState);
 	else if(m_mode >= JUMP && m_mode <= RIGHTJUMP)
-		UpdateJump(bAniState);
+		UpdateJump(bAniState, elapseTime);
+	else if(m_mode == BEHIT && bAniState == false)
+	{
+		m_mode = NORMAL;
+		m_bone->SetAniLoop(true);
+		SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+	}
 
 	if(m_weapon)
 		UpdateWeapon();
 
-	return true;
+	return bAniState;
 }
 
 
@@ -362,7 +368,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = state;
 				m_jumpCnt++;
 
-				m_jumpSpeed = 10.f;
+				m_jumpSpeed = JUMPSPEED;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
 		//	mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
@@ -379,15 +385,15 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 {
 	Vector3 camRight( GetCamera()->GetRight() );  //카메라 우방벡터 가져오기
 	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0));  //방향벡터 구하기
-	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
+	float fCurrAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
 //	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
-	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
-	m_prevAniPos = fAniPos;
-	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
-	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우
+	m_aniPosGap = fCurrAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
+	m_prevAniPos = fCurrAniPos;
+	m_aniPosGap = ::fabs(m_aniPosGap);  //절대값으로 변환하여
+	if( m_aniPosGap > MATH_EPSILON )  //값의 차이가 있을경우
 	{
 		//카메라가 바라보는 방향으로 (카메라 look을)차이값만큼 이동
-		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
+		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * m_aniPosGap );
 	}
 
 	if(bAniState == false)
@@ -551,7 +557,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 	return false;
 }
 
-void cCharacter::UpdateJump(const bool bAniState)
+void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 {
 	Vector3 camDir( GetCamera()->GetDirection().Normal() );
 	Vector3 camRight( GetCamera()->GetRight() );
@@ -563,9 +569,12 @@ void cCharacter::UpdateJump(const bool bAniState)
 		{
 			m_currJumpAttack = false;
 			m_prevJumpAttack = true;			
-			m_bone->SetAniLoop(true);
-			if(m_jumpSpeed > -7.5f)
+		//	if(m_jumpSpeed > -7.5f)
+			if( GetTM().GetPosition().y > 30.f )
+			{
+				m_bone->SetAniLoop(true);
 				SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
+			}
 		}
 		else if( m_jumpCnt == 1)
 		{
@@ -593,7 +602,8 @@ void cCharacter::UpdateJump(const bool bAniState)
 		}
 	}
 	
-	if( m_jumpCnt == 2 && m_jumpSpeed <= -7.5f )
+	if( m_jumpCnt == 2 && //m_jumpSpeed <= -7.5f )
+		m_jumpSpeed <= -7.5f )
 	{		
 		switch( m_currJumpAttack )
 		{
@@ -610,11 +620,12 @@ void cCharacter::UpdateJump(const bool bAniState)
 				if(y <= 10.f)
 					return;
 				else if(y > 10.f)
-					m_jumpSpeed += 0.2f;
+					m_jumpSpeed += elapseTime;
 			break;
 		}
 	}
-	m_jumpSpeed -= 0.2f;
+//	m_jumpSpeed -= 0.2f;
+	m_jumpSpeed -= ( 0.2f + elapseTime );
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
@@ -671,20 +682,29 @@ void cCharacter::UpdateJump(const bool bAniState)
 	}
 }
 
-void cCharacter::UpdateBeHit(const bool bAniState)
+void cCharacter::UpdateBeHit(const bool bAniState, const Vector3& sourDir, const float fAniPosGap)
 {
-	Vector3 camRight( GetCamera()->GetRight() );  //카메라 우방벡터 가져오기
-	Vector3 camDir = camRight.CrossProduct(Vector3(0,1,0));  //방향벡터 구하기
-	float fAniPos = (m_bone->GetPalette()[0]).GetPosition().z;  //현재 애니 동작의 이동한 값 가져오기
-//	float fAniPos = ((m_bone->GetRoot())->GetAccTM()).GetPosition().z;  //root의 accTM을 이용해도 될듯싶다..
-	float fCurrPos = fAniPos - m_prevAniPos;  //중첩되는 경우를 방지하고자 이전 값과 동일한지 판단
-	m_prevAniPos = fAniPos;
-	fCurrPos = ::fabs(fCurrPos);  //절대값으로 변환하여
-	if( fCurrPos > MATH_EPSILON )  //값의 차이가 있을경우
+	Matrix44 mat;
+	Vector3 newSourDir( Vector3(sourDir.x, 0.f, sourDir.z) );
+	mat.SetTranslate( newSourDir.Normal() * fAniPosGap );
+	MultiplyTM( mat );
+
+	if(m_weapon)
+		m_weapon->SetTM( GetTM() );
+//		UpdateWeapon();
+
+/*
+	if( bAniState == false )
 	{
-		//카메라가 바라보는 방향으로 (카메라 look을)차이값만큼 이동
-		GetCamera()->SetTranslation( Vector3( camDir.x, 0.f, camDir.z ) * fCurrPos );
+		m_mode = NORMAL;
+		m_bone->SetAniLoop(true);
+		SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 	}
+	else if( bAniState == true )
+	{
+
+	}
+*/	
 }
 
 void cCharacter::FindWeapon()
@@ -744,46 +764,65 @@ void cCharacter::GetWeaponBoundingBox()
 	}
 }
 
-bool cCharacter::CollisionCheck( cCube& sourCube, const Matrix44& sourTM )
+bool cCharacter::CollisionCheck( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
 {
+	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
+	Vector3 destPos( GetTM().GetPosition() );
+
+	if( m_mode == BEHIT )
+	{
+		Vector3 distanceDir( destPos - sourPos );
+		Vector3 newSourDir( sourDir.x, 0.f, sourDir.z );
+		if( distanceDir.Normal().DotProduct( newSourDir.Normal() ) < 0.8f)
+			return false;
+	}
+
 	cBoundingBox destBox( *m_characterCube );
 	cBoundingBox sourBox( sourCube );
 	
 	if( destBox.Collision( sourBox ) )
 	{
-		/*
-		Vector3 destPos( GetTM().GetPosition() );
-		Vector3 sourPos( sourTM.GetPosition() );
-
-		{
+		if( m_mode != BEHIT )
+		{  //원래 하던 동작과 관련된 변수들 초기화
 			m_mode = BEHIT;
 		
 			m_prevAniPos = 0.f;
+			m_aniPosGap = 0.f;
 			m_attackCnt = 0;
+			m_jumpCnt = 0;
+			m_currJumpAttack = 0;
+			m_prevJumpAttack = 0;
+		//	m_jumpSpeed 
 			m_cubeStartFrame = 0;
 			m_cubeMaximumFrame = 0;
 			m_reserveL = false;
 			m_reserveR = false;
+			m_cubeCheck = false;
 
-			Vector3 finalPos = GetCamera()->GetLook();
-			Matrix44 mat;
-			mat.SetTranslate( finalPos - destPos );
-			MultiplyTM( mat );
+//			Vector3 finalPos = GetCamera()->GetLook();
+		//	Matrix44 mat;
+		//	mat.SetTranslate( sourPos - destPos );
+		//	MultiplyTM( mat );
+
+	//		Vector3 sourPos( sourTM.GetPosition() );
+						
+			Vector3 distanceDir( sourPos - destPos ); 
+		
+			m_bone->SetAniLoop(false);
+			float test = MyDir.DotProduct( distanceDir.Normal() );
+	//		if( destPos.Normal().DotProduct( sourPos.Normal() ) >= 0.f )
+			if( test >= 0.f )
+			{	
+				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
+			}
+			else
+			{
+				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+			}
+		
+			m_hp -= 10;
 		}
 		
-		if( destPos.Normal().DotProduct( sourPos.Normal() ) >= 0.f )
-		{
-			m_bone->SetAniLoop(false);
-			SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-		}
-		else
-		{
-			m_bone->SetAniLoop(false);
-			SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-		}
-		*/
-		m_hp -= 10;
-
 		return true;
 	}
 

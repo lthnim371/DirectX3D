@@ -1,4 +1,4 @@
-// EditChat.cpp : ±¸Çö ÆÄÀÏÀÔ´Ï´Ù.
+ï»¿// EditChat.cpp : êµ¬í˜„ íŒŒì¼ì…ë‹ˆë‹¤.
 //
 
 #include "stdafx.h"
@@ -21,7 +21,7 @@ END_MESSAGE_MAP()
 
 
 
-// CEditChat ¸Ş½ÃÁö Ã³¸®±âÀÔ´Ï´Ù.
+// CEditChat ë©”ì‹œì§€ ì²˜ë¦¬ê¸°ì…ë‹ˆë‹¤.
 BOOL CEditChat::PreTranslateMessage(MSG* pMsg)
 {
 	if (WM_KEYDOWN == pMsg->message)
