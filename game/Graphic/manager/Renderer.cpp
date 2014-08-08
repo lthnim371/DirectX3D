@@ -99,7 +99,7 @@ void cRenderer::RenderFPS()
 		DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
 	
 	char camY[16];
-	::itoa( GetCamera()->GetPosition().y, camY, 10 );
+	::itoa( (int)GetCamera()->GetPosition().y, camY, 10 );
 //	::_gcvt_s(camY, sizeof(camY), GetCamera()->GetPosition().y, 1);
 //	::strcat_s(buff, _countof(buff), camY);
 	string str("camHeight : ");

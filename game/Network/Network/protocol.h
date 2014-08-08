@@ -29,6 +29,8 @@ namespace network
 	{
 		sPacketHeader header1;
 		sPacketHeader header2;
+	//	PROTOCOL::TYPE header1;
+	//	PROTOCOL::TYPE header2;
 		int nId;
 		POINT ptMouse;
 

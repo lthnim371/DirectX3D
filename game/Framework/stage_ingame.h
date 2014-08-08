@@ -1,7 +1,11 @@
 #pragma once
 
+//#include "../Network/Network/network.h"
+//using namespace network;
+
 namespace framework
 {
+	
 	class cStage_Ingame : public cStage
 	{
 	public:
@@ -17,14 +21,22 @@ namespace framework
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;
 
+	protected:
+		bool PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse);
+	//	bool PacketSend(const int nState1, const int nState2, const POINT ptMouse);
+		bool PacketReceive();
+
 	private:
 		POINT m_currMouse;
 		POINT m_prevMouse;
 //		bool m_bMouse;
+		float m_elapseTime;
 
 		graphic::cCharacter* character1;
 		graphic::cCharacter* character2;
-
+		
+		bool m_access;
 		short m_id;
+		network::InfoProtocol m_packetInfo;
 	};
 }

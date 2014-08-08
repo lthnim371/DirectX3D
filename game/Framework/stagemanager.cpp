@@ -14,6 +14,11 @@ cStageMgr::cStageMgr()
 
 	m_stage = pMain;
 	m_currentStage = MAIN;
+
+	m_socket = 0;
+//	m_ip.SetAddress(192,168,168,101);
+	m_ip = "192.168.168.101";
+	m_port = 10000;
 }
 
 cStageMgr::~cStageMgr()
@@ -25,6 +30,11 @@ cStageMgr::~cStageMgr()
 	}
 }
 
+void cStageMgr::Release()
+{
+	closesocket(m_socket);
+}
+
 cStage* cStageMgr::FindStage(const int nId)
 {
 	auto it = m_list.find(nId);
@@ -33,4 +43,24 @@ cStage* cStageMgr::FindStage(const int nId)
 		return NULL;
 
 	return it->second;
+}
+
+bool cStageMgr::SetSocket()
+{
+	/*
+	DWORD address;
+	m_ip.GetAddress(address);
+
+	std::stringstream ss;
+	ss << ((address & 0xff000000) >> 24) << "." 
+		<< ((address & 0x00ff0000) >> 16) << "." 
+		<< ((address & 0x0000ff00) >> 8) << "." 
+		<< (address & 0x000000ff);
+	
+	const string ip = ss.str();
+	*/
+	if ( false == network::LaunchClient( m_ip, m_port, m_socket ) )
+		return false;
+
+	return true;
 }

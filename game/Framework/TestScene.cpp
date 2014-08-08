@@ -15,7 +15,6 @@ cTestScene::~cTestScene()
 
 }
 
-
 void cTestScene::Button1Click(framework::cEvent &event)
 {
 	GetStageMgr()->SetStage( GetStageMgr()->SELECT );
@@ -24,12 +23,18 @@ void cTestScene::Button1Click(framework::cEvent &event)
 
 void cTestScene::Button2Click(framework::cEvent &event)
 {
+	if( false == GetStageMgr()->SetSocket() )
+		return;
+
 	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
 	GetStageMgr()->GetStage()->Init(0);
 }
 
 void cTestScene::Button3Click(framework::cEvent &event)
 {
+	if( false == GetStageMgr()->SetSocket() )
+		return;
+
 	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
 	GetStageMgr()->GetStage()->Init(1);
 }

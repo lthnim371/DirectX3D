@@ -14,5 +14,7 @@ namespace framework
 	//select
 		void Button2Click(framework::cEvent &event);
 		void Button3Click(framework::cEvent &event);
+
+	private:
 	};
 }
