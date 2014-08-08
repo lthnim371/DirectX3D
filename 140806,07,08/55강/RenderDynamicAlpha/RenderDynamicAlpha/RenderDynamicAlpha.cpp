@@ -297,8 +297,8 @@ void Render(int timeDelta)
 
 
 		// 첫 번째 이미지를 알파이미지로, 두 번째 이미지를 원본 이미지로 쓴다.
-		g_pDevice->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );
-		g_pDevice->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, 0 );
+		g_pDevice->SetTextureStageState( 0, D3DTSS_TEXCOORDINDEX, 0 );  //1번째 스테이지는 디폴트가 0이지만
+		g_pDevice->SetTextureStageState( 1, D3DTSS_TEXCOORDINDEX, 0 );  //2번째 스테이지는 디폴트가 0이 아니므로 꼭 0으로 셋팅해줘야한다.
 
 		g_pDevice->SetTextureStageState( 0, D3DTSS_ALPHAOP,   D3DTOP_SELECTARG1 );
 		g_pDevice->SetTextureStageState( 0, D3DTSS_ALPHAARG1, D3DTA_TEXTURE );

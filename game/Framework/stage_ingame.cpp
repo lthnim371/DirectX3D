@@ -20,10 +20,7 @@ void cStage_Ingame::Init(const int nId)
 	character2 = new graphic::cCharacter(1);
 	m_id = nId;
 
-	switch(nId)
-	{
-		case 0:
-			{
+			//character1
 				character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 				character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
 			//test
@@ -56,11 +53,8 @@ void cStage_Ingame::Init(const int nId)
 				pos.SetTranslate( Vector3( 0, 0, -5000.f) );
 				character1->MultiplyTM( pos);
 				graphic::GetCamera()->SetPosition( character1->GetTM() );
-			}
-		break;
 
-		case 1:
-			{
+			//character2
 				character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 				character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
 			//test
@@ -93,9 +87,7 @@ void cStage_Ingame::Init(const int nId)
 				pos.SetTranslate( Vector3( 0, 0, 5000.f) );
 				character2->MultiplyTM( pos);
 				graphic::GetCamera()->SetPosition( character2->GetTM() );
-			}
-		break;
-	}
+
 	
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
@@ -104,7 +96,9 @@ void cStage_Ingame::Init(const int nId)
 //void cStage_Ingame::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Input(const float elapseTime)
 {
-	graphic::cCharacter* pMe = ( m_id == 0 ? character1 : character2 );
+	POINT ptMouse;
+	int nState1 = 0;
+	int nState2 = 0;
 
 	m_prevMouse = m_currMouse;
 	::GetCursorPos( &m_currMouse );
@@ -112,12 +106,12 @@ void cStage_Ingame::Input(const float elapseTime)
 	if( m_currMouse.x != m_prevMouse.x || m_currMouse.y != m_prevMouse.y )
 	{
 		//character1->Action( character1->ROTATION, m_currMouse.x );
-		POINT ptMouse;
 		ptMouse.x = m_currMouse.x - m_prevMouse.x;
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
 	//	character1->Update( character1->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
-		pMe->Update( pMe->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
-	}	
+	//	pMe->Update( pMe->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
+		nState1 = graphic::cCharacter::ROTATION;
+	}
 	
 	//프로그램 테스트용
 //	else if( InputMgr->isOnceKeyDown('1') )
@@ -132,7 +126,8 @@ void cStage_Ingame::Input(const float elapseTime)
 
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
-		pMe->Update( pMe->LATTACK );
+		nState2 = graphic::cCharacter::LATTACK;
+	//	pMe->Update( pMe->LATTACK );
 	//	character1->Update( character1->LATTACK );
 	}
 	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
@@ -194,14 +189,102 @@ void cStage_Ingame::Input(const float elapseTime)
 //void cStage_Ingame::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Update(const float elapseTime)
 {
-	//	graphic::GetRenderer()->Update(elapseT);  //fps 업데이트
+	graphic::cCharacter* pMe = ( m_id == 0 ? character1 : character2 );
 	
-	bool bAniState = character1->Move(elapseTime);
-	bool bAniState2 = character2->Move(elapseTime);
+	/*
+	m_prevMouse = m_currMouse;
+	::GetCursorPos( &m_currMouse );
+	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
+	if( m_currMouse.x != m_prevMouse.x || m_currMouse.y != m_prevMouse.y )
+	{
+		//character1->Action( character1->ROTATION, m_currMouse.x );
+		POINT ptMouse;
+		ptMouse.x = m_currMouse.x - m_prevMouse.x;
+		ptMouse.y = m_currMouse.y - m_prevMouse.y;
+		//	character1->Update( character1->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
+		pMe->Update( pMe->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
+	}
+	*/
+	
+	/*
+	if( InputMgr->isOnceKeyDown('1') )
+	{
+		graphic::GetCamera()->SetHeight(-10.f);
+	}
+	else if( InputMgr->isOnceKeyDown('2') )
+	{
+		graphic::GetCamera()->SetHeight(10.f);
+	}
+
+	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
+	{
+		pMe->Update( pMe->LATTACK );
+		//	character1->Update( character1->LATTACK );
+	}
+	else if( InputMgr->isOnceKeyDown( VK_RBUTTON ) )
+	{
+		pMe->Update( pMe->RATTACK );
+		//	character1->Update( character1->RATTACK );
+	}
+	else if( InputMgr->isStayKey('W') )
+	{	
+		if( InputMgr->isStayKey(VK_SHIFT) )
+			pMe->Update( pMe->DASH );
+		//	character1->Update( character1->DASH );
+		else if( InputMgr->isOnceKeyDown(VK_SPACE) )
+			pMe->Update( pMe->FRONTJUMP );
+		//	character1->Update( character1->FRONTJUMP );
+		else
+			pMe->Update( pMe->FORWARD );
+		//	character1->Update( character1->FORWARD );
+	}
+	else if( InputMgr->isStayKey('S') )
+	{	
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
+			pMe->Update( pMe->BACKJUMP );
+		//	character1->Update( character1->BACKJUMP );
+		else
+			pMe->Update( pMe->BACKWARD );
+		//	character1->Update( character1->BACKWARD );
+	}
+	else if( InputMgr->isStayKey('A') )
+	{	
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
+			pMe->Update( pMe->LEFTJUMP );
+		//	character1->Update( character1->LEFTJUMP );
+		else
+			pMe->Update( pMe->LEFTWARD );
+		//	character1->Update( character1->LEFTWARD );
+	}
+	else if( InputMgr->isStayKey('D') )
+	{	
+		if( InputMgr->isOnceKeyDown(VK_SPACE) )
+			pMe->Update( pMe->RIGHTJUMP );
+		//	character1->Update( character1->RIGHTJUMP );
+		else
+			pMe->Update( pMe->RIGHTWARD );
+		//	character1->Update( character1->RIGHTWARD );
+	}
+	else if( InputMgr->isOnceKeyDown(VK_SPACE) )
+	{	
+		pMe->Update( pMe->JUMP );
+		//	character1->Update( character1->JUMP );
+	}
+	else
+	{
+		pMe->Update( pMe->NORMAL );
+		//	character1->Update( character1->NORMAL );
+	}
+	*/
+
+	bool bAniState = pMe->Move(elapseTime);
+
+//	bool bAniState = character1->Move(elapseTime);
+//	bool bAniState2 = character2->Move(elapseTime);
 //	graphic::GetCamera()->SetPosition( character1->GetTM() );
 
-	if( character1->GetCharacterCube() != NULL && character2->GetCharacterCube() != NULL )
-	{
+	
+	
 		if( character1->GetCubeCheck() == true )
 		{
 			if( true == character2->CollisionCheck( *(character1->GetWeaponCube()), graphic::GetCamera()->GetLook() ) )
@@ -227,7 +310,7 @@ void cStage_Ingame::Update(const float elapseTime)
 			if( true == character2->CollisionCheck( *(character1->GetCharacterCube()), graphic::GetCamera()->GetLook(), graphic::GetCamera()->GetDirection() ) )
 				character2->UpdateBeHit( bAniState2, graphic::GetCamera()->GetDirection(), character1->GetAniPosGap() );
 		}
-	}
+	
 }
 
 //void cStage_Ingame::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)

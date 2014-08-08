@@ -12,7 +12,9 @@ namespace network
 	{
 		enum TYPE
 		{
-			NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
+			NONE, NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
+			DASH, JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
+			LATTACK, RATTACK, BEHIT,
 		};
 	}
 
@@ -25,8 +27,10 @@ namespace network
 
 	typedef struct tagInfoProtocol
 	{
-		sPacketHeader header;
+		sPacketHeader header1;
+		sPacketHeader header2;
 		int nId;
+		POINT ptMouse;
 
 	} InfoProtocol;
 
