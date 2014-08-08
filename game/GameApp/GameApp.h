@@ -29,7 +29,8 @@ private:
 	POINT m_prevMouse;
 	bool m_bMouse;
 
-	graphic::cCharacter* character;
+//	graphic::cCharacter* character1;
+//	graphic::cCharacter* character2;
 
-	graphic::cCharacter* character2;
+//	framework::cStage* m_stage;
 };

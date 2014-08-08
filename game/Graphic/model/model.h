@@ -6,9 +6,9 @@ namespace graphic
 	class cBoneMgr;
 	class cBoundingBox;
 
-	DECLARE_TYPE_NAME_SCOPE(graphic, cModel)
+//	DECLARE_TYPE_NAME_SCOPE(graphic, cModel)
 	class cModel : public ICollisionable
-						, public memmonitor::Monitor<cModel, TYPE_NAME(cModel)>
+						//, public memmonitor::Monitor<cModel, TYPE_NAME(cModel)>
 	{
 	public:
 		cModel(const int id);

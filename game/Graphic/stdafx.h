@@ -16,3 +16,4 @@
 using namespace common;
 
 #include "graphic.h"
+#include "..\Network\Network\protocol.h"

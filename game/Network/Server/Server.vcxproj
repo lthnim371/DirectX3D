@@ -11,9 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9AF87D65-E897-4EB2-A60D-940DB77653CC}</ProjectGuid>
+    <ProjectGuid>{011B0866-A0F7-4FF1-9B45-DE33FBFD381C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GameApp</RootNamespace>
+    <RootNamespace>Server</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -45,7 +45,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -73,24 +74,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameApp.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="Server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GameApp.h" />
-    <ClInclude Include="stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\Common.vcxproj">
-      <Project>{ef9ca22d-0c8f-42e9-ab66-98bc1a640f10}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Framework\Framework.vcxproj">
-      <Project>{b4998e31-b50a-4583-b023-ce8262773cc1}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Graphic\Graphic.vcxproj">
-      <Project>{3a91e3aa-18df-4733-9f41-ed09a61f97e3}</Project>
+    <ProjectReference Include="..\Network\Network.vcxproj">
+      <Project>{a202aa06-f0ee-4b05-86de-da63b9f146d4}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

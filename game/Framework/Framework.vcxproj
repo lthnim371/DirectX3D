@@ -70,8 +70,14 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="gamemain\GameMain.h" />
     <ClInclude Include="keyManager.h" />
+    <ClInclude Include="stage.h" />
+    <ClInclude Include="stagemanager.h" />
+    <ClInclude Include="stage_ingame.h" />
+    <ClInclude Include="stage_main.h" />
+    <ClInclude Include="stage_select.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TestScene.h" />
     <ClInclude Include="ui\button.h" />
     <ClInclude Include="ui\event.h" />
     <ClInclude Include="ui\eventhandler.h" />
@@ -82,10 +88,15 @@
   <ItemGroup>
     <ClCompile Include="gamemain\GameMain.cpp" />
     <ClCompile Include="keyManager.cpp" />
+    <ClCompile Include="stagemanager.cpp" />
+    <ClCompile Include="stage_ingame.cpp" />
+    <ClCompile Include="stage_main.cpp" />
+    <ClCompile Include="stage_select.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="ui\button.cpp" />
     <ClCompile Include="ui\event.cpp" />
     <ClCompile Include="ui\eventhandler.cpp" />
@@ -95,9 +106,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{ef9ca22d-0c8f-42e9-ab66-98bc1a640f10}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj">
-      <Project>{937b4bdb-2bc4-43de-9e32-ba36aee888eb}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

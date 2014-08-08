@@ -8,7 +8,7 @@
 #include "../Common/common.h"
 using namespace common;
 
-#include "../wxMemMonitorLib/wxMemMonitor.h" // debug library
+//#include "../wxMemMonitorLib/wxMemMonitor.h" // debug library
 
 
 #include "base/graphicdef.h"

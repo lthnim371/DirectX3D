@@ -15,4 +15,3 @@
 #include "../Common/common.h"
 #include "../Graphic/graphic.h"
 #include "framework.h"
-
