@@ -233,7 +233,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = FORWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 5.f );  //카메라가 바라보는 방향으로
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
 			MultiplyTM( mat );  //현재 위치에 더해주기
 			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
 		break;
@@ -245,7 +245,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = BACKWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_backward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * -5.f );
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * -10.f );
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -258,7 +258,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );  //카메라의 좌우방향으로
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -10.f );  //카메라의 좌우방향으로
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -271,7 +271,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 10.f );
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -283,7 +283,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = DASH;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 20.f );  //카메라가 바라보는 방향으로
 			MultiplyTM( mat );  //현재 위치에 더해주기
 			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
 		break;
@@ -345,9 +345,9 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 			//		m_cubePos *= 100.f;
 				}
-				else if(m_attackCnt == 0 && m_currJumpAttack == false)
-				{
-				}
+		//		else if(m_attackCnt == 0 && m_currJumpAttack == false)
+		//		{
+		//		}
 				else  //한번 이상 공격하는 상태라면..
 				{
 					m_reserveR = true;  //공격 예약

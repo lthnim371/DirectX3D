@@ -5,7 +5,7 @@ using namespace framework;
 
 cStage_Ingame::cStage_Ingame()
 {
-	m_id = 0;
+//	m_id = 0;
 	ZeroMemory(&m_packetInfo, sizeof(m_packetInfo));
 	m_access = false;
 }
@@ -18,12 +18,14 @@ cStage_Ingame::~cStage_Ingame()
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId)
 {
-	m_elapseTime = 0.f;
+	fTick1 = 0.f;
+	fTick2 = 0.f;
 
 	character1 = new graphic::cCharacter(0);
 	character2 = new graphic::cCharacter(1);
-	m_id = nId;
-
+//	m_id = nId;
+	m_packetInfo.nId = nId;
+			
 			//character1
 				character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 				character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
@@ -99,11 +101,9 @@ void cStage_Ingame::Init(const int nId)
 //void cStage_Ingame::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Input(const float elapseTime)
 {
-	if( !m_access )
-		//GetStageMgr()->SetSocket();
+//	if( !m_access )
+//		GetStageMgr()->SetSocket();
 	
-	m_elapseTime += elapseTime;
-
 	POINT ptMouse;
 	ptMouse.x = 0;
 	ptMouse.y = 0;
@@ -202,42 +202,82 @@ void cStage_Ingame::Input(const float elapseTime)
 	}
 	else
 	{
+	//	nState2 = network::PROTOCOL::NORMAL;
 		nState2 = network::PROTOCOL::NONE;
 	//	pMe->Update( pMe->NORMAL );
 	//	character1->Update( character1->NORMAL );
 	}
 
-	m_access = PacketSend(nState1, nState2, ptMouse);
-
-	if( nState1 != network::PROTOCOL::NONE || nState2 != network::PROTOCOL::NONE )
+/*	
+	if( network::PROTOCOL::FORWARD <= nState2 && nState2 <= network::PROTOCOL::DASH ||
+		nState1 == network::PROTOCOL::ROTATION )
 	{
-		m_access = PacketSend(nState1, nState2, ptMouse);
-	//	m_access = PacketSend((int)nState1, (int)nState2, ptMouse);
+	//	if( fTick1 >= 0.1f )
+	//	{
+			fTick1 = 0.f;
+			PacketSend(nState1, nState2, ptMouse);
+	//	}
 	}
-	else if( m_elapseTime >= 100.f )
+*/
+/*
+	if( nState2 != m_packetInfo.header2.protocol || nState1 != m_packetInfo.header1.protocol )
+	{
+		PacketSend(nState1, nState2, ptMouse);
+	}
+	else if( fTick1 >= 0.1f )
+	{
+		
+	}
+*/
+	fTick1 += elapseTime;
+	if( nState2 != network::PROTOCOL::NONE || nState1 != network::PROTOCOL::NONE )
+	{
+		fTick1 = 0.f;
+		PacketSend(nState1, nState2, ptMouse);
+	}
+	
+	
+	//	PacketSend();
+	//	m_access = PacketSend((int)nState1, (int)nState2, ptMouse);
+/*	else if( m_elapseTime >= 100.f )
 	{
 		m_elapseTime = 0.f;
-		m_access = PacketSend(nState1, nState2, ptMouse);
+	//	PacketSend();
+		PacketSend(nState1, nState2, ptMouse);
 	//	m_access = PacketSend((int)nState1, (int)nState2, ptMouse);
-	}
+	}	*/
 }
 
 //void cStage_Ingame::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Update(const float elapseTime)
 {
-	m_access = PacketReceive();
+//	fTick2 += elapseTime;
 
-	graphic::cCharacter* pMe = ( m_packetInfo.nId == 0 ? character1 : character2 );
+//	if(fTick2 >= 0.2f)
+//	{
+//		fTick2 = 0.f;
+
+		network::InfoProtocol packetRecv;
+		ZeroMemory(&packetRecv, sizeof(packetRecv));
+		m_access = PacketReceive(packetRecv);
+
+		if( m_access == true )
+		{
+			graphic::cCharacter* pMe = ( packetRecv.nId == 0 ? character1 : character2 );
 		
-	if( m_packetInfo.header1.protocol == network::PROTOCOL::ROTATION )
-	{		
-		pMe->Update( pMe->ROTATION, (float)m_packetInfo.ptMouse.x, (float)m_packetInfo.ptMouse.y );
-	}
+			if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
+			{		
+				pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
+			}
 
-	if( m_packetInfo.header2.protocol != network::PROTOCOL::NONE )
-	{
-		pMe->Update( m_packetInfo.header2.protocol );
-	}
+			if( packetRecv.header2.protocol != network::PROTOCOL::NONE )
+			{
+				pMe->Update( packetRecv.header2.protocol );
+			}
+		}
+
+//	}
+
 /*	
 	if( InputMgr->isOnceKeyDown('1') )
 	{
@@ -302,17 +342,16 @@ void cStage_Ingame::Render(const float elapseTime)
 
 bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse)
 //bool cStage_Ingame::PacketSend(const int nState1, const int nState2, const POINT ptMouse)
+//bool cStage_Ingame::PacketSend(const network::InfoProtocol packetInfo)
 {
-	network::InfoProtocol info;
-	ZeroMemory(&info, sizeof(info));
-	info.header1.protocol = nState1;
-	info.header2.protocol = nState2;
-	info.nId = m_id;
-	info.ptMouse = ptMouse;
+	m_packetInfo.header1.protocol = nState1;
+	m_packetInfo.header2.protocol = nState2;
+//	m_packetInfo.nId = m_id;
+	m_packetInfo.ptMouse = ptMouse;
 
 	char buff[ 128];  //배열 크기는 미리 정해진 약속이어야 한다. 즉, 채우려는 데이터가 적어도 배열크기로 다 채워야한다.
 	ZeroMemory(buff, sizeof(buff));
-	memcpy(buff, &info, sizeof(info));  //데이터 채우기
+	memcpy(buff, &m_packetInfo, sizeof(m_packetInfo));  //데이터 채우기
 
 	const int result = send( GetStageMgr()->GetSocket(), buff, sizeof(buff), 0 );
 	if (result == INVALID_SOCKET)
@@ -324,9 +363,10 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 	return true;
 }
 
-bool cStage_Ingame::PacketReceive()
+bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 {
-	const timeval t = {0, 10}; // 10 millisecond
+//	const timeval t = {0, 10}; // 10 millisecond
+	const timeval t = {0, 1};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
 	fd_set readSockets;
 	FD_ZERO(&readSockets);
 	FD_SET(GetStageMgr()->GetSocket(), &readSockets);
@@ -347,10 +387,10 @@ bool cStage_Ingame::PacketReceive()
 		//	ParsePacket(buff);  //패킷이 왔다면 호출
 
 			const network::InfoProtocol* protocol = (network::InfoProtocol*)buff;
-			m_packetInfo.header1 = protocol->header1;
-			m_packetInfo.header2 = protocol->header2;
-			m_packetInfo.ptMouse.x = protocol->ptMouse.x;
-			m_packetInfo.ptMouse.y = protocol->ptMouse.y;
+			packetInfo.header1 = protocol->header1;
+			packetInfo.header2 = protocol->header2;
+			packetInfo.ptMouse.x = protocol->ptMouse.x;
+			packetInfo.ptMouse.y = protocol->ptMouse.y;
 
 			return true;
 		}

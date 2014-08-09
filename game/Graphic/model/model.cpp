@@ -106,8 +106,8 @@ void cModel::SetAnimation( const string &aniFileName)
 
 bool cModel::Move(const float elapseTime)
 {
-	BOOST_FOREACH (auto node, m_meshes)
-		node->Move(elapseTime);
+//	BOOST_FOREACH (auto node, m_meshes)
+//		node->Move(elapseTime);
 
 	if (m_bone)
 		return m_bone->Move(elapseTime);  //Ãß°¡

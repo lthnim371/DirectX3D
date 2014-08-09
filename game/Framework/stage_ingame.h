@@ -24,19 +24,21 @@ namespace framework
 	protected:
 		bool PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse);
 	//	bool PacketSend(const int nState1, const int nState2, const POINT ptMouse);
-		bool PacketReceive();
+	//	bool PacketSend(const network::InfoProtocol packetInfo);
+		bool PacketReceive(OUT network::InfoProtocol& packetInfo);
 
 	private:
 		POINT m_currMouse;
 		POINT m_prevMouse;
 //		bool m_bMouse;
-		float m_elapseTime;
+		float fTick1;
+		float fTick2;
 
 		graphic::cCharacter* character1;
 		graphic::cCharacter* character2;
 		
 		bool m_access;
-		short m_id;
+	//	short m_id;
 		network::InfoProtocol m_packetInfo;
 	};
 }

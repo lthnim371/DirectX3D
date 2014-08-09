@@ -214,7 +214,7 @@ void CClientDlg::MainLoop()
 
 void CClientDlg::PacketProcess()
 {
-	const timeval t = {0, 10}; // 10 millisecond
+	const timeval t = {0, 10}; // 10 millisecond  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
 	fd_set readSockets;
 	FD_ZERO(&readSockets);
 	FD_SET(m_socket, &readSockets);
