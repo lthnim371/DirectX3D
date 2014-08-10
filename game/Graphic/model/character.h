@@ -7,8 +7,9 @@ namespace graphic
 	public:
 		enum STATE
 		{
-			NONE, NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
-			DASH, JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
+			NONE, NORMAL, ROTATION, LEFTROTATION, RIGHTROTATION,
+			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,	DASH,
+			JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
 			LATTACK, RATTACK, BEHIT,
 		};
 
@@ -33,6 +34,7 @@ namespace graphic
 		int GetMode() const;
 		void UpdateBeHit(const bool bAniState, const Vector3& sourPos, const float fAniPosGap);
 		float GetAniPosGap() const;
+		cCamera* GetCamera();
 
 	protected:
 		bool UpdateAttack(const bool bAniState);
@@ -72,6 +74,9 @@ namespace graphic
 		bool m_targetAttackCheck;
 		int m_hp;
 		int m_sp;
+
+		cCamera* m_camera;
+		ID3DXFont* m_font;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }
@@ -81,4 +86,5 @@ namespace graphic
 	inline void cCharacter::SetAttackSuccess() { m_cubeCheck = false; m_targetAttackCheck = true; }
 	inline int cCharacter::GetMode() const { return m_mode; }
 	inline float cCharacter::GetAniPosGap() const { return m_aniPosGap; }
+	inline cCamera* cCharacter::GetCamera() { return m_camera; }
 }

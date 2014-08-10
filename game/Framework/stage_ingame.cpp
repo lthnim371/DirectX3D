@@ -2,17 +2,21 @@
 #include "stage_ingame.h"
 
 using namespace framework;
+//using namespace graphic;
 
 cStage_Ingame::cStage_Ingame()
 {
 //	m_id = 0;
-	ZeroMemory(&m_packetInfo, sizeof(m_packetInfo));
+	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
+	ZeroMemory(&m_info1, sizeof(m_info1));
+	ZeroMemory(&m_info2, sizeof(m_info2));
 	m_access = false;
 }
 cStage_Ingame::~cStage_Ingame()
 {
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
+	SAFE_DELETE(m_shader);
 }
 
 //void cStage_Ingame::Init()
@@ -21,79 +25,74 @@ void cStage_Ingame::Init(const int nId)
 	fTick1 = 0.f;
 	fTick2 = 0.f;
 
-	character1 = new graphic::cCharacter(0);
-	character2 = new graphic::cCharacter(1);
-//	m_id = nId;
-	m_packetInfo.nId = nId;
-			
-			//character1
-				character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
-				character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
-			//test
-			//	character1->SetRenderBoundingBox(true);
+	//	m_id = nId;
+	m_infoSend.nId = nId;
+//	m_info2.nId = ( nId == 0 ? 1 : 0 );
 
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
-				character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+	m_shader = new graphic::cShader();
 
-				//Matrix44 rot;
-				//rot.SetRotationY( -1.f );
-				Matrix44 pos;
-				pos.SetTranslate( Vector3( 0, 0, -5000.f) );
-				character1->MultiplyTM( pos);
-				graphic::GetCamera()->SetPosition( character1->GetTM() );
-
-			//character2
-				character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
-				character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
-			//test
-			//	character2->SetRenderBoundingBox(true);
-
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
-				character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
-
-				//Matrix44 rot;
-				//rot.SetRotationY( 180.f );
-				pos.SetTranslate( Vector3( 0, 0, 5000.f) );
-				character2->MultiplyTM( pos);
-				graphic::GetCamera()->SetPosition( character2->GetTM() );
-
+	character1 = new graphic::cCharacter(1);
+	character2 = new graphic::cCharacter(2);
+		
+	m_shader->Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
 	
+	//character1
+		character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
+		character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
+	//test
+	//	character1->SetRenderBoundingBox(true);
+
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+
+		//Matrix44 rot;
+		//rot.SetRotationY( -1.f );
+		Matrix44 pos;
+		pos.SetTranslate( Vector3( 0, 0, -2500.f) );
+		character1->MultiplyTM( pos);
+	//	character1->GetCamera()->Init( character1->GetTM().GetPosition() );
+
+	//character2
+		character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
+		character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
+	//test
+	//	character2->SetRenderBoundingBox(true);
+		//Matrix44 rot;
+		//rot.SetRotationY( 180.f );
+		pos.SetTranslate( Vector3( 0, 0, 2500.f) );
+		character2->MultiplyTM( pos);
+	//	character2->GetCamera()->SetPosition( character2->GetTM() );
+
+		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+		if( m_infoSend.nId == 1 )
+		{
+			Vector3 characterPos( character1->GetTM().GetPosition() );
+			character1->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, -300.f) );
+		}
+		else if( m_infoSend.nId == 2 )
+		{
+			Vector3 characterPos( character2->GetTM().GetPosition() );
+			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, -300.f) );
+		}
+
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
 }
@@ -202,37 +201,17 @@ void cStage_Ingame::Input(const float elapseTime)
 	}
 	else
 	{
-	//	nState2 = network::PROTOCOL::NORMAL;
-		nState2 = network::PROTOCOL::NONE;
+		nState2 = network::PROTOCOL::NORMAL;
+	//	nState2 = network::PROTOCOL::NONE;
 	//	pMe->Update( pMe->NORMAL );
 	//	character1->Update( character1->NORMAL );
 	}
 
-/*	
-	if( network::PROTOCOL::FORWARD <= nState2 && nState2 <= network::PROTOCOL::DASH ||
-		nState1 == network::PROTOCOL::ROTATION )
+//	fTick1 += elapseTime;
+//		fTick1 = 0.f;
+//	if( nState2 != network::PROTOCOL::NONE || nState1 != network::PROTOCOL::NONE )
+	if( nState2 != m_infoSend.header2.protocol || nState1 != m_infoSend.header1.protocol )
 	{
-	//	if( fTick1 >= 0.1f )
-	//	{
-			fTick1 = 0.f;
-			PacketSend(nState1, nState2, ptMouse);
-	//	}
-	}
-*/
-/*
-	if( nState2 != m_packetInfo.header2.protocol || nState1 != m_packetInfo.header1.protocol )
-	{
-		PacketSend(nState1, nState2, ptMouse);
-	}
-	else if( fTick1 >= 0.1f )
-	{
-		
-	}
-*/
-	fTick1 += elapseTime;
-	if( nState2 != network::PROTOCOL::NONE || nState1 != network::PROTOCOL::NONE )
-	{
-		fTick1 = 0.f;
 		PacketSend(nState1, nState2, ptMouse);
 	}
 	
@@ -259,21 +238,40 @@ void cStage_Ingame::Update(const float elapseTime)
 
 		network::InfoProtocol packetRecv;
 		ZeroMemory(&packetRecv, sizeof(packetRecv));
-		m_access = PacketReceive(packetRecv);
-
-		if( m_access == true )
+		if( PacketReceive(packetRecv) )
 		{
-			graphic::cCharacter* pMe = ( packetRecv.nId == 0 ? character1 : character2 );
-		
-			if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
-			{		
-				pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
-			}
-
-			if( packetRecv.header2.protocol != network::PROTOCOL::NONE )
+			if( packetRecv.nId == 1 )
 			{
-				pMe->Update( packetRecv.header2.protocol );
+				m_info1 = packetRecv;
+				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+				character1->Update( m_info1.header2.protocol );
+				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( m_info2.header2.protocol );
 			}
+			else if( packetRecv.nId == 2 )
+			{
+				m_info2 = packetRecv;
+				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( m_info2.header2.protocol );
+				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+				character1->Update( m_info1.header2.protocol );
+			}
+			
+			graphic::cCharacter* pMe = ( packetRecv.nId == 1 ? character1 : character2 );
+			pMe->GetCamera()->SetCamera( packetRecv.camLook, packetRecv.camPos );
+/*
+			if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
+				pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
+			if( packetRecv.header2.protocol != network::PROTOCOL::NONE )
+				pMe->Update( packetRecv.header2.protocol );
+*/
+		}
+		else
+		{
+			character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+			character1->Update( m_info1.header2.protocol );
+			character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+			character2->Update( m_info2.header2.protocol );
 		}
 
 //	}
@@ -294,14 +292,14 @@ void cStage_Ingame::Update(const float elapseTime)
 		
 		if( character1->GetCubeCheck() == true )
 		{
-			if( true == character2->CollisionCheck( *(character1->GetWeaponCube()), graphic::GetCamera()->GetLook() ) )
+			if( true == character2->CollisionCheck( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook() ) )
 			{
 				character1->SetAttackSuccess();
 			}
 		}
 		else if( character2->GetCubeCheck() == true )
 		{
-			if ( true == character1->CollisionCheck( *(character2->GetWeaponCube()), graphic::GetCamera()->GetLook() ) )
+			if ( true == character1->CollisionCheck( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook() ) )
 			{
 				character2->SetAttackSuccess();
 			}
@@ -309,13 +307,13 @@ void cStage_Ingame::Update(const float elapseTime)
 
 		if( character1->GetMode() == character1->BEHIT )
 		{
-			if( true == character1->CollisionCheck( *(character2->GetCharacterCube()), graphic::GetCamera()->GetLook(), graphic::GetCamera()->GetDirection() ) )
-				character1->UpdateBeHit( bAniState, graphic::GetCamera()->GetDirection(), character2->GetAniPosGap()  );
+			if( true == character1->CollisionCheck( *(character2->GetCharacterCube()), character2->GetCamera()->GetLook(), character2->GetCamera()->GetDirection() ) )
+				character1->UpdateBeHit( bAniState, character2->GetCamera()->GetDirection(), character2->GetAniPosGap()  );
 		}
 		else if( character2->GetMode() == character2->BEHIT )
 		{
-			if( true == character2->CollisionCheck( *(character1->GetCharacterCube()), graphic::GetCamera()->GetLook(), graphic::GetCamera()->GetDirection() ) )
-				character2->UpdateBeHit( bAniState2, graphic::GetCamera()->GetDirection(), character1->GetAniPosGap() );
+			if( true == character2->CollisionCheck( *(character1->GetCharacterCube()), character1->GetCamera()->GetLook(), character1->GetCamera()->GetDirection() ) )
+				character2->UpdateBeHit( bAniState2, character1->GetCamera()->GetDirection(), character1->GetAniPosGap() );
 		}
 	
 }
@@ -328,30 +326,38 @@ void cStage_Ingame::Render(const float elapseTime)
 		graphic::GetRenderer()->RenderGrid();
 		graphic::GetRenderer()->RenderAxis();
 
-
 //		character1->Render();
 //		character2->Render();
 
 	//test
-		character1->RenderShader( graphic::GetCamera()->GetShader() );
-		character2->RenderShader( graphic::GetCamera()->GetShader() );				
+		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+		Matrix44 VP;
+		VP = pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection();
+		m_shader->SetMatrix( "mVP", VP );
+		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl에 디폴트 값으로 되어있음
+		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition() );
+		character1->RenderShader( *m_shader );
+		character2->RenderShader( *m_shader );
+		
 
-	//test
-		graphic::GetCamera()->Render( character1->GetHP(), character2->GetHP() );
 }
 
 bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse)
 //bool cStage_Ingame::PacketSend(const int nState1, const int nState2, const POINT ptMouse)
 //bool cStage_Ingame::PacketSend(const network::InfoProtocol packetInfo)
 {
-	m_packetInfo.header1.protocol = nState1;
-	m_packetInfo.header2.protocol = nState2;
-//	m_packetInfo.nId = m_id;
-	m_packetInfo.ptMouse = ptMouse;
+	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+
+	m_infoSend.header1.protocol = nState1;
+	m_infoSend.header2.protocol = nState2;
+//	m_infoSend.nId = m_id;
+	m_infoSend.ptMouse = ptMouse;
+	m_infoSend.camLook = pMe->GetCamera()->GetLook();
+	m_infoSend.camPos = pMe->GetCamera()->GetPosition();
 
 	char buff[ 128];  //배열 크기는 미리 정해진 약속이어야 한다. 즉, 채우려는 데이터가 적어도 배열크기로 다 채워야한다.
 	ZeroMemory(buff, sizeof(buff));
-	memcpy(buff, &m_packetInfo, sizeof(m_packetInfo));  //데이터 채우기
+	memcpy(buff, &m_infoSend, sizeof(m_infoSend));  //데이터 채우기
 
 	const int result = send( GetStageMgr()->GetSocket(), buff, sizeof(buff), 0 );
 	if (result == INVALID_SOCKET)
@@ -366,7 +372,7 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 {
 //	const timeval t = {0, 10}; // 10 millisecond
-	const timeval t = {0, 1};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
+	const timeval t = {0, 2};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
 	fd_set readSockets;
 	FD_ZERO(&readSockets);
 	FD_SET(GetStageMgr()->GetSocket(), &readSockets);
@@ -387,10 +393,13 @@ bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 		//	ParsePacket(buff);  //패킷이 왔다면 호출
 
 			const network::InfoProtocol* protocol = (network::InfoProtocol*)buff;
+			packetInfo.nId = protocol->nId;
 			packetInfo.header1 = protocol->header1;
 			packetInfo.header2 = protocol->header2;
 			packetInfo.ptMouse.x = protocol->ptMouse.x;
 			packetInfo.ptMouse.y = protocol->ptMouse.y;
+			packetInfo.camLook = protocol.camLook;
+			packetInfo.camPos = protocol.camPos;
 
 			return true;
 		}

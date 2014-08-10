@@ -46,6 +46,8 @@ cCharacter::cCharacter(const int id) :
 cCharacter::~cCharacter()
 {
 	SAFE_DELETE(m_weapon);
+	SAFE_DELETE(m_camera);
+	SAFE_RELEASE(m_font);
 }
 
 
@@ -59,6 +61,11 @@ bool cCharacter::Create(const string &modelName)
 	m_characterCube = new cCube( Vector3(-35.f, 0.f, -35.f), Vector3(35.f, 175.f, 35.f) );
 //	SetRenderMesh(false);
 
+	m_camera = new cCamera();
+	m_font = NULL;
+	HRESULT hr = D3DXCreateFontA( ::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
+	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
+		
 	return bResult;
 }
 
@@ -169,6 +176,25 @@ void cCharacter::Render()
 		m_characterCube->Render( Matrix44() );
 	if(m_weaponCube)
 		m_weaponCube->Render( Matrix44() );
+
+	if( m_font )
+	{
+		char buff[32];
+		::_itoa_s( m_hp, buff, sizeof(buff), 10 );
+		string str("HP : ");
+		str.append( buff );
+		sRect rect(10,740,110,840);
+		m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+			DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
+
+		::_itoa_s( m_sp, buff, sizeof(buff), 10 );
+		str.assign("SP : ");
+		str.append( buff );
+		rect.SetX(900);
+		rect.SetY(740);
+		m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+			DT_NOCLIP, D3DXCOLOR( 1.0f, 0.2f, 0.0f, 1.0f ) );
+	}
 }
 
 void cCharacter::RenderShader(cShader &shader)
@@ -222,7 +248,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				Matrix44 m = q.GetMatrix();
 				SetTM( m * GetTM() );  //R * T (이동한 뒤 회전하는걸 방지)
 				GetCamera()->SetPosition( GetTM() );
-				graphic::GetCamera()->SetRotation( x, y );  //카메라 회전도 갱신
+				GetCamera()->SetRotation( x, y );  //카메라 회전도 갱신
 			}
 		break;
 		

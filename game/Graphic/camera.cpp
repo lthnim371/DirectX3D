@@ -8,8 +8,17 @@
 using namespace graphic;
 
 cCamera::cCamera()
-	: m_pos(0,300,300), m_look(0,0,0), m_up(0,1,0)
+	: m_up(0,1,0)
 {
+}
+cCamera::~cCamera()
+{
+//	SAFE_RELEASE(m_font);
+}
+
+void cCamera::Init(const Vector3& look, const Vector3& pos)
+{
+	SetCamera(look, pos);
 	SetView();  //set view
 	
 	//set projection
@@ -18,16 +27,12 @@ cCamera::cCamera()
 	
 	m_proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 5000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_proj) ;
-
+/*
 	m_font = NULL;
 	HRESULT hr = D3DXCreateFontA( ::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
-		DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
-
-	m_shader.Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
-}
-cCamera::~cCamera()
-{
-	SAFE_RELEASE(m_font);
+	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
+*/
+//	m_shader.Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
 }
 
 void cCamera::Update()
@@ -38,7 +43,7 @@ void cCamera::Update()
 	m_right = m_up.CrossProduct( m_dir.Normal() );
 	m_right.Normalize();
 }
-
+/*
 void cCamera::Render(const int hp, const int sp)
 {
 	RET(!m_font);
@@ -52,14 +57,14 @@ void cCamera::Render(const int hp, const int sp)
 		DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
 
 	::_itoa_s( sp, buff, sizeof(buff), 10 );
-	str.assign("target HP : ");
+	str.assign("SP : ");
 	str.append( buff );
-	rect.SetX(800);
+	rect.SetX(900);
 	rect.SetY(740);
 	m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
 		DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
 }
-
+*/
 void cCamera::SetPosition(const Matrix44& pos)
 {
 //	m_pos += ( Vector3(m_dir.x, 0.f, m_dir.z) * step );
@@ -118,11 +123,13 @@ void cCamera::SetView()  //set view
 	m_view.SetView( m_pos, m_dir.Normal(), m_up );
 	graphic::GetDevice()->SetTransform(D3DTS_VIEW, (D3DXMATRIX*)&m_view);
 
+/*
 	Matrix44 VP;
 	VP = m_view * m_proj;
 	m_shader.SetMatrix( "mVP", VP );
 	m_shader.SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl에 디폴트 값으로 되어있음
 	m_shader.SetVector( "vEyePos", m_pos);
+*/
 }
 
 //프로그램 테스트용
@@ -134,4 +141,11 @@ void cCamera::SetHeight(const float number)
 		m_pos.y -= 10.f;
 	else
 		m_pos.y += number;	
+}
+
+void cCamera::SetCamera(const Vector3& look, const Vector3& pos)
+{
+	m_look = look;
+	m_pos = pos;
+	Update();
 }

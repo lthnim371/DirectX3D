@@ -27,7 +27,7 @@ void cTestScene::Button2Click(framework::cEvent &event)
 		return;
 
 	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
-	GetStageMgr()->GetStage()->Init(0);
+	GetStageMgr()->GetStage()->Init(1);
 }
 
 void cTestScene::Button3Click(framework::cEvent &event)
@@ -36,5 +36,5 @@ void cTestScene::Button3Click(framework::cEvent &event)
 		return;
 
 	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
-	GetStageMgr()->GetStage()->Init(1);
+	GetStageMgr()->GetStage()->Init(2);
 }

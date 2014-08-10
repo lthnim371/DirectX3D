@@ -36,9 +36,14 @@ namespace framework
 
 		graphic::cCharacter* character1;
 		graphic::cCharacter* character2;
+
 		
 		bool m_access;
 	//	short m_id;
-		network::InfoProtocol m_packetInfo;
+		network::InfoProtocol m_infoSend;
+		network::InfoProtocol m_info1;
+		network::InfoProtocol m_info2;
+
+		graphic::cShader* m_shader;
 	};
 }

@@ -114,7 +114,7 @@ void cGameApp::OnUpdate(const float elapseT)
 //	framework::GetStageMgr()->GetStage()->Update( elapseT, character1, character2  );
 	framework::GetStageMgr()->GetStage()->Update( elapseT );
 	
-	graphic::GetCamera()->SetView();
+//	graphic::GetCamera()->SetView();
 }
 
 

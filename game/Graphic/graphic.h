@@ -41,6 +41,8 @@ using namespace common;
 #include "model/model.h"
 #include "model/bonemgr.h"
 #include "model/bonenode.h"
+
+#include "camera.h"
 #include "model/character.h"
 
 #include "sprite/sprite.h"
@@ -54,7 +56,6 @@ using namespace common;
 #pragma comment( lib, "d3dx9.lib" )
 
 //Ãß°¡
-#include "camera.h"
 //#include "Image.h"
 
 #define JUMPSPEED 10

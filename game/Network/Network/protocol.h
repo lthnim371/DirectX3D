@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../../Common/common.h"
 
 namespace network
 {
@@ -12,8 +13,9 @@ namespace network
 	{
 		enum TYPE
 		{
-			NONE, NORMAL, ROTATION, FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
-			DASH, JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
+			NONE, NORMAL, ROTATION, LEFTROTATION, RIGHTROTATION,
+			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,	DASH,
+			JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
 			LATTACK, RATTACK, BEHIT,
 		};
 	}
@@ -33,6 +35,8 @@ namespace network
 	//	PROTOCOL::TYPE header2;
 		int nId;
 		POINT ptMouse;
+		common::Vector3 camLook;
+		common::Vector3 camPos;
 
 	} InfoProtocol;
 

@@ -157,3 +157,14 @@ graphic의 character클래스 업데이트 : 애니 적용시 이동한 거리를 카메라 look에 거�
 
 ※ trouble
 스키닝셰이더를 적용할려면 메쉬의 본이 64개 이하인 메쉬만 가능한 거 같음...
+
+
+140809
+★ update
+graphic의 model클래스의 move함수에 mesh move 하는 부분을 주석처리하였음
+
+
+140810
+★ update
+네트워크 임시 성공 : 
+->stage_ingame

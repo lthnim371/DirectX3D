@@ -97,7 +97,7 @@ void cRenderer::RenderFPS()
 	sRect rc(10,10,200,200);
 	m_font->DrawTextA( NULL, m_fpsText.c_str(), -1, &rc,
 		DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
-	
+/*	
 	char camY[16];
 	::itoa( (int)GetCamera()->GetPosition().y, camY, 10 );
 //	::_gcvt_s(camY, sizeof(camY), GetCamera()->GetPosition().y, 1);
@@ -107,6 +107,7 @@ void cRenderer::RenderFPS()
 	sRect rect(10,30,50,50);
 	m_font->DrawTextA( NULL, str.c_str(), -1, &rect,
 		DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
+*/
 }
 
 
