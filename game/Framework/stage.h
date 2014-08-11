@@ -2,7 +2,7 @@
 
 namespace framework
 {
-	class cStage
+	class cStage  //그때그때마다 자식클래스들의 형변환을 위한 추상클래스
 	{
 	public:
 	//	virtual void Init() = 0;

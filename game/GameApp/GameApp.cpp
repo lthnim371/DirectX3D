@@ -41,45 +41,7 @@ bool cGameApp::OnInit()
 	graphic::GetDevice()->LightEnable (
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
-/*
-	character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
-	character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
-//test
-//	character1->SetRenderBoundingBox(true);
 
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_backward.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLLA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LRA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_LLRA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_RRRA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump1.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
-	character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
-
-//test
-	character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
-	character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
-	character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
-	Matrix44 pos;
-	pos.SetTranslate( Vector3( 0, 0, 500.f) );
-	character2->MultiplyTM( pos );
-*/
 /*  마우스 가두기
 	sRect rc;
 	::GetClientRect(m_hWnd, &rc);
@@ -105,7 +67,7 @@ bool cGameApp::OnInit()
 
 void cGameApp::OnInput(const float elapseT)
 {
-	if( m_hWnd == ::GetFocus() )
+	if( m_hWnd == ::GetFocus() )  //활성화가 된 클라이언트만 입력키 받게끔 설정
 		framework::GetStageMgr()->GetStage()->Input( elapseT );
 	//	framework::GetStageMgr()->GetStage()->Input( elapseT, character1, character2 );
 		
@@ -158,6 +120,8 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 //test
 	switch (message)
 	{
+
+	//button클래스의 충돌을 실행하기 위함(ex : 마우스클릭)
 		case WM_MOUSEMOVE:
 		case WM_LBUTTONDOWN:
 			if( framework::GetStageMgr()->GetStage() )

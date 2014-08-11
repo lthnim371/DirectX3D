@@ -1,3 +1,4 @@
+//game application
 
 #pragma once
 
@@ -15,7 +16,7 @@ public:
 	virtual void MessageProc( UINT message, WPARAM wParam, LPARAM lParam) override;
 
 //추가
-	virtual void OnInput(const float elapseT) override;
+	virtual void OnInput(const float elapseT) override;  //입력키만 받는 loop
 
 private:
 	graphic::cVertexBuffer m_vtxBuff;
@@ -24,11 +25,11 @@ private:
 	int m_FaceSize;
 	graphic::cMaterial m_mtrl;
 	graphic::cLight m_light;
-
+/*
 	POINT m_currMouse;
 	POINT m_prevMouse;
 	bool m_bMouse;
-
+*/
 //	graphic::cCharacter* character1;
 //	graphic::cCharacter* character2;
 

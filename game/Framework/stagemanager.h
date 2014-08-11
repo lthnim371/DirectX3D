@@ -2,23 +2,24 @@
 
 namespace framework
 {
+//모든 스테이지들을 통합관리하는 매니저클래스
 	class cStageMgr : public common::cSingleton<cStageMgr>
 	{
 	public:
-		enum STAGE
+		enum STAGE  //스테이지 명칭
 		{
 			MAIN, NETWORK_SELECT, NETWORK_LOADING, INGAME,
 		};
 
-		cStageMgr();
+		cStageMgr();  //모든 스테이지 생성 및 현재 스테이지를 처음 메인 스테이지로
 		~cStageMgr();
 		
 		cStage* FindStage(const int nId);
-		void Release();
+		void Release();  //소켓닫기 (추후 스테이지 제거도 포함시키기)
 
-		void SetStage(const int nId);
-		void SetWindowHandle(const HWND& hWnd);
-		bool SetSocket();
+		void SetStage(const int nId);  //현재 스테이지를 원하는 스테이지로 교체
+		void SetWindowHandle(const HWND& hWnd);  //gameapp으로부터 윈도우핸들을 받아올때 사용
+		bool SetSocket();  //네트워크 클라이언트로 접속
 		
 		cStage* GetStage() const;
 		int GetCurrentStage() const;
@@ -29,14 +30,14 @@ namespace framework
 	//	DWORD GetIpAddress();
 
 	private:
-		std::map<int, cStage*> m_list;
-		cStage* m_stage;
-		short m_currentStage;
-		HWND m_hWnd;
-		SOCKET m_socket;
+		std::map<int, cStage*> m_list;  //해당 스테이지 객체 주소를 보관
+		cStage* m_stage;  //현재 스테이지 주소
+		short m_currentStage;  //현재 스테이지의 이름
+		HWND m_hWnd;  //전역적으로 필요한 윈도우핸들
+		SOCKET m_socket;  //전역적으로 필요한 소켓
 	//	CIPAddressCtrl m_ip;
-		string m_ip;
-		int m_port;
+		string m_ip;  //네트워크 접속을 위한 ip주소
+		int m_port;  //네트워크 접속을 위한 포트
 	};
 	
 	inline cStageMgr* GetStageMgr() { return cStageMgr::Get(); }

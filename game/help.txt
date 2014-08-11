@@ -177,3 +177,9 @@ network의 protocol구조체 수정
 framework에 stage_loading클래스 작성
 framework의 stagemanager클래스 수정
 framework의 stage main~loading 클래스까지 메인화면 애니메이션 동작
+
+
+선생님 ftp(filezila client)
+주소 : 112.222.208.106
+아이디 : jjuiddong.
+메일 : jjuiddong@naver.com
