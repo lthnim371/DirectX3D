@@ -38,6 +38,7 @@
 #include "TestScene.h"
 #include "stage.h"
 #include "stage_main.h"
-#include "stage_select.h"
+#include "stage_NetworkSelect.h"
+#include "stage_NetworkLoading.h"
 #include "stage_ingame.h"
 #include "stagemanager.h"

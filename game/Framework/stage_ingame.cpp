@@ -10,20 +10,25 @@ cStage_Ingame::cStage_Ingame()
 	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
 	ZeroMemory(&m_info1, sizeof(m_info1));
 	ZeroMemory(&m_info2, sizeof(m_info2));
-	m_access = false;
+//	m_access = false;
 }
 cStage_Ingame::~cStage_Ingame()
 {
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
 	SAFE_DELETE(m_shader);
+	SAFE_RELEASE(m_font);
 }
 
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId)
 {
-	fTick1 = 0.f;
-	fTick2 = 0.f;
+//	fTick1 = 0.f;
+//	fTick2 = 0.f;
+
+	m_font = NULL;
+	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
+	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
 
 	//	m_id = nId;
 	m_infoSend.nId = nId;
@@ -73,6 +78,8 @@ void cStage_Ingame::Init(const int nId)
 	//character2
 		character2->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 		character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
+
+		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 	//test
 	//	character2->SetRenderBoundingBox(true);
 		//Matrix44 rot;
@@ -81,16 +88,16 @@ void cStage_Ingame::Init(const int nId)
 		character2->MultiplyTM( pos);
 	//	character2->GetCamera()->SetPosition( character2->GetTM() );
 
-		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+	//	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 		if( m_infoSend.nId == 1 )
 		{
 			Vector3 characterPos( character1->GetTM().GetPosition() );
-			character1->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, -300.f) );
+			character1->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
 		}
 		else if( m_infoSend.nId == 2 )
 		{
 			Vector3 characterPos( character2->GetTM().GetPosition() );
-			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, -300.f) );
+			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
 		}
 
 	::GetCursorPos( &m_currMouse );
@@ -119,7 +126,11 @@ void cStage_Ingame::Input(const float elapseTime)
 		ptMouse.y = m_currMouse.y - m_prevMouse.y;
 	//	character1->Update( character1->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
 	//	pMe->Update( pMe->ROTATION, (float)ptMouse.x, (float)ptMouse.y );
-		nState1 = network::PROTOCOL::ROTATION;
+	//	nState1 = network::PROTOCOL::ROTATION;
+		if( ptMouse.x > 0 )
+			nState1 = network::PROTOCOL::RIGHTROTATION;
+		else if( ptMouse.x < 0 )
+			nState1 = network::PROTOCOL::LEFTROTATION;
 	}
 	
 /*	//프로그램 테스트용
@@ -240,38 +251,57 @@ void cStage_Ingame::Update(const float elapseTime)
 		ZeroMemory(&packetRecv, sizeof(packetRecv));
 		if( PacketReceive(packetRecv) )
 		{
-			if( packetRecv.nId == 1 )
-			{
-				m_info1 = packetRecv;
+//			graphic::cCharacter* pMe = ( packetRecv.nId != 1 ? character1 : character2 );
+//			pMe->GetCamera()->SetCamera( packetRecv.camLook, packetRecv.camPos );
+
+				if( packetRecv.nId == 1 )
+				{
+					m_info1 = packetRecv;
+					if( m_infoSend.nId != m_info1.nId )
+					{
+						character1->GetCamera()->SetCamera( m_info1.camLook, m_info1.camPos );
+						character1->SetTM( m_info1.character );
+					}
+				}
+				else if( packetRecv.nId == 2 )
+				{
+					m_info2 = packetRecv;
+					if( m_infoSend.nId != m_info2.nId )
+					{
+						character2->GetCamera()->SetCamera( m_info2.camLook, m_info2.camPos );
+						character2->SetTM( m_info2.character );
+					}
+	/*
+					character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+					character2->Update( m_info2.header2.protocol );
+					character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+					character1->Update( m_info1.header2.protocol );
+	*/
+				}  //if packetRecv.nId
+
 				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
 				character1->Update( m_info1.header2.protocol );
-				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( m_info2.header1.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
 				character2->Update( m_info2.header2.protocol );
-			}
-			else if( packetRecv.nId == 2 )
-			{
-				m_info2 = packetRecv;
-				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-				character2->Update( m_info2.header2.protocol );
-				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-				character1->Update( m_info1.header2.protocol );
-			}
-			
-			graphic::cCharacter* pMe = ( packetRecv.nId == 1 ? character1 : character2 );
-			pMe->GetCamera()->SetCamera( packetRecv.camLook, packetRecv.camPos );
-/*
-			if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
-				pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
-			if( packetRecv.header2.protocol != network::PROTOCOL::NONE )
-				pMe->Update( packetRecv.header2.protocol );
+	/*
+				if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
+					pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
+				if( packetRecv.header2.protocol != network::PROTOCOL::NONE )
+					pMe->Update( packetRecv.header2.protocol );
 */
 		}
 		else
 		{
-			character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-			character1->Update( m_info1.header2.protocol );
-			character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-			character2->Update( m_info2.header2.protocol );
+			if( character1->GetMode() < character1->LATTACK )
+			{
+				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+				character1->Update( m_info1.header2.protocol );
+			}
+			if( character2->GetMode() < character2->LATTACK )
+			{
+				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( m_info2.header2.protocol );
+			}
 		}
 
 //	}
@@ -321,6 +351,9 @@ void cStage_Ingame::Update(const float elapseTime)
 //void cStage_Ingame::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Render(const float elapseTime)
 {
+		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+		pMe->GetCamera()->SetView();
+
 		//fps 및 그리드 출력
 		graphic::GetRenderer()->RenderFPS();
 		graphic::GetRenderer()->RenderGrid();
@@ -330,7 +363,6 @@ void cStage_Ingame::Render(const float elapseTime)
 //		character2->Render();
 
 	//test
-		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 		Matrix44 VP;
 		VP = pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection();
 		m_shader->SetMatrix( "mVP", VP );
@@ -339,7 +371,37 @@ void cStage_Ingame::Render(const float elapseTime)
 		character1->RenderShader( *m_shader );
 		character2->RenderShader( *m_shader );
 		
+		if( m_font )
+		{
+			char buff[16];
+			::_itoa_s( pMe->GetHP(), buff, sizeof(buff), 10 );
+			string str("HP : ");
+			str.append( buff );
+			sRect rect(10,660,110,840);
+			m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+				DT_NOCLIP, D3DXCOLOR( 1.0f, 0.0f, 0.0f, 1.0f ) );
 
+			::_itoa_s( pMe->GetSP(), buff, sizeof(buff), 10 );
+			str.assign("SP : ");
+			str.append( buff );
+			rect.SetX(1050);
+			rect.SetY(660);
+			m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
+				DT_NOCLIP, D3DXCOLOR( 1.0f, 0.2f, 0.0f, 1.0f ) );
+
+
+			ID3DXFont* font = NULL;
+			HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 20, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &font );
+			::_itoa_s( (int)pMe->GetCamera()->GetPosition().y, buff, sizeof(buff), 10 );
+			str.assign("camHeight : ");
+			str.append( format(buff) );
+			rect.SetX(10);
+			rect.SetY(30);
+			font->DrawTextA( NULL, str.c_str(), -1, &rect,
+				DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
+			SAFE_RELEASE(font);
+		}
 }
 
 bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse)
@@ -354,6 +416,7 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 	m_infoSend.ptMouse = ptMouse;
 	m_infoSend.camLook = pMe->GetCamera()->GetLook();
 	m_infoSend.camPos = pMe->GetCamera()->GetPosition();
+	m_infoSend.character = pMe->GetTM();
 
 	char buff[ 128];  //배열 크기는 미리 정해진 약속이어야 한다. 즉, 채우려는 데이터가 적어도 배열크기로 다 채워야한다.
 	ZeroMemory(buff, sizeof(buff));
@@ -372,7 +435,7 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 {
 //	const timeval t = {0, 10}; // 10 millisecond
-	const timeval t = {0, 2};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
+	const timeval t = {0, 1};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
 	fd_set readSockets;
 	FD_ZERO(&readSockets);
 	FD_SET(GetStageMgr()->GetSocket(), &readSockets);
@@ -398,8 +461,9 @@ bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 			packetInfo.header2 = protocol->header2;
 			packetInfo.ptMouse.x = protocol->ptMouse.x;
 			packetInfo.ptMouse.y = protocol->ptMouse.y;
-			packetInfo.camLook = protocol.camLook;
-			packetInfo.camPos = protocol.camPos;
+			packetInfo.camLook = protocol->camLook;
+			packetInfo.camPos = protocol->camPos;
+			packetInfo.character = protocol->character;
 
 			return true;
 		}

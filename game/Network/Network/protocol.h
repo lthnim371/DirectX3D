@@ -35,10 +35,18 @@ namespace network
 	//	PROTOCOL::TYPE header2;
 		int nId;
 		POINT ptMouse;
+	//	bool bAccess;
 		common::Vector3 camLook;
 		common::Vector3 camPos;
+		common::Matrix44 character;
 
 	} InfoProtocol;
+
+	typedef struct tagAccessProtocol
+	{
+		int nId;
+		bool bAccess;
+	} AccessProtocol;
 
 #pragma pack()  //끝날때 다시 기본으로 되돌리기
 

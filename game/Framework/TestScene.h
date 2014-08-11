@@ -11,10 +11,11 @@ namespace framework
 	//main
 		void Button1Click(framework::cEvent &event);
 	
-	//select
+	//network select
 		void Button2Click(framework::cEvent &event);
 		void Button3Click(framework::cEvent &event);
 
 	private:
+	//	bool m_clickLimit;
 	};
 }

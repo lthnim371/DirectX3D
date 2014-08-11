@@ -8,6 +8,7 @@
 
 using namespace graphic;
 
+#define JUMPSPEED 10
 
 cCharacter::cCharacter(const int id) :
 	cModel(id)
@@ -47,7 +48,6 @@ cCharacter::~cCharacter()
 {
 	SAFE_DELETE(m_weapon);
 	SAFE_DELETE(m_camera);
-	SAFE_RELEASE(m_font);
 }
 
 
@@ -62,9 +62,6 @@ bool cCharacter::Create(const string &modelName)
 //	SetRenderMesh(false);
 
 	m_camera = new cCamera();
-	m_font = NULL;
-	HRESULT hr = D3DXCreateFontA( ::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
-	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
 		
 	return bResult;
 }
@@ -157,6 +154,8 @@ bool cCharacter::Move(const float elapseTime)
 	if(m_weapon)
 		UpdateWeapon();
 
+
+
 	return bAniState;
 }
 
@@ -176,7 +175,7 @@ void cCharacter::Render()
 		m_characterCube->Render( Matrix44() );
 	if(m_weaponCube)
 		m_weaponCube->Render( Matrix44() );
-
+/*
 	if( m_font )
 	{
 		char buff[32];
@@ -195,6 +194,7 @@ void cCharacter::Render()
 		m_font->DrawTextA( NULL, str.c_str(), -1, (RECT*)&rect,
 			DT_NOCLIP, D3DXCOLOR( 1.0f, 0.2f, 0.0f, 1.0f ) );
 	}
+*/
 }
 
 void cCharacter::RenderShader(cShader &shader)
@@ -243,6 +243,8 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		break;
 
 		case ROTATION:  //캐릭터 회전
+		case LEFTROTATION:
+		case RIGHTROTATION:
 			{
 				Quaternion q( Vector3(0,1,0), x * 0.005f ); 
 				Matrix44 m = q.GetMatrix();
@@ -646,12 +648,12 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 				if(y <= 10.f)
 					return;
 				else if(y > 10.f)
-					m_jumpSpeed += elapseTime;
+					m_jumpSpeed += ( 22.f * elapseTime );
 			break;
 		}
 	}
 //	m_jumpSpeed -= 0.2f;
-	m_jumpSpeed -= ( 0.2f + elapseTime );
+	m_jumpSpeed -= ( 22.f * elapseTime );
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
@@ -714,6 +716,7 @@ void cCharacter::UpdateBeHit(const bool bAniState, const Vector3& sourDir, const
 	Vector3 newSourDir( Vector3(sourDir.x, 0.f, sourDir.z) );
 	mat.SetTranslate( newSourDir.Normal() * fAniPosGap );
 	MultiplyTM( mat );
+	m_camera->SetPosition( GetTM() );
 
 	if(m_weapon)
 		m_weapon->SetTM( GetTM() );
@@ -792,7 +795,8 @@ void cCharacter::GetWeaponBoundingBox()
 
 bool cCharacter::CollisionCheck( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
 {
-	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
+//	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
+	Vector3 MyDir( m_camera->GetDirection().Normal() );
 	Vector3 destPos( GetTM().GetPosition() );
 
 	if( m_mode == BEHIT )

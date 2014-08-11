@@ -2,11 +2,11 @@
 
 namespace framework
 {
-	class cStage_Select : public cStage
+	class cStage_NetworkSelect : public cStage
 	{
 	public:
-		cStage_Select();
-		~cStage_Select();
+		cStage_NetworkSelect();
+		~cStage_NetworkSelect();
 
 	//	virtual void Init() override;
 	//	virtual void Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
@@ -22,5 +22,7 @@ namespace framework
 	private:
 		LPD3DXSPRITE m_sprite;
 		cTestScene* m_scene;
+
+		u_short usCount;
 	};
 }

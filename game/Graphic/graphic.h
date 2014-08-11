@@ -57,5 +57,3 @@ using namespace common;
 
 //Ãß°¡
 //#include "Image.h"
-
-#define JUMPSPEED 10

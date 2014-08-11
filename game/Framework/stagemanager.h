@@ -7,7 +7,7 @@ namespace framework
 	public:
 		enum STAGE
 		{
-			MAIN, SELECT, INGAME,
+			MAIN, NETWORK_SELECT, NETWORK_LOADING, INGAME,
 		};
 
 		cStageMgr();

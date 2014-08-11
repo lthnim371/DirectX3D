@@ -5,6 +5,7 @@ using namespace framework;
 
 cStage_Main::cStage_Main()
 {
+	usCount = 7;
 }
 
 cStage_Main::~cStage_Main()
@@ -19,7 +20,7 @@ void cStage_Main::Init(const int nId)
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");
-	m_scene->Create("../media/image/UI_Main_Scene.tga");
+	m_scene->Create("../media/image/main_movie_I7.tga");
 	m_scene->SetPos( Vector3(0.f, 0.f, 0.f) );
 	
 	cButton* pBtn1 = new cButton(m_sprite, 1, "Button1");
@@ -42,6 +43,17 @@ void cStage_Main::Update(const float elapseTime)
 //void cStage_Main::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Main::Render(const float elapseTime)
 {
+	usCount += 2;
+	if( usCount >= 77 )
+		usCount = 7;
+	char buff[8];
+	::_itoa_s( usCount, buff, sizeof(buff), 10 );
+
+	string str1("../media/image/main_movie_I");
+	string str2( buff );
+	str2.append( ".tga" );
+
+	m_scene->Create( str1 + str2 );
 	m_scene->Render( Matrix44() );
 }
 

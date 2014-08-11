@@ -73,8 +73,9 @@
     <ClInclude Include="stage.h" />
     <ClInclude Include="stagemanager.h" />
     <ClInclude Include="stage_ingame.h" />
+    <ClInclude Include="stage_NetworkLoading.h" />
     <ClInclude Include="stage_main.h" />
-    <ClInclude Include="stage_select.h" />
+    <ClInclude Include="stage_NetworkSelect.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestScene.h" />
@@ -90,8 +91,9 @@
     <ClCompile Include="keyManager.cpp" />
     <ClCompile Include="stagemanager.cpp" />
     <ClCompile Include="stage_ingame.cpp" />
+    <ClCompile Include="stage_NetworkLoading.cpp" />
     <ClCompile Include="stage_main.cpp" />
-    <ClCompile Include="stage_select.cpp" />
+    <ClCompile Include="stage_NetworkSelect.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -7,8 +7,10 @@ cStageMgr::cStageMgr()
 {
 	cStage_Main* pMain = new cStage_Main;
 	m_list.insert( std::make_pair(MAIN, pMain) );
-	cStage_Select* pSel = new cStage_Select;
-	m_list.insert( std::make_pair(SELECT, pSel) );
+	cStage_NetworkSelect* pNetSel = new cStage_NetworkSelect;
+	m_list.insert( std::make_pair(NETWORK_SELECT, pNetSel) );
+	cStage_NetworkLoading* pNetload = new cStage_NetworkLoading;
+	m_list.insert( std::make_pair(NETWORK_LOADING, pNetload) );
 	cStage_Ingame* pIn = new cStage_Ingame;
 	m_list.insert( std::make_pair(INGAME, pIn) );
 

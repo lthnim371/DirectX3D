@@ -105,8 +105,10 @@ bool cGameApp::OnInit()
 
 void cGameApp::OnInput(const float elapseT)
 {
-//	framework::GetStageMgr()->GetStage()->Input( elapseT, character1, character2 );
-	framework::GetStageMgr()->GetStage()->Input( elapseT );
+	if( m_hWnd == ::GetFocus() )
+		framework::GetStageMgr()->GetStage()->Input( elapseT );
+	//	framework::GetStageMgr()->GetStage()->Input( elapseT, character1, character2 );
+		
 }
 
 void cGameApp::OnUpdate(const float elapseT)
@@ -162,16 +164,22 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				switch( framework::GetStageMgr()->GetCurrentStage() )
 				{
-					case 0:
+					case 0:  //MAIN
 						{
 							framework::cStage_Main* pMain = dynamic_cast<framework::cStage_Main*>( framework::GetStageMgr()->GetStage() );
 							pMain->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 1:
+					case 1:  //NETWORK_SELECT
 						{
-							framework::cStage_Select* pMain = dynamic_cast<framework::cStage_Select*>( framework::GetStageMgr()->GetStage() );
-							pMain->MessageProc(message, wParam, lParam);
+							framework::cStage_NetworkSelect* pNetSel = dynamic_cast<framework::cStage_NetworkSelect*>( framework::GetStageMgr()->GetStage() );
+							pNetSel->MessageProc(message, wParam, lParam);
+						}
+					break;
+					case 2:  //NETWORK_LOADING
+						{
+							framework::cStage_NetworkLoading* pNetLoad = dynamic_cast<framework::cStage_NetworkLoading*>( framework::GetStageMgr()->GetStage() );
+							pNetLoad->MessageProc(message, wParam, lParam);
 						}
 					break;
 				}

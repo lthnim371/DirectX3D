@@ -28,6 +28,7 @@ namespace graphic
 		bool GetCubeCheck() const;
 		bool CollisionCheck( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
 		int GetHP() const;
+		int GetSP() const;
 		cCube* GetWeaponCube() const;
 		cCube* GetCharacterCube() const;
 		void SetAttackSuccess();
@@ -76,11 +77,12 @@ namespace graphic
 		int m_sp;
 
 		cCamera* m_camera;
-		ID3DXFont* m_font;
+//		ID3DXFont* m_font;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }
 	inline int cCharacter::GetHP() const { return m_hp; }
+	inline int cCharacter::GetSP() const { return m_sp; }
 	inline cCube* cCharacter::GetWeaponCube() const { return m_weaponCube; }
 	inline cCube* cCharacter::GetCharacterCube() const { return m_characterCube; }
 	inline void cCharacter::SetAttackSuccess() { m_cubeCheck = false; m_targetAttackCheck = true; }

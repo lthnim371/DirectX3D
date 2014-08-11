@@ -15,6 +15,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9C76A094-52A2-419C-A807-5F3DF4915F0E}"
 	ProjectSection(SolutionItems) = preProject
 		help.txt = help.txt
+		README.txt = README.txt
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Server", "Network\Server\Server.vcxproj", "{011B0866-A0F7-4FF1-9B45-DE33FBFD381C}"
