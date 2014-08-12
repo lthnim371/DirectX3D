@@ -67,7 +67,7 @@ bool cCharacter::Create(const string &modelName)
 }
 
 
-void cCharacter::LoadWeapon(const string &fileName)
+void cCharacter::LoadWeapon(const string &fileName)//, const string &fileName2)
 {
 	SAFE_DELETE(m_weapon);
 
@@ -81,7 +81,6 @@ void cCharacter::LoadWeapon(const string &fileName)
 */
 	if (!m_weapon)
 		m_weapon = new cModel(100);
-
 	if (!m_weapon->Create(fileName))
 		return;
 	else if(m_weapon)
@@ -89,7 +88,7 @@ void cCharacter::LoadWeapon(const string &fileName)
 		FindWeapon();
 		GetWeaponBoundingBox();
 	}
-
+	
 //	GetBoneMgr()->SwapBone( m_weapon->GetBoneMgr() );
 //	m_weapon->SetBoneMgr( GetBoneMgr() );
 
@@ -144,11 +143,17 @@ bool cCharacter::Move(const float elapseTime)
 		UpdateAttack(bAniState);
 	else if(m_mode >= JUMP && m_mode <= RIGHTJUMP)
 		UpdateJump(bAniState, elapseTime);
-	else if(m_mode == BEHIT && bAniState == false)
+	else if( m_mode == BEHIT && bAniState == false)
 	{
 		m_mode = NORMAL;
 		m_bone->SetAniLoop(true);
 		SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+	}
+	else if(m_mode == GUARD_BE_HIT && bAniState == false)
+	{
+		m_mode = GUARD;
+		m_bone->SetAniLoop(true);
+		SetAnimation( "..\\media\\ani\\valle\\valle1_guard_loop.ani" );
 	}
 
 	if(m_weapon)
@@ -213,7 +218,7 @@ void cCharacter::RenderShader(cShader &shader)
 
 void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
 {
-	if( m_mode == BEHIT )
+	if( m_mode == BEHIT || m_mode == GUARD_BE_HIT )
 		return;
 	else if(m_mode >= JUMP)  //공격 상태 확인
 	{
@@ -402,6 +407,15 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		//	mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
 		//	MultiplyTM( mat );  //현재 위치에 더해주기
 		//	GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+		break;
+
+		case GUARD:
+			if( m_mode != state )
+			{
+				m_mode = GUARD;
+				m_bone->SetAniLoop(true);
+				SetAnimation( "..\\media\\ani\\valle\\valle1_guard_loop.ani" );
+			}
 		break;
 	}
 
@@ -648,12 +662,12 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 				if(y <= 10.f)
 					return;
 				else if(y > 10.f)
-					m_jumpSpeed += ( 22.f * elapseTime );
+					m_jumpSpeed += ( 30.f * elapseTime );
 			break;
 		}
 	}
 //	m_jumpSpeed -= 0.2f;
-	m_jumpSpeed -= ( 22.f * elapseTime );
+	m_jumpSpeed -= ( 30.f * elapseTime );
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );
@@ -793,28 +807,34 @@ void cCharacter::GetWeaponBoundingBox()
 	}
 }
 
-bool cCharacter::CollisionCheck( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
+bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
 {
 //	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
-	Vector3 MyDir( m_camera->GetDirection().Normal() );
-	Vector3 destPos( GetTM().GetPosition() );
+	Vector3 MyDir( m_camera->GetDirection().Normal() );  //현재 사용자의 카메라 방향
+	Vector3 destPos( GetTM().GetPosition() );  //현재 사용자의 위치
 
-	if( m_mode == BEHIT )
-	{
-		Vector3 distanceDir( destPos - sourPos );
-		Vector3 newSourDir( sourDir.x, 0.f, sourDir.z );
-		if( distanceDir.Normal().DotProduct( newSourDir.Normal() ) < 0.8f)
-			return false;
-	}
-
+//cube를 boundingbox로 변환
 	cBoundingBox destBox( *m_characterCube );
 	cBoundingBox sourBox( sourCube );
 	
-	if( destBox.Collision( sourBox ) )
+	if( destBox.Collision( sourBox ) )  //충돌 확인..
 	{
-		if( m_mode != BEHIT )
-		{  //원래 하던 동작과 관련된 변수들 초기화
+		Vector3 distanceDir( sourPos - destPos );   //상대방과의 거리(방향) 파악
+
+		if( m_mode == GUARD )
+		{
+			if( MyDir.DotProduct( distanceDir.Normal() ) >= 0.2f )  //상대방이 전방에서 공격했다면..
+			{
+				m_mode = GUARD_BE_HIT;
+				m_bone->SetAniLoop(false);
+				SetAnimation( "..\\media\\ani\\valle\\valle1_guard_hit1.ani" );
+				return true;
+			}
+		}
+		
+		//원래 하던 동작과 관련된 변수들 초기화
 			m_mode = BEHIT;
+			m_hp -= 10;
 		
 			m_prevAniPos = 0.f;
 			m_aniPosGap = 0.f;
@@ -833,28 +853,41 @@ bool cCharacter::CollisionCheck( cCube& sourCube, const Vector3& sourPos, const 
 		//	Matrix44 mat;
 		//	mat.SetTranslate( sourPos - destPos );
 		//	MultiplyTM( mat );
-
-	//		Vector3 sourPos( sourTM.GetPosition() );
-						
-			Vector3 distanceDir( sourPos - destPos ); 
+	//		Vector3 sourPos( sourTM.GetPosition() );		
 		
 			m_bone->SetAniLoop(false);
-			float test = MyDir.DotProduct( distanceDir.Normal() );
 	//		if( destPos.Normal().DotProduct( sourPos.Normal() ) >= 0.f )
-			if( test >= 0.f )
+			if( MyDir.DotProduct( distanceDir.Normal() ) >= 0.f )  //상대방이 전방에서 공격했다면..
 			{	
 				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
 			}
-			else
+			else  //상대방이 후방에서 공격했다면..
 			{
 				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
 			}
-		
-			m_hp -= 10;
-		}
-		
+
 		return true;
-	}
+	}  //if( destBox.Collision( sourBox ) )
+
+	return false;
+}
+
+bool cCharacter::CollisionCheck2( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
+{
+//	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
+	Vector3 MyDir( m_camera->GetDirection().Normal() );
+	Vector3 destPos( GetTM().GetPosition() );
+
+	Vector3 distanceDir( destPos - sourPos );  //현재 사용자와 상대방과의 거리(방향) 파악
+	Vector3 newSourDir( sourDir.x, 0.f, sourDir.z );  //상대방의 카메라방향벡터이기 때문에 y값을 제거해주어야 함
+	if( distanceDir.Normal().DotProduct( newSourDir.Normal() ) < 0.8f)  //상대방이 바라보는 방향과 실제 상대방과 나와의 거리 방향이 거의 비슷할 경우에만 충돌 확인
+		return false;  //상대방이 다른곳을 공격하고 있는 상태이다...
+
+	cBoundingBox destBox( *m_characterCube );
+	cBoundingBox sourBox( sourCube );
+	
+	if( destBox.Collision( sourBox ) )		
+		return true;
 
 	return false;
 }

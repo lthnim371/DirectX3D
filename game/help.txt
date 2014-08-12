@@ -183,3 +183,11 @@ framework의 stage main~loading 클래스까지 메인화면 애니메이션 동작
 주소 : 112.222.208.106
 아이디 : jjuiddong.
 메일 : jjuiddong@naver.com
+
+
+140812
+★ update
+캐릭터를 미는 현상 구현 : 공격상태일 때는 몸통 충돌을 계속 확인
+캐릭터 모션 추가 : 방어 (방패크기로 인해 추후 max로 수정 바람)
+framework의 stage_ingame클래스 수정
+graphic의 character클래스 수정

@@ -2,15 +2,16 @@
 #include "stage_ingame.h"
 
 using namespace framework;
-//using namespace graphic;
 
 cStage_Ingame::cStage_Ingame()
 {
-//	m_id = 0;
 	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
 	ZeroMemory(&m_info1, sizeof(m_info1));
 	ZeroMemory(&m_info2, sizeof(m_info2));
 //	m_access = false;
+	fTick1 = 0.f;
+	fTick2 = 0.f;
+	m_font = NULL;
 }
 cStage_Ingame::~cStage_Ingame()
 {
@@ -23,24 +24,19 @@ cStage_Ingame::~cStage_Ingame()
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId)
 {
-//	fTick1 = 0.f;
-//	fTick2 = 0.f;
-
-	m_font = NULL;
+//font 생성
 	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
 
-	//	m_id = nId;
-	m_infoSend.nId = nId;
+	m_infoSend.nId = nId;  //사용자 식별
 //	m_info2.nId = ( nId == 0 ? 1 : 0 );
 
 	m_shader = new graphic::cShader();
-
-	character1 = new graphic::cCharacter(1);
-	character2 = new graphic::cCharacter(2);
-		
 	m_shader->Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
 	
+	character1 = new graphic::cCharacter(1);
+	character2 = new graphic::cCharacter(2);
+
 	//character1
 		character1->Create( "..\\media\\mesh\\valle\\valle_character1.dat" );
 		character1->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
@@ -63,15 +59,14 @@ void cStage_Ingame::Init(const int nId)
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_JLA.ani" );
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
-		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back2.ani" );
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front1.ani" );
-		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_hit_front2.ani" );
+		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_guard_loop.ani" );
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 
 		//Matrix44 rot;
 		//rot.SetRotationY( -1.f );
 		Matrix44 pos;
-		pos.SetTranslate( Vector3( 0, 0, -2500.f) );
+		pos.SetTranslate( Vector3( 0, 0, -1500.f) );
 		character1->MultiplyTM( pos);
 	//	character1->GetCamera()->Init( character1->GetTM().GetPosition() );
 
@@ -80,26 +75,31 @@ void cStage_Ingame::Init(const int nId)
 		character2->LoadWeapon( "..\\media\\mesh\\valle\\valle_weapon1.dat" );
 
 		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
-	//test
-	//	character2->SetRenderBoundingBox(true);
+	
+	//debug
+		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_guard_loop.ani" );
+		character2->SetMode( character2->GUARD );
+
 		//Matrix44 rot;
 		//rot.SetRotationY( 180.f );
-		pos.SetTranslate( Vector3( 0, 0, 2500.f) );
+		pos.SetTranslate( Vector3( 0, 0, 1500.f) );
 		character2->MultiplyTM( pos);
 	//	character2->GetCamera()->SetPosition( character2->GetTM() );
 
 	//	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
-		if( m_infoSend.nId == 1 )
-		{
+	//사용자를 식별하여 해당캐릭터 위치로 카메라 셋팅 -> 그러나 굳이 구분할 필요가 없을듯하다
+//		if( m_infoSend.nId == 1 )
+//		{
 			Vector3 characterPos( character1->GetTM().GetPosition() );
 			character1->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
-		}
-		else if( m_infoSend.nId == 2 )
-		{
-			Vector3 characterPos( character2->GetTM().GetPosition() );
+//		}
+//		else if( m_infoSend.nId == 2 )
+//		{
+			characterPos = Vector3( character2->GetTM().GetPosition() );
 			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
-		}
+//		}
 
+//초기 마우스위치 값 보관
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
 }
@@ -109,13 +109,15 @@ void cStage_Ingame::Input(const float elapseTime)
 {
 //	if( !m_access )
 //		GetStageMgr()->SetSocket();
-	
+
+//패킷 전송에 필요한 변수들 생성 및 초기화
 	POINT ptMouse;
 	ptMouse.x = 0;
 	ptMouse.y = 0;
 	network::PROTOCOL::TYPE nState1 = network::PROTOCOL::NONE;
 	network::PROTOCOL::TYPE nState2 = network::PROTOCOL::NONE;
 
+//회전 확인
 	m_prevMouse = m_currMouse;
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
@@ -133,7 +135,7 @@ void cStage_Ingame::Input(const float elapseTime)
 			nState1 = network::PROTOCOL::LEFTROTATION;
 	}
 	
-/*	//프로그램 테스트용
+/*	//카메라 높이 조절(프로그램 테스트)
 //	else if( InputMgr->isOnceKeyDown('1') )
 	if( InputMgr->isOnceKeyDown('1') )
 	{
@@ -210,6 +212,12 @@ void cStage_Ingame::Input(const float elapseTime)
 	//	pMe->Update( pMe->JUMP );
 	//	character1->Update( character1->JUMP );
 	}
+	else if( InputMgr->isStayKey('E') )
+	{	
+		nState2 = network::PROTOCOL::GUARD;
+	//	pMe->Update( pMe->JUMP );
+	//	character1->Update( character1->JUMP );
+	}
 	else
 	{
 		nState2 = network::PROTOCOL::NORMAL;
@@ -218,24 +226,11 @@ void cStage_Ingame::Input(const float elapseTime)
 	//	character1->Update( character1->NORMAL );
 	}
 
-//	fTick1 += elapseTime;
-//		fTick1 = 0.f;
-//	if( nState2 != network::PROTOCOL::NONE || nState1 != network::PROTOCOL::NONE )
+//이전 전송된 패킷과 다를 경우에만 전송
 	if( nState2 != m_infoSend.header2.protocol || nState1 != m_infoSend.header1.protocol )
 	{
 		PacketSend(nState1, nState2, ptMouse);
 	}
-	
-	
-	//	PacketSend();
-	//	m_access = PacketSend((int)nState1, (int)nState2, ptMouse);
-/*	else if( m_elapseTime >= 100.f )
-	{
-		m_elapseTime = 0.f;
-	//	PacketSend();
-		PacketSend(nState1, nState2, ptMouse);
-	//	m_access = PacketSend((int)nState1, (int)nState2, ptMouse);
-	}	*/
 }
 
 //void cStage_Ingame::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
@@ -246,24 +241,25 @@ void cStage_Ingame::Update(const float elapseTime)
 //	if(fTick2 >= 0.2f)
 //	{
 //		fTick2 = 0.f;
-
+	//서버로부터 패킷 받아오기
 		network::InfoProtocol packetRecv;
 		ZeroMemory(&packetRecv, sizeof(packetRecv));
-		if( PacketReceive(packetRecv) )
+		if( PacketReceive(packetRecv) )  //패킷을 받아왔다면..
 		{
 //			graphic::cCharacter* pMe = ( packetRecv.nId != 1 ? character1 : character2 );
 //			pMe->GetCamera()->SetCamera( packetRecv.camLook, packetRecv.camPos );
 
-				if( packetRecv.nId == 1 )
+				if( packetRecv.nId == 1 )  //사용자 식별번호가 1번이라면..
 				{
-					m_info1 = packetRecv;
-					if( m_infoSend.nId != m_info1.nId )
+					m_info1 = packetRecv;  //받아온 패킷 보관해두기
+					if( m_infoSend.nId != m_info1.nId )  //받아온 식별번호와 지금 실행하고 있는 사용자와 다르다면...(즉, 현재 사용자가 2번이라면..)
 					{
+					//1번캐릭터 위치 갱신
 						character1->GetCamera()->SetCamera( m_info1.camLook, m_info1.camPos );
 						character1->SetTM( m_info1.character );
 					}
 				}
-				else if( packetRecv.nId == 2 )
+				else if( packetRecv.nId == 2 )  //사용자 식별번호가 2번이라면..
 				{
 					m_info2 = packetRecv;
 					if( m_infoSend.nId != m_info2.nId )
@@ -271,14 +267,9 @@ void cStage_Ingame::Update(const float elapseTime)
 						character2->GetCamera()->SetCamera( m_info2.camLook, m_info2.camPos );
 						character2->SetTM( m_info2.character );
 					}
-	/*
-					character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-					character2->Update( m_info2.header2.protocol );
-					character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-					character1->Update( m_info1.header2.protocol );
-	*/
-				}  //if packetRecv.nId
-
+				}  //if( packetRecv.nId == 1 )
+		
+			//받아온 패킷정보로 해당 캐릭터를 새롭게 갱신하고 다른 캐릭터는 이전 패킷정보 그대로 다시 적용
 				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
 				character1->Update( m_info1.header2.protocol );
 				character2->Update( m_info2.header1.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
@@ -290,8 +281,9 @@ void cStage_Ingame::Update(const float elapseTime)
 					pMe->Update( packetRecv.header2.protocol );
 */
 		}
-		else
+		else  //받아올 패킷이 없었다면..
 		{
+		//1번, 2번 캐릭터 각각 공격모드인 경우에만 다시 업데이트하고 그 외의 상태일 경우 무시
 			if( character1->GetMode() < character1->LATTACK )
 			{
 				character1->Update( m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
@@ -302,50 +294,45 @@ void cStage_Ingame::Update(const float elapseTime)
 				character2->Update( m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
 				character2->Update( m_info2.header2.protocol );
 			}
-		}
+		}  //if( PacketReceive(packetRecv) )
 
 //	}
 
-/*	
-	if( InputMgr->isOnceKeyDown('1') )
-	{
-		graphic::GetCamera()->SetHeight(-10.f);
-	}
-	else if( InputMgr->isOnceKeyDown('2') )
-	{
-		graphic::GetCamera()->SetHeight(10.f);
-	}
-*/
-	bool bAniState = character1->Move(elapseTime);
+//새롭게 갱신된 정보대로 적용시킴
+	bool bAniState1 = character1->Move(elapseTime);
 	bool bAniState2 = character2->Move(elapseTime);
 //	graphic::GetCamera()->SetPosition( character1->GetTM() );
-		
-		if( character1->GetCubeCheck() == true )
+	
+	//현재 사용자가 공격이 적중할 순간일 떄 사용자의 무기와 상대방의 몸통이 충돌하였는지 확인
+		if( character1->GetCubeCheck() == true )  //공격이 적중할 순간이라면..
 		{
-			if( true == character2->CollisionCheck( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook() ) )
+		//상대방을 기준으로 충돌을 확인
+			if( true == character2->CollisionCheck1( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook() ) )
 			{
-				character1->SetAttackSuccess();
+				character1->SetAttackSuccess();  //상대방이 맞았다면 상태 셋팅
 			}
 		}
 		else if( character2->GetCubeCheck() == true )
 		{
-			if ( true == character1->CollisionCheck( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook() ) )
+			if ( true == character1->CollisionCheck1( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook() ) )
 			{
 				character2->SetAttackSuccess();
 			}
-		}
+		}  //if( character1->GetCubeCheck() == true )
 
-		if( character1->GetMode() == character1->BEHIT )
+	//현재 사용자가 공격상태일 때 사용자의 몸통과 상대방의 몸통이 충돌하였는지 확인
+		if( character1->GetMode() == character1->LATTACK ||
+			character1->GetMode() == character1->RATTACK)
 		{
-			if( true == character1->CollisionCheck( *(character2->GetCharacterCube()), character2->GetCamera()->GetLook(), character2->GetCamera()->GetDirection() ) )
-				character1->UpdateBeHit( bAniState, character2->GetCamera()->GetDirection(), character2->GetAniPosGap()  );
+			if( true == character2->CollisionCheck2( *(character1->GetCharacterCube()), character1->GetCamera()->GetLook(), character1->GetCamera()->GetDirection() ) )
+				character2->UpdateBeHit( bAniState2, character1->GetCamera()->GetDirection(), character1->GetAniPosGap()  );
 		}
-		else if( character2->GetMode() == character2->BEHIT )
+		else if( character2->GetMode() == character2->LATTACK ||
+			character2->GetMode() == character2->RATTACK)
 		{
-			if( true == character2->CollisionCheck( *(character1->GetCharacterCube()), character1->GetCamera()->GetLook(), character1->GetCamera()->GetDirection() ) )
-				character2->UpdateBeHit( bAniState2, character1->GetCamera()->GetDirection(), character1->GetAniPosGap() );
-		}
-	
+			if( true == character1->CollisionCheck2( *(character2->GetCharacterCube()), character2->GetCamera()->GetLook(), character2->GetCamera()->GetDirection() ) )
+				character1->UpdateBeHit( bAniState1, character2->GetCamera()->GetDirection(), character2->GetAniPosGap() );
+		}  //if( character1->GetMode() == character1->BEHIT )
 }
 
 //void cStage_Ingame::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)

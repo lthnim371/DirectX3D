@@ -8,7 +8,8 @@ namespace graphic
 		enum STATE
 		{
 			NONE, NORMAL, ROTATION, LEFTROTATION, RIGHTROTATION,
-			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,	DASH,
+			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
+			DASH, GUARD, GUARD_BE_HIT,
 			JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
 			LATTACK, RATTACK, BEHIT,
 		};
@@ -17,7 +18,7 @@ namespace graphic
 		virtual ~cCharacter();
 
 		bool Create(const string &modelName);
-		void LoadWeapon(const string &fileName);
+		void LoadWeapon(const string &fileName);//, const string &fileName2);
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
 		virtual void RenderShader(cShader &shader);
@@ -26,7 +27,8 @@ namespace graphic
 	public:
 		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool GetCubeCheck() const;
-		bool CollisionCheck( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
+		bool CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
+		bool CollisionCheck2( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
 		int GetHP() const;
 		int GetSP() const;
 		cCube* GetWeaponCube() const;
@@ -36,6 +38,9 @@ namespace graphic
 		void UpdateBeHit(const bool bAniState, const Vector3& sourPos, const float fAniPosGap);
 		float GetAniPosGap() const;
 		cCamera* GetCamera();
+
+	//debug
+		void SetMode( const int stage );
 
 	protected:
 		bool UpdateAttack(const bool bAniState);
@@ -47,7 +52,7 @@ namespace graphic
 	private:
 		cModel *m_weapon;
 		cBoneNode *m_weaponNode; // reference
-
+	
 	//추가
 //		short m_state;
 		short m_attackCnt;  //공격 횟수(공격 상태 확인 가능)
@@ -89,4 +94,7 @@ namespace graphic
 	inline int cCharacter::GetMode() const { return m_mode; }
 	inline float cCharacter::GetAniPosGap() const { return m_aniPosGap; }
 	inline cCamera* cCharacter::GetCamera() { return m_camera; }
+
+//debug
+	inline void cCharacter::SetMode( const int stage ) { m_mode = stage; }
 }
