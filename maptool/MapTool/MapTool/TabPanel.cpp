@@ -8,15 +8,14 @@
 #include "HeightMapPanel.h"
 #include "TerrainPanel.h"
 #include "BrushPanel.h"
+#include "ModelPanel.h"
 //추가
 #include "ObjectPanel.h"
 
 // CTabPanel 대화 상자입니다.
-
-IMPLEMENT_DYNAMIC(CTabPanel, CDialogEx)
-
 CTabPanel::CTabPanel(CWnd* pParent /*=NULL*/)
 	: CDialogEx(CTabPanel::IDD, pParent)
+,	m_modelPanel(NULL)
 {
 
 }
@@ -26,6 +25,7 @@ CTabPanel::~CTabPanel()
 	SAFE_DELETE(m_heightMapPanel);
 	SAFE_DELETE(m_terrainPanel);
 	SAFE_DELETE(m_brushPanel);
+	SAFE_DELETE(m_modelPanel);
 //추가
 	SAFE_DELETE(m_objectPanel);
 }
@@ -66,8 +66,9 @@ BOOL CTabPanel::OnInitDialog()
 	m_Tab.InsertItem(0, L"HeightMap");
 	m_Tab.InsertItem(1,  L"Terrain");
 	m_Tab.InsertItem(2,  L"Brush");
+	m_Tab.InsertItem(3, L"Model");
 //추가
-	m_Tab.InsertItem(3,  L"Object");
+	m_Tab.InsertItem(4,  L"Object");
 
 	CRect cr;
 	GetClientRect(cr);
@@ -91,7 +92,14 @@ BOOL CTabPanel::OnInitDialog()
 	m_brushPanel->MoveWindow(CRect(0, 25, cr.Width(), cr.Height()));
 	m_brushPanel->ShowWindow(SW_HIDE);
 	cMapController::Get()->AddObserver(m_brushPanel);
-	
+
+
+	m_modelPanel = new CModelPanel(this);
+	m_modelPanel->Create(CModelPanel::IDD, this);
+	m_modelPanel->MoveWindow(CRect(0, 25, cr.Width(), cr.Height()));
+	m_modelPanel->ShowWindow(SW_HIDE);
+	cMapController::Get()->AddObserver(m_modelPanel);
+
 //추가
 	m_objectPanel = new CObjectPanel(this);
 	m_objectPanel->Create(CObjectPanel::IDD, this);
@@ -111,6 +119,7 @@ void CTabPanel::OnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_heightMapPanel->ShowWindow(SW_SHOW);
 		m_terrainPanel->ShowWindow(SW_HIDE);
 		m_brushPanel->ShowWindow(SW_HIDE);
+		m_modelPanel->ShowWindow(SW_HIDE);
 		m_objectPanel->ShowWindow(SW_HIDE);
 		cMapController::Get()->ChangeEditMode(EDIT_MODE::MODE_HEIGHTMAP);
 		break;
@@ -119,6 +128,7 @@ void CTabPanel::OnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_terrainPanel->ShowWindow(SW_SHOW);
 		m_heightMapPanel->ShowWindow(SW_HIDE);
 		m_brushPanel->ShowWindow(SW_HIDE);
+		m_modelPanel->ShowWindow(SW_HIDE);
 		m_objectPanel->ShowWindow(SW_HIDE);
 		cMapController::Get()->ChangeEditMode(EDIT_MODE::MODE_TERRAIN);
 		break;
@@ -127,16 +137,27 @@ void CTabPanel::OnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_brushPanel->ShowWindow(SW_SHOW);
 		m_terrainPanel->ShowWindow(SW_HIDE);
 		m_heightMapPanel->ShowWindow(SW_HIDE);
+		m_modelPanel->ShowWindow(SW_HIDE);
 		m_objectPanel->ShowWindow(SW_HIDE);
 		cMapController::Get()->ChangeEditMode(EDIT_MODE::MODE_BRUSH);
 		break;
 
-	//추가
 	case 3:
+		m_modelPanel->ShowWindow(SW_SHOW);
+		m_brushPanel->ShowWindow(SW_HIDE);
+		m_terrainPanel->ShowWindow(SW_HIDE);
+		m_heightMapPanel->ShowWindow(SW_HIDE);
+		m_objectPanel->ShowWindow(SW_HIDE);
+		cMapController::Get()->ChangeEditMode(EDIT_MODE::MODE_MODEL);
+		break;
+
+//추가 : 위의 코드에도 추가
+	case 4:
 		m_objectPanel->ShowWindow(SW_SHOW);
 		m_terrainPanel->ShowWindow(SW_HIDE);
 		m_heightMapPanel->ShowWindow(SW_HIDE);
 		m_brushPanel->ShowWindow(SW_HIDE);
+		m_modelPanel->ShowWindow(SW_HIDE);
 		cMapController::Get()->ChangeEditMode(EDIT_MODE::MODE_OBJECT);
 		break;
 	}

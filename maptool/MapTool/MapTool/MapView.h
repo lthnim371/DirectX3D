@@ -19,12 +19,12 @@ protected:
 	bool m_dxInit;
 	string m_filePath;
 	Matrix44 m_rotateTm;
-	graphic::cCamera m_camera;
 
 	graphic::cGrid m_grid;
 	graphic::cCube m_cube;
 	graphic::cShader m_terrainShader;
 	graphic::cShader m_terrainShader2;
+	graphic::cShader *m_modelShader; // reference
 	graphic::cLine m_line;
 	common::Ray m_ray;
 
@@ -36,6 +36,7 @@ protected:
 //추가
 	graphic::cShader m_objectShader;
 	int m_objectCount;
+	graphic::cModel* m_currSelectObj;
 
 public:
 	virtual void OnDraw(CDC* pDC);      // 이 뷰를 그리기 위해 재정의되었습니다.

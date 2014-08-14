@@ -22,7 +22,6 @@ cMesh::cMesh(const int id, const sRawBone &rawBone) :
 
 cMesh::~cMesh()
 {
-
 }
 
 
@@ -59,7 +58,7 @@ void cMesh::CreateMesh( const vector<Vector3> &vertices,
 		m_idxBuff.Unlock();
 	}
 
-	//CreateBoundingBox(m_boundingBox);
+	CreateBoundingBox(m_boundingBox);
 }
 
 
@@ -341,7 +340,7 @@ void cMesh::RenderBoundingBox(const Matrix44 &tm)
 
 
 // 경계박스 생성.
-/*void cMesh::CreateBoundingBox(OUT cCube &out)
+void cMesh::CreateBoundingBox(OUT cCube &out)
 {
 	sMinMax mm;
 
@@ -354,9 +353,10 @@ void cMesh::RenderBoundingBox(const Matrix44 &tm)
 	m_vtxBuff.Unlock();
 
 	out.SetCube(mm.Min, mm.Max);
-}*/
+}
 
-void cMesh::CreateBoundingBox()
+//추가
+const cCube& cMesh::CreateBoundingBox()
 {
 	sMinMax mm;
 
@@ -369,4 +369,6 @@ void cMesh::CreateBoundingBox()
 	m_vtxBuff.Unlock();
 
 	m_boundingBox.SetCube(mm.Min, mm.Max);
+
+	return m_boundingBox;
 }

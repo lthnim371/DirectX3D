@@ -191,3 +191,10 @@ framework의 stage main~loading 클래스까지 메인화면 애니메이션 동작
 캐릭터 모션 추가 : 방어 (방패크기로 인해 추후 max로 수정 바람)
 framework의 stage_ingame클래스 수정
 graphic의 character클래스 수정
+
+
+140814
+★ update
+common 전부 교체
+graphic의 manager, terrain 전부 교체
+graphic의 mesh클래스 수정

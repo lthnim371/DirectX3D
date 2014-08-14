@@ -37,6 +37,7 @@ bool cModel::Create(const string &modelName, MODEL_TYPE::TYPE type )
 
 	Clear();
 
+	m_fileName = modelName;
 	const bool isSkinnedMesh = !rawMeshes->bones.empty();
 
 	// 스키닝 애니메이션이면 Bone을 생성한다.
@@ -78,6 +79,9 @@ bool cModel::Create(const string &modelName, MODEL_TYPE::TYPE type )
 			m_meshes.push_back(p);
 	}
 	
+	// 모델 충돌 박스를 생성한다.
+//	GetCollisionBox();
+
 	return true;
 }
 
@@ -149,6 +153,10 @@ void cModel::RenderShader(cShader &shader)
 
 	if (m_bone && m_isRenderBoundingBox) 
 		m_bone->RenderBoundingBox(m_matTM);
+
+//추가
+	if( m_isRenderBoundingBox )
+		m_cube.Render( Matrix44() );
 }
 
 
@@ -239,4 +247,45 @@ cBoundingBox* cModel::GetCollisionBox()
 void cModel::Collision( int testNum, ICollisionable *obj )
 {
 
+}
+
+
+// 모델을 복사해서 리턴한다.
+cModel* cModel::Clone() const
+{
+	cModel *clone = new cModel(GenerateId());
+	clone->Create(m_fileName, m_type);
+
+	clone->SetTM(m_matTM);
+	clone->SetRenderMesh(m_isRenderMesh);
+	clone->SetRenderBone(m_isRenderBone);
+	clone->SetRenderBoundingBox(m_isRenderBoundingBox);
+
+	return clone;
+}
+
+
+// 스크린 좌표 x,y 로 모델이 선택이 되었는지 판단한다. 피킹되었다면 true를 리턴한다.
+bool cModel::Pick(const Vector3 &orig, const Vector3 &dir)
+{
+//추가
+	m_cube.SetTransform( m_matTM );
+	m_boundingBox = m_cube;
+//	m_boundingBox.SetTransform(m_matTM);
+	return m_boundingBox.Pick(orig, dir);
+}
+
+//추가
+void cModel::CreateCube()
+{
+	sMinMax mm;
+	BOOST_FOREACH (auto &mesh, m_meshes)
+	{
+		const cCube &cube = mesh->CreateBoundingBox();
+		mm.Update(cube.GetMin());
+		mm.Update(cube.GetMax());
+	}
+	
+	m_cube.SetCube( mm.Min, mm.Max );
+	m_cube.SetTransform( GetTM() );
 }

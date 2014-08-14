@@ -64,5 +64,5 @@ using std::wstringstream;
 #include "etc/rect.h"
 
 //Ãß°¡
-#include "utility\BaseType.h"
-#include "utility\Utility.h"
+//#include "utility\BaseType.h"
+//#include "utility\Utility.h"

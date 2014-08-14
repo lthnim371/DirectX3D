@@ -87,7 +87,6 @@
     <ClInclude Include="collision\collision.h" />
     <ClInclude Include="collision\collisionmanager.h" />
     <ClInclude Include="graphic.h" />
-    <ClInclude Include="Image.h" />
     <ClInclude Include="importer\modelimporter.h" />
     <ClInclude Include="manager\Renderer.h" />
     <ClInclude Include="manager\resourcemanager.h" />
@@ -125,7 +124,6 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="collision\boundingbox.cpp" />
     <ClCompile Include="collision\collisionmanager.cpp" />
-    <ClCompile Include="Image.cpp" />
     <ClCompile Include="importer\modelimporter.cpp" />
     <ClCompile Include="manager\Renderer.cpp" />
     <ClCompile Include="manager\resourcemanager.cpp" />

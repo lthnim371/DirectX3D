@@ -9,11 +9,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphic", "..\Graphic\Graph
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxMemMonitorLib", "..\wxMemMonitorLib\compiler\vc10win32\wxMemMonitorLib.vcxproj", "{937B4BDB-2BC4-43DE-9E32-BA36AEE888EB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{799E3405-9BE1-405E-9E6E-5EBC8941B357}"
-	ProjectSection(SolutionItems) = preProject
-		Update.txt = Update.txt
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32

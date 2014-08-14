@@ -144,3 +144,30 @@ void cCube::Render(const Matrix44 &tm)
 	GetDevice()->SetRenderState(D3DRS_FILLMODE, fillMode );
 	GetDevice()->SetRenderState( D3DRS_LIGHTING, lightMode );
 }
+
+//Ãß°¡
+bool cCube::Pick(const Vector3& orig, const Vector3& dir)
+{
+	bool bResult = false;
+	sVertexDiffuse *vertices = (sVertexDiffuse*)m_vtxBuff.Lock();
+	WORD *indices = (WORD*)m_idxBuff.Lock();
+	RETV(!vertices || !indices, false);
+
+	for (int i=0; i < m_idxBuff.GetFaceCount()*3; i+=3)
+	{
+		const Vector3 &p1 = vertices[ indices[ i]].p;
+		const Vector3 &p2 = vertices[ indices[ i+1]].p;
+		const Vector3 &p3 = vertices[ indices[ i+2]].p;
+
+		const Triangle tri(p1, p2, p3);
+		
+		if (tri.Intersect(orig, dir))
+		{
+			bResult = true;
+		}
+	}
+	m_vtxBuff.Unlock();
+	m_idxBuff.Unlock();
+
+	return bResult;
+}

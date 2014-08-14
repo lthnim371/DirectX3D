@@ -17,9 +17,10 @@ namespace graphic
 		virtual void RenderShader( const Matrix44 &parentTm ) override;
 		virtual void RenderShader( cShader &shader, const Matrix44 &parentTm ) override;
 		virtual void RenderShadow(cShader &shader, const Matrix44 &parentTm) override;
+
+		void CreateBoundingBox(OUT cCube &out);		
 	//추가
-		void CreateBoundingBox();
-//원본	void CreateBoundingBox(OUT cCube &out);		
+		const cCube& CreateBoundingBox();
 		void RenderBoundingBox(const Matrix44 &tm);
 		const cCube& GetBoundingBox() const;
 

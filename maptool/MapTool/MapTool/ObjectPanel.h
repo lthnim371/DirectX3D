@@ -5,7 +5,7 @@
 // CObjectPanel 대화 상자입니다.
 
 class CObjectPanel : public CDialogEx
-								, public common::iObserver
+								, public common::iObserver2
 {
 //	DECLARE_DYNAMIC(CObjectPanel)
 
@@ -17,7 +17,7 @@ public:
 	enum { IDD = IDD_DIALOG_OBJECT };
 
 public:
-	virtual void Update() override;  //iObserver가상함수 재정의
+	virtual void Update(int type) override;  //iObserver가상함수 재정의
 	void UpdateObjectList();
 
 protected:
@@ -27,9 +27,7 @@ protected:
 public:
 	afx_msg void OnBnClickedOk();
 	afx_msg void OnBnClickedCancel();
-	virtual BOOL OnInitDialog();
 	CListBox m_objectList;
-	afx_msg void OnLbnSelchangeListObject();
-	afx_msg void OnLbnSelchangeListObjectSetup();
-	CListBox m_objectSetUpList;
+	virtual BOOL OnInitDialog();
+	afx_msg void OnLbnSelchangeListObjectLoad();
 };

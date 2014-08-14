@@ -10,10 +10,10 @@ cTerrainCursor::cTerrainCursor() :
 ,	m_outerRadius(60)
 ,	m_innerAlpha(1.f)
 ,	m_brushTexture(NULL)
+,	m_selectModel(NULL)
 {
 	m_innerCircle.Create( CURSOR_VERTEX_COUNT, sizeof(sVertexDiffuse), sVertexDiffuse::FVF );
-	m_outerCircle.Create( CURSOR_VERTEX_COUNT, sizeof(sVertexDiffuse), sVertexDiffuse::FVF );
-
+	m_outerCircle.Create( CURSOR_VERTEX_COUNT, sizeof(sVertexDiffuse), sVertexDiffuse::FVF );	
 }
 
 
@@ -22,10 +22,17 @@ cTerrainCursor::~cTerrainCursor()
 }
 
 
-void cTerrainCursor::Render()
+void cTerrainCursor::RenderBrush()
 {
 	m_innerCircle.RenderLineStrip();
 	m_outerCircle.RenderLineStrip();
+}
+
+
+void cTerrainCursor::RenderModel()
+{
+	if (m_selectModel)
+		m_selectModel->Render();
 }
 
 
@@ -52,7 +59,7 @@ void cTerrainCursor::UpdateCursor( graphic::cTerrain &terrain,  const Vector3 &c
 		outer += cursorPos;
 		outerVertices[ index].p = outer;
 		outerVertices[ index].p.y = terrain.GetHeight(outer.x, outer.z);
-		outerVertices[ index].c = D3DXCOLOR( 1, 0, 0, 0 );
+		outerVertices[ index].c = D3DXCOLOR( 0, 0, 1, 0 );
 
 		index++;
 		angle += offset;
@@ -60,6 +67,14 @@ void cTerrainCursor::UpdateCursor( graphic::cTerrain &terrain,  const Vector3 &c
 
 	m_innerCircle.Unlock();
 	m_outerCircle.Unlock();
+
+
+	if (m_selectModel)
+	{
+		Matrix44 matT;
+		matT.SetTranslate(cursorPos);
+		m_selectModel->SetTM(matT);
+	}
 }
 
 
@@ -77,4 +92,16 @@ void cTerrainCursor::SelectBrushTexture(const string &fileName )
 	{
 		MessageBoxA(NULL, "텍스쳐 파일을 읽을 수 없습니다.", "ERROR", MB_OK);
 	}
+}
+
+
+// 모델 선택.
+void cTerrainCursor::SelectModel(const string &fileName)
+{
+	if (!m_selectModel)
+	{
+		m_selectModel = new cModel(common::GenerateId());
+		m_selectModel->SetRenderBoundingBox(true);
+	}
+	m_selectModel->Create(fileName);
 }

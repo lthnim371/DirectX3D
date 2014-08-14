@@ -8,7 +8,6 @@
 #include <objidl.h>
 #include <gdiplus.h> 
 
-
 #include "../Common/common.h"
 using namespace common;
 
@@ -56,7 +55,6 @@ using namespace common;
 
 #include "manager/Renderer.h"
 #include "manager/resourcemanager.h"
-
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )

@@ -19,6 +19,8 @@ namespace graphic
 
 		void Render(const Matrix44 &tm);
 
+	//Ãß°¡
+		bool Pick(const Vector3& orig, const Vector3& dir);
 
 	protected:
 		void InitCube();

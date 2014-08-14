@@ -1,9 +1,7 @@
 
 #include "stdafx.h"
 #include "terrain.h"
-#include <objidl.h>
-#include <gdiplus.h> 
-#pragma comment( lib, "gdiplus.lib" ) 
+
 using namespace std;
 using namespace Gdiplus;
 using namespace graphic;
@@ -15,11 +13,18 @@ cTerrain::cTerrain() :
 ,	m_colCellCount(0)
 ,	m_cellSize(0)
 ,	m_textureUVFactor(1.f)
+,	m_heightFactor(3.f)
+,	m_modelShader(NULL)
 {
+	m_rigids.reserve(32);
+
+	m_modelShader = cResourceManager::Get()->LoadShader(  "hlsl_skinning_no_light.fx" );
+
 }
 
 cTerrain::~cTerrain()
 {
+	Clear();
 }
 
 
@@ -63,8 +68,11 @@ bool cTerrain::CreateTerrain( const int rowCellCount, const int colCellCount, co
 bool cTerrain::UpdateHeightMap( const string &heightMapFileName, 
 	const string &textureFileName, const float heightFactor )
 {
+	m_heightFactor = heightFactor;
+	m_heightMapFileName = heightMapFileName;
+
 	const wstring wfileName = common::str2wstr(heightMapFileName);
-	Bitmap bmp(wfileName.c_str());
+	Gdiplus::Bitmap bmp(wfileName.c_str());
 
 	const int VERTEX_COL_COUNT = m_colCellCount + 1;
 	const int VERTEX_ROW_COUNT = m_rowCellCount + 1;
@@ -82,7 +90,7 @@ bool cTerrain::UpdateHeightMap( const string &heightMapFileName,
 		{
 			sVertexNormTex *vtx = pv + (k*VERTEX_COL_COUNT) + i;
 
-			Color color;
+			Gdiplus::Color color;
 			bmp.GetPixel(i*incX, k*incY, &color);
 			const float h = ((color.GetR() + color.GetG() + color.GetB()) / 3.f) 
 				* heightFactor;
@@ -112,6 +120,29 @@ void cTerrain::RenderShader(cShader &shader)
 	shader.SetVector( "vFog", fog);
 
 	m_grid.RenderShader(shader);
+
+	if (m_modelShader)
+		RenderShaderRigidModels(*m_modelShader);
+}
+
+
+// 정적 모델 출력
+void cTerrain::RenderRigidModels()
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->Render();
+	}
+}
+
+
+// 정적 모델 출력.
+void cTerrain::RenderShaderRigidModels(cShader &shader)
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->RenderShader(shader);
+	}
 }
 
 
@@ -200,20 +231,84 @@ float cTerrain::GetHeightFromRay( const Vector3 &orig, const Vector3 &dir, OUT V
 
 
 // 피킹 처리.
-bool cTerrain::Pick(const int x, const int y, const Vector3 &orig, const Vector3 &dir, OUT Vector3 &out)
+bool cTerrain::Pick(const Vector3 &orig, const Vector3 &dir, OUT Vector3 &out)
 {
 	return m_grid.Pick(orig, dir, out);
+}
+
+
+// 모델 피킹.
+cModel* cTerrain::PickModel(const Vector3 &orig, const Vector3 &dir)
+{
+	BOOST_FOREACH (auto &model, m_rigids)
+	{
+		if (model->Pick(orig, dir))
+			return model;
+	}
+	return NULL;
 }
 
 
 // 초기화.
 void cTerrain::Clear()
 {
+	m_rowCellCount = 0;
+	m_colCellCount = 0;
+	m_cellSize = 0;
+	m_heightFactor = 3.f;
+	m_textureUVFactor = 1.f;
+	m_heightMapFileName.clear();
 	m_grid.Clear();
+
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		SAFE_DELETE(model);
+	}
+	m_rigids.clear();
 }
 
 
 const string& cTerrain::GetTextureName()
 {
 	return m_grid.GetTexture().GetTextureName();
+}
+
+
+// 정적 모델 추가
+bool cTerrain::AddRigidModel(const cModel &model)
+{
+	RETV(FindRigidModel(model.GetId()), false); // already exist return
+
+	m_rigids.push_back(model.Clone());
+	return true;
+}
+
+
+// 정적 모델 찾기.
+cModel* cTerrain::FindRigidModel(const int id)
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		if (model->GetId() == id)
+			return model;
+	}
+	return NULL;
+}
+
+
+// 정적 모델 제거
+bool cTerrain::RemoveRigidModel(cModel *model)
+{
+	const bool result = common::removevector(m_rigids, model);
+	SAFE_DELETE(model);
+	return result;
+}
+
+
+// 정적 모델 제거.
+bool cTerrain::RemoveRigidModel(const int id)
+{
+	cModel *model = FindRigidModel(id);
+	RETV(!model, false);
+	return RemoveRigidModel(model);
 }

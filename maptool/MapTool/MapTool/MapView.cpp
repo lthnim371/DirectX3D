@@ -14,8 +14,11 @@ CMapView::CMapView() :
 	m_dxInit(false)
 ,	m_RButtonDown(false)
 ,	m_LButtonDown(false)
+,	m_MButtonDown(false)
+,	m_modelShader(NULL)
 //추가
 , m_objectCount(0)
+, m_currSelectObj(NULL)
 {
 
 }
@@ -67,9 +70,6 @@ void CMapView::Dump(CDumpContext& dc) const
 
 bool CMapView::Init()
 {
-	m_camera.SetCamera(Vector3(100,100,-500), Vector3(0,0,0), Vector3(0,1,0));
-	m_camera.SetProjection( D3DX_PI / 4.f, (float)WINDOW_WIDTH / (float) WINDOW_HEIGHT, 1.f, 10000.0f);
-
 	graphic::GetDevice()->SetRenderState(D3DRS_NORMALIZENORMALS, TRUE);
 
 	graphic::GetDevice()->LightEnable (
@@ -82,11 +82,12 @@ bool CMapView::Init()
 	m_cube.SetColor( 0xFF0000FF );
 	m_dxInit = true;
 
-	m_terrainShader.Create( "../media/shader/hlsl_terrain.fx", "TShader" );
-	m_terrainShader2.Create( "../media/shader/hlsl_terrain_splatting.fx", "TShader" );
+	m_terrainShader.Create( "../../media/shader/hlsl_terrain.fx", "TShader" );
+	m_terrainShader2.Create( "../../media/shader/hlsl_terrain_splatting.fx", "TShader" );
+	m_modelShader = graphic::cResourceManager::Get()->LoadShader(  "hlsl_skinning_no_light.fx" );
 
 //추가
-	m_objectShader.Create( "../media/shader/hlsl_rigid.fx", "TShader" );
+	m_objectShader.Create( "../../media/shader/hlsl_rigid.fx", "TShader" );
 
 	return true;
 }
@@ -114,25 +115,29 @@ void CMapView::Render()
 
 		const Matrix44 matIdentity;
 
-		m_terrainShader.SetMatrix( "mVP", m_camera.GetViewProjectionMatrix());
+		cCamera &camera = cMapController::Get()->GetCamera();
+		m_terrainShader.SetMatrix( "mVP", camera.GetViewProjectionMatrix());
 		m_terrainShader.SetVector( "vLightDir", Vector3(0,-1,0) );
-		m_terrainShader.SetVector( "vEyePos", m_camera.GetEyePos());
+		m_terrainShader.SetVector( "vEyePos", camera.GetEyePos());
 		m_terrainShader.SetMatrix( "mWIT", matIdentity);
 		m_terrainShader.SetMatrix( "mWorld", matIdentity);
 		//m_terrainShader.SetTexture("ShadowMap", m_pShadowTex);
 
+		m_modelShader->SetMatrix( "mVP", camera.GetViewProjectionMatrix());
+		m_modelShader->SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_modelShader->SetVector( "vEyePos", camera.GetEyePos());
 
-		m_terrainShader2.SetMatrix( "mVP", m_camera.GetViewProjectionMatrix());
+		m_terrainShader2.SetMatrix( "mVP", camera.GetViewProjectionMatrix());
 		m_terrainShader2.SetVector( "vLightDir", Vector3(0,-1,0) );
-		m_terrainShader2.SetVector( "vEyePos", m_camera.GetEyePos());
+		m_terrainShader2.SetVector( "vEyePos", camera.GetEyePos());
 		m_terrainShader2.SetMatrix( "mWIT", matIdentity);
 		m_terrainShader2.SetMatrix( "mWorld", matIdentity);
 		//m_terrainShader.2SetTexture("ShadowMap", m_pShadowTex);
 
 	//추가
-		m_objectShader.SetMatrix( "mVP", m_camera.GetViewProjectionMatrix());
+		m_objectShader.SetMatrix( "mVP", camera.GetViewProjectionMatrix());
 		m_objectShader.SetVector( "vLightDir", Vector3(0,-1,0) );
-		m_objectShader.SetVector( "vEyePos", m_camera.GetEyePos());
+		m_objectShader.SetVector( "vEyePos", camera.GetEyePos());
 		m_objectShader.SetMatrix( "mWIT", matIdentity);
 		m_objectShader.SetMatrix( "mWorld", matIdentity);
 
@@ -143,28 +148,33 @@ void CMapView::Render()
 		m_terrainShader2.SetRenderPass(1);
 		cMapController::Get()->GetTerrain().RenderShader(m_terrainShader2);
 
-		if (cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_BRUSH)
-		{
-			// Render Brush Line
-			const Vector3 p0 = m_ray.orig + Vector3(10,10,0);
-			const Vector3 p1 = m_ray.orig + m_ray.dir * 200.f;
-			m_line.SetLine( p0, p1, 0.5f );
-			//m_line.Render();
-			cMapController::Get()->GetTerrainCursor().Render();
-		}
 
+		switch (cMapController::Get()->GetEditMode())
+		{
+		case EDIT_MODE::MODE_BRUSH:
+			cMapController::Get()->GetTerrainCursor().RenderBrush();
+			break;
+		case EDIT_MODE::MODE_MODEL:
+			cMapController::Get()->GetTerrainCursor().RenderModel();
+			break;
 	//추가
-		if( cMapController::Get()->GetObject().empty() == false )
-		{
-			for( auto it = cMapController::Get()->GetObject().begin();
-				it != cMapController::Get()->GetObject().end();		++it )
+		case EDIT_MODE::MODE_OBJECT:
 			{
-				(*it)->RenderShader( m_objectShader );
+				if( cMapController::Get()->GetObject().empty() == false )
+				{
+					for( auto it = cMapController::Get()->GetObject().begin();
+						it != cMapController::Get()->GetObject().end();		++it )
+					{
+						(*it)->RenderShader( m_objectShader );
+					}
+				}
+
+				if( graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject() )
+					pCurrObject->RenderShader( m_objectShader );
 			}
+			break;
 		}
 
-		if( graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject() )
-			pCurrObject->RenderShader( m_objectShader );
 
 		graphic::GetRenderer()->RenderAxis();
 
@@ -185,18 +195,21 @@ void CMapView::Update(float elapseT)
 
 void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	SetFocus();
+	SetCapture();
 	m_LButtonDown = true;
+	m_curPos = point;
+
 //추가
 	if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
-	{
+	{	
 		graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject();
+		m_ray.Create(point.x, point.y, VIEW_WIDTH, VIEW_HEIGHT, 
+					cMapController::Get()->GetCamera().GetProjectionMatrix(), cMapController::Get()->GetCamera().GetViewMatrix() );
 		if( pCurrObject )
 		{
-			m_ray.Create(point.x, point.y, WINDOW_WIDTH, WINDOW_HEIGHT, 
-				m_camera.GetProjectionMatrix(), m_camera.GetViewMatrix() );
-
 			Vector3 pickPos;
-			cMapController::Get()->GetTerrain().Pick( m_curPos.x, m_curPos.y, m_ray.orig, m_ray.dir, pickPos);
+			cMapController::Get()->GetTerrain().Pick(m_ray.orig, m_ray.dir, pickPos);
 			
 			Matrix44 matPos;
 			matPos.SetTranslate( pickPos );
@@ -204,13 +217,31 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 			graphic::cModel* pNewObj = new graphic::cModel( m_objectCount++ );
 			pNewObj->Create( cMapController::Get()->GetCurrObjFileName(), graphic::MODEL_TYPE::RIGID );
 			pNewObj->SetTM( matPos );
+			pNewObj->CreateCube();
+			pNewObj->SetRenderBoundingBox( true );
 
 			cMapController::Get()->AddObject( pNewObj );
 		}
 		else if( !pCurrObject )
-		{
-		}
-	}
+		{			
+			vector<graphic::cModel*>& rObj = cMapController::Get()->GetObject();
+
+			if( rObj.empty() == false )
+			{
+				if( m_currSelectObj )
+					m_currSelectObj = NULL;
+
+				for( auto it = rObj.begin(); it != rObj.end(); ++it )
+				{
+					if( (*it)->Pick( m_ray.orig, m_ray.dir ) == true )
+					{
+						m_currSelectObj = (*it);
+						break;
+					}  //if
+				}  //for
+			}  //if
+		}  //else if
+	}  //if
 
 	CView::OnLButtonDown(nFlags, point);
 }
@@ -218,8 +249,41 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 
 void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	m_LButtonDown = false;
+	ReleaseCapture();
 
+	// 지형위에 모델을 위치 시킨다.
+	if (m_LButtonDown && 
+		(cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_MODEL))
+	{
+		// 모델이 선택되어 있는 상태라면, 모델을 지형위에 위치 시킨다.
+		if (cMapController::Get()->GetTerrainCursor().IsSelectModel())
+		{
+			if (const graphic::cModel *model = cMapController::Get()->GetTerrainCursor().GetSelectModel())
+			{
+				cMapController::Get()->GetTerrain().AddRigidModel(*model);
+				cMapController::Get()->UpdatePlaceModel();
+			}
+		}
+		else
+		{
+			// 모델이 선택되어 있지 않다면, 지형위의 모델을 피킹해서 선택한다.
+
+			cCamera &camera = cMapController::Get()->GetCamera();
+			m_ray.Create(point.x, point.y, VIEW_WIDTH, VIEW_HEIGHT, 
+				camera.GetProjectionMatrix(), camera.GetViewMatrix() );
+
+			// 모델 피킹.
+			Vector3 pickPos;
+			if (graphic::cModel *model = 
+				cMapController::Get()->GetTerrain().PickModel(m_ray.orig, m_ray.dir))
+			{
+				cMapController::Get()->GetTerrainCursor().SelectModel(model);
+			}
+
+		}
+	}
+
+	m_LButtonDown = false;
 	CView::OnLButtonUp(nFlags, point);
 }
 
@@ -244,21 +308,26 @@ void CMapView::OnRButtonUp(UINT nFlags, CPoint point)
 
 void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 {
+	cCamera &camera = cMapController::Get()->GetCamera();
+
 	if (m_LButtonDown)
 	{
+		CPoint pos = point - m_curPos;
 		m_curPos = point;
 
 		if (cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_BRUSH)
 		{
-			m_ray.Create(m_curPos.x, m_curPos.y, WINDOW_WIDTH, WINDOW_HEIGHT, 
-				m_camera.GetProjectionMatrix(), m_camera.GetViewMatrix() );
-
-			Vector3 pickPos;
-			graphic::cTerrainEditor &terrain = cMapController::Get()->GetTerrain();
-			graphic::cTerrainCursor &cursor = cMapController::Get()->GetTerrainCursor();
-			terrain.Pick( m_curPos.x, m_curPos.y, m_ray.orig, m_ray.dir, pickPos);
-			cursor.UpdateCursor( terrain, pickPos );
-			terrain.Brush( cursor );
+			cMapController::Get()->Brush(point);
+		}
+		else if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
+		{
+			if( m_currSelectObj )
+			{
+				Quaternion q( Vector3(0,1,0), pos.x * -0.005f );
+				Matrix44 matR = q.GetMatrix();
+				m_currSelectObj->SetTM( matR * m_currSelectObj->GetTM() );
+				m_currSelectObj->GetCube().SetTransform( m_currSelectObj->GetTM() );
+			}
 		}
 
 	}
@@ -266,8 +335,21 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		CPoint pos = point - m_curPos;
 		m_curPos = point;
-		m_camera.Pitch2(pos.y * 0.005f); 
-		m_camera.Yaw2(pos.x * 0.005f); 
+		camera.Pitch2(pos.y * 0.005f); 
+		camera.Yaw2(pos.x * 0.005f); 
+	}
+	else if (m_MButtonDown)
+	{
+		CPoint pos = point - m_curPos;
+		m_curPos = point;
+
+		Vector3 dir = camera.GetDirection();
+		dir.y = 0;
+		dir.Normalize();
+
+		const float len = camera.GetDistance();
+		camera.MoveRight( -pos.x * len * 0.001f );
+		camera.MoveAxis( dir, pos.y * len * 0.001f );
 	}
 //추가
 	else if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
@@ -276,11 +358,11 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 		if( graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject() )
 		{
-			m_ray.Create(m_curPos.x, m_curPos.y, WINDOW_WIDTH, WINDOW_HEIGHT, 
-				m_camera.GetProjectionMatrix(), m_camera.GetViewMatrix() );
+			m_ray.Create(m_curPos.x, m_curPos.y, VIEW_WIDTH, VIEW_HEIGHT, 
+				camera.GetProjectionMatrix(), camera.GetViewMatrix() );
 
 			Vector3 pickPos;
-			cMapController::Get()->GetTerrain().Pick( m_curPos.x, m_curPos.y, m_ray.orig, m_ray.dir, pickPos);
+			cMapController::Get()->GetTerrain().Pick( m_ray.orig, m_ray.dir, pickPos);
 
 			Matrix44 matT;
 			matT.SetTranslate( pickPos );
@@ -291,13 +373,14 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		m_curPos = point;
 
-		if (cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_BRUSH)
+		if ((cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_BRUSH) ||
+			(cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_MODEL))
 		{
-			m_ray.Create(m_curPos.x, m_curPos.y, WINDOW_WIDTH, WINDOW_HEIGHT, 
-				m_camera.GetProjectionMatrix(), m_camera.GetViewMatrix() );
+			m_ray.Create(m_curPos.x, m_curPos.y, VIEW_WIDTH, VIEW_HEIGHT, 
+				camera.GetProjectionMatrix(), camera.GetViewMatrix() );
 
 			Vector3 pickPos;
-			cMapController::Get()->GetTerrain().Pick( m_curPos.x, m_curPos.y, m_ray.orig, m_ray.dir, pickPos);
+			cMapController::Get()->GetTerrain().Pick(m_ray.orig, m_ray.dir, pickPos);
 			cMapController::Get()->GetTerrainCursor().UpdateCursor(cMapController::Get()->GetTerrain(), pickPos );
 		}
 
@@ -309,28 +392,31 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 
 void CMapView::OnMButtonDown(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+	SetFocus();
+	SetCapture();
+	m_MButtonDown = true;
 	CView::OnMButtonDown(nFlags, point);
 }
 
 
 void CMapView::OnMButtonUp(UINT nFlags, CPoint point)
 {
-	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
-
+	m_MButtonDown = false;
+	ReleaseCapture();
 	CView::OnMButtonUp(nFlags, point);
 }
 
 
 BOOL CMapView::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
-	const float len = m_camera.GetDistance();
+	cCamera &camera = cMapController::Get()->GetCamera();
+	
+	const float len = camera.GetDistance();
 	float zoomLen = (len > 100)? 50 : (len/4.f);
 	if (nFlags & 0x4)
 		zoomLen = zoomLen/10.f;
 
-	m_camera.Zoom( (zDelta<0)? -zoomLen : zoomLen );	
+	camera.Zoom( (zDelta<0)? -zoomLen : zoomLen );	
 
 	return CView::OnMouseWheel(nFlags, zDelta, pt);
 }
@@ -348,9 +434,11 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			flag = !flag;
 		}
 		break;
-	//추가
+
 	case VK_ESCAPE:
 		{
+			cMapController::Get()->GetTerrainCursor().CancelSelectModel();
+		//추가
 			cMapController::Get()->DeleteCurrObject();
 		}
 		break;

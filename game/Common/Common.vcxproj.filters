@@ -52,12 +52,6 @@
     <ClInclude Include="math\ray.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="utility\BaseType.h">
-      <Filter>utility</Filter>
-    </ClInclude>
-    <ClInclude Include="utility\Utility.h">
-      <Filter>utility</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -96,9 +90,6 @@
     </ClCompile>
     <ClCompile Include="math\ray.cpp">
       <Filter>math</Filter>
-    </ClCompile>
-    <ClCompile Include="utility\BaseType.cpp">
-      <Filter>utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

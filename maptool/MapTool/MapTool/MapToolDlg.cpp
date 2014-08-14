@@ -81,17 +81,18 @@ BOOL CMapToolDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	Gdiplus::GdiplusStartup(&m_gdiplusToken, &m_gdiplusStartupInput, NULL); 
 
+	graphic::cResourceManager::Get()->SetMediaDirectory( "../../media/");
 
 	MoveWindow(CRect(0,0,REAL_WINDOW_WIDTH,REAL_WINDOW_HEIGHT));
 
 	// Create Main Model View
 	m_mapView = new CMapView();
 	m_mapView->Create(NULL, _T("CView"), WS_CHILDWINDOW, 
-		CRect(0,25, WINDOW_WIDTH, WINDOW_HEIGHT+25), this, 0);
+		CRect(0,25, VIEW_WIDTH, VIEW_HEIGHT+25), this, 0);
 
 	// Create Direct
 	graphic::cRenderer::Get()->CreateDirectX(
-		m_mapView->GetSafeHwnd(), WINDOW_WIDTH, WINDOW_HEIGHT);
+		m_mapView->GetSafeHwnd(), VIEW_WIDTH, VIEW_HEIGHT);
 
 	m_mapView->Init();
 	m_mapView->ShowWindow(SW_SHOW);
@@ -131,6 +132,7 @@ BOOL CMapToolDlg::OnInitDialog()
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
+
 
 void CMapToolDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
