@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "MapController.h"
 
+using namespace graphic;
 
 cMapController::cMapController(void) :
 	m_editMode(EDIT_MODE::MODE_HEIGHTMAP)
@@ -17,6 +18,15 @@ cMapController::~cMapController(void)
 {
 }
 
+// 지형 파일 열기.
+bool cMapController::LoadTerrainFile(const string &fileName)
+{
+	graphic::sRawTerrain rawTerrain;
+	graphic::importer::ReadRawTerrainFile(fileName, rawTerrain);
+
+
+	return true;
+}
 
 // 높이맵 파일을 읽어서 지형에 적용한다.
 bool cMapController::LoadHeightMap(const string &fileName)
@@ -39,6 +49,17 @@ bool cMapController::LoadHeightMapTexture(const string &fileName)
 	return result;
 }
 
+// 지형 정보를 파일에 저장한다.
+bool cMapController::SaveTerrainFile(const string &fileName)
+{
+	m_terrain.GetRigidModels() = m_object;
+
+	graphic::sRawTerrain rawTerrain;
+	m_terrain.GetRawTerrain(rawTerrain);
+	graphic::exporter::WriteRawTerrainFile(fileName, rawTerrain);
+
+	return true;
+}
 
 // 지형 생성.
 bool cMapController::CreateDefaultTerrain()

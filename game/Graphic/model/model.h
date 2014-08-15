@@ -15,20 +15,24 @@ namespace graphic
 		virtual ~cModel();
 
 		virtual bool Create(const string &modelName, MODEL_TYPE::TYPE type = MODEL_TYPE::AUTO);
-		void SetAnimation( const string &aniFileName);
 		virtual bool Move(const float elapseTime);
 		virtual void Render();
 		virtual void RenderShader(cShader &shader);
 		virtual void RenderShadow(cShader &shader);
+		virtual void SetTM(const Matrix44 &tm);
+		virtual void MultiplyTM(const Matrix44 &tm);
+
 		void Clear();
 
+		void SetAnimation(const string &aniFileName);
 		int GetId() const;
-		void SetTM(const Matrix44 &tm);
-		void MultiplyTM(const Matrix44 &tm);
 		const Matrix44& GetTM() const;
+		const string& GetFileName() const;
 		cBoneMgr* GetBoneMgr();
 		cMesh* FindMesh(const string &meshName);
 		sRawAniGroup* GetCurrentAnimation();
+		bool Pick(const Vector3 &orig, const Vector3 &dir, OUT float* pfT = NULL);
+		cModel* Clone() const;
 
 		// ICollisionable Interface
 		virtual bool IsTest( int testNum ) override;
@@ -45,9 +49,12 @@ namespace graphic
 	//추가
 		void SetAniLoop(const bool loop);
 //		void SetBoneMgr(cBoneMgr* const bone);
+		void CreateCube();
+		cCube& GetCube();
 
 	protected:
 		int m_id;
+		string m_fileName; //model 파일 명.
 		MODEL_TYPE::TYPE m_type;
 		vector<cMesh*> m_meshes;
 		cBoneMgr *m_bone;
@@ -59,6 +66,9 @@ namespace graphic
 		bool m_isRenderMesh; // default = true
 		bool m_isRenderBone; // default = false
 		bool m_isRenderBoundingBox; // default = false
+
+	//추가
+		cCube m_cube;
 	};
 
 
@@ -71,4 +81,5 @@ namespace graphic
 
 //추가
 //	inline void cModel::SetAniLoop(const bool loop) { m_bone->SetAniLoop(loop); }
+	inline cCube& cModel::GetCube() { return m_cube; }
 }

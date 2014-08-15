@@ -38,6 +38,7 @@ namespace graphic
 		void UpdateBeHit(const bool bAniState, const Vector3& sourPos, const float fAniPosGap);
 		float GetAniPosGap() const;
 		cCamera* GetCamera();
+		void MoveControl(const bool bCtl);
 
 	//debug
 		void SetMode( const int stage );
@@ -80,6 +81,7 @@ namespace graphic
 		bool m_targetAttackCheck;
 		int m_hp;
 		int m_sp;
+		bool m_moveControl;
 
 		cCamera* m_camera;
 //		ID3DXFont* m_font;
@@ -94,6 +96,7 @@ namespace graphic
 	inline int cCharacter::GetMode() const { return m_mode; }
 	inline float cCharacter::GetAniPosGap() const { return m_aniPosGap; }
 	inline cCamera* cCharacter::GetCamera() { return m_camera; }
+//	inline void cCharacter::MoveControl(const bool bCtl) { m_moveControl = bCtl; m_bone->MoveControl(bCtl); }
 
 //debug
 	inline void cCharacter::SetMode( const int stage ) { m_mode = stage; }

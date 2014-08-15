@@ -247,3 +247,14 @@ bool cBoneMgr::GetAniState() const
 //{
 //	m_root
 //}
+
+void cBoneMgr::MoveControl(const bool bCtl)
+{
+	if( m_root->GetMoveControl() == bCtl ? true : false )
+		return;
+
+	BOOST_FOREACH (auto pBone, m_bones)
+	{
+		pBone->SetMoveControl(bCtl);
+	}
+}

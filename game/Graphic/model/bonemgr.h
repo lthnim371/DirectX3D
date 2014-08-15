@@ -32,6 +32,7 @@ namespace graphic
 		bool GetAniState() const;
 		void SetPalette(const vector<Matrix44>& palette);
 		vector<cCube>& GetCube();
+		void MoveControl(const bool bCtl);
 
 	protected:
 		void SetAnimationRec( cBoneNode *node, const sRawAniGroup &rawAni, int nAniFrame );

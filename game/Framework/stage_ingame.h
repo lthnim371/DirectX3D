@@ -26,6 +26,8 @@ namespace framework
 	//	bool PacketSend(const int nState1, const int nState2, const POINT ptMouse);
 	//	bool PacketSend(const network::InfoProtocol packetInfo);
 		bool PacketReceive(OUT network::InfoProtocol& packetInfo);
+		void LoadMapObject(const string& fileName);
+		void ObjectCollisionCheck();
 
 	private:
 		POINT m_currMouse;
@@ -45,5 +47,8 @@ namespace framework
 
 		graphic::cShader* m_shader;
 		ID3DXFont* m_font;
+
+		graphic::cTerrain* m_terrain;
+		graphic::cShader* m_terrainShader;
 	};
 }

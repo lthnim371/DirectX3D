@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "stage_ingame.h"
+#include <fstream>
 
 using namespace framework;
 
@@ -18,6 +19,8 @@ cStage_Ingame::~cStage_Ingame()
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
 	SAFE_DELETE(m_shader);
+	SAFE_DELETE(m_terrainShader);
+	SAFE_DELETE(m_terrain);
 	SAFE_RELEASE(m_font);
 }
 
@@ -27,6 +30,14 @@ void cStage_Ingame::Init(const int nId)
 //font 생성
 	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
+
+//바닥 생성
+	m_terrain = new graphic::cTerrain();
+	m_terrain->CreateTerrain(128, 128, 100.f);
+	m_terrain->CreateTerrainTexture( "../media/texture/map/Grassbland01_T.tga" );
+	m_terrainShader = new graphic::cShader();
+	m_terrainShader->Create( "../media/shader/hlsl_terrain_splatting.fx", "TShader" );
+	LoadMapObject( "../media/mapobject.map" );
 
 	m_infoSend.nId = nId;  //사용자 식별
 //	m_info2.nId = ( nId == 0 ? 1 : 0 );
@@ -236,6 +247,7 @@ void cStage_Ingame::Input(const float elapseTime)
 //void cStage_Ingame::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Update(const float elapseTime)
 {
+//	graphic::GetRenderer()->Update( elapseTime );
 //	fTick2 += elapseTime;
 
 //	if(fTick2 >= 0.2f)
@@ -297,6 +309,8 @@ void cStage_Ingame::Update(const float elapseTime)
 		}  //if( PacketReceive(packetRecv) )
 
 //	}
+		
+	ObjectCollisionCheck();
 
 //새롭게 갱신된 정보대로 적용시킴
 	bool bAniState1 = character1->Move(elapseTime);
@@ -341,10 +355,15 @@ void cStage_Ingame::Render(const float elapseTime)
 		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 		pMe->GetCamera()->SetView();
 
-		//fps 및 그리드 출력
-		graphic::GetRenderer()->RenderFPS();
-		graphic::GetRenderer()->RenderGrid();
+	//fps 및 그리드 출력
+//		graphic::GetRenderer()->RenderGrid();
+		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
+		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition() );
+		m_terrainShader->SetRenderPass(1);
+		m_terrain->RenderShader( *m_terrainShader, pMe->GetCamera() );
 		graphic::GetRenderer()->RenderAxis();
+		graphic::GetRenderer()->RenderFPS();
 
 //		character1->Render();
 //		character2->Render();
@@ -459,8 +478,145 @@ bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 	return false;
 }
 
+void cStage_Ingame::LoadMapObject(const string& fileName)
+{
+	using namespace std;
 
+	ifstream fs;
+	fs.open(fileName, ios_base::binary);
 
+	int objectCount = 0;
+	fs.read((char*)&objectCount, sizeof(int));
+
+	vector<graphic::cModel*>& rTerrainObj = m_terrain->GetRigidModels();
+
+	for(int i=0; i<objectCount; ++i)
+	{
+		string fileName;
+		Matrix44 tm;
+		int nSize = 0;
+		fs.read((char*)&nSize, sizeof(int));
+		char* cFileName = new char[nSize + 1];
+	//	fs.read((char*)&fileName, nSize);
+		fs.read(cFileName, nSize + 1);
+		fs.read((char*)&tm, sizeof(Matrix44));
+		
+		fileName.assign( cFileName );
+		fileName.erase(0, 3);
+		delete[] cFileName;
+
+		graphic::cModel* pNewObj = new graphic::cModel( i );
+		pNewObj->Create( fileName, graphic::MODEL_TYPE::RIGID );
+		pNewObj->SetTM( tm );
+		pNewObj->CreateCube();
+
+//		m_terrain->AddRigidModel( *pNewObj );
+//		delete pNewObj;
+
+		rTerrainObj.push_back( pNewObj );
+	}
+}
+
+void cStage_Ingame::ObjectCollisionCheck()
+{
+	vector<graphic::cModel*>& rTerrainObj = m_terrain->GetRigidModels();
+	for(auto it = rTerrainObj.begin(); it != rTerrainObj.end(); ++it)
+	{			
+		Vector3 objHalfDis = (*it)->GetCube().GetMax();
+
+		if( objHalfDis.y <= 10.f )
+			continue;
+
+		Vector3 objPos = (*it)->GetTM().GetPosition();
+		Vector3 cam1_look = character1->GetCamera()->GetLook();
+
+		Vector3 distance = objPos - cam1_look;
+		distance.y = 0.f;
+		objHalfDis.y = 0.f;
+		if( distance.Length() <= objHalfDis.Length() )
+		{
+			float fT = 0.f;
+			Vector3 up(0.f, 1.f, 0.f);
+			Vector3 cam1_newPos( character1->GetCamera()->GetPosition() );
+			cam1_newPos.y = 100.f;
+			Vector3 cam1_newLook(cam1_look);
+			cam1_newLook.y = cam1_newPos.y;
+			Vector3 cam1_newDir = cam1_newLook - cam1_newPos;
+			cam1_newDir.Normalize();
+			Vector3 cam1_newRight( up.CrossProduct(cam1_newDir) );
+
+			switch( character1->GetMode() )
+			{
+			case character1->FORWARD:
+				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * -5.f;
+				if( (*it)->Pick( cam1_newLook, cam1_newDir, &fT ) )
+				{
+				//	if( 0 <= fT && fT <= 10.f) {}
+					if( fT < 0.f )
+						break;
+					
+						Matrix44 matT;
+						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * -5.f );  //카메라가 바라보는 방향으로
+						character1->MultiplyTM( matT );  //현재 위치에 더해주기
+						character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
+					
+				}
+				break;
+
+			case character1->BACKWARD:
+				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * 5.f;
+				if( (*it)->Pick( cam1_newLook, -cam1_newDir, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+
+					Matrix44 matT;
+					matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * 5.f );  //카메라가 바라보는 방향으로
+					character1->MultiplyTM( matT );  //현재 위치에 더해주기
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
+				}
+				break;
+
+			case character1->LEFTWARD:
+				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * 5.f;
+				if( (*it)->Pick( cam1_newLook, -cam1_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+
+					Matrix44 matT;
+					matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * 5.f );  //카메라가 바라보는 방향으로
+					character1->MultiplyTM( matT );  //현재 위치에 더해주기
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
+				}
+				break;
+
+			case character1->RIGHTWARD:
+				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * -5.f;
+				if( (*it)->Pick( cam1_newLook, cam1_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+
+					Matrix44 matT;
+					matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * -5.f );  //카메라가 바라보는 방향으로
+					character1->MultiplyTM( matT );  //현재 위치에 더해주기
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
+				}
+				break;
+			
+			case character1->LATTACK:
+			case character1->RATTACK:
+				if( (*it)->Pick( cam1_newLook, cam1_newDir, &fT ) )
+				{
+				//	if( character1->GetBoneMgr()->GetRoot()->GetMoveControl() == false )
+						character1->MoveControl( true );
+				}
+				break;
+			}
+		}
+	}
+}
 
 /*  Input Backup
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )

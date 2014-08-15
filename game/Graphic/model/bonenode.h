@@ -28,6 +28,8 @@ namespace graphic
 		Vector3 GetAniTM() const;
 		void SetAccTM(const Matrix44& accTM);
 		int GetEndFrame() const;
+		void SetMoveControl(const bool bCtl);
+		bool GetMoveControl() const;
 
 	private:
 		cTrack *m_track;
@@ -46,6 +48,9 @@ namespace graphic
 
 		bool m_isAni; // TRUE일경우만 에니메이션이 된다.
 		bool m_isLoop; // 에니메이션 반복 여부
+
+	//추가
+		bool m_moveControl;
 	};
 
 	
@@ -59,4 +64,6 @@ namespace graphic
 	inline Vector3 cBoneNode::GetAniTM() const { return m_aniTM.GetPosition(); }
 	inline void cBoneNode::SetAccTM(const Matrix44& accTM) { m_accTM = accTM; }
 	inline int cBoneNode::GetEndFrame() const { return m_aniEnd; }
+	inline void cBoneNode::SetMoveControl(const bool bCtl) { m_moveControl = bCtl; }
+	inline bool cBoneNode::GetMoveControl() const { return m_moveControl; }
 }

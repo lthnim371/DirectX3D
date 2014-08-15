@@ -1,59 +1,86 @@
 
 #include "stdafx.h"
 #include "terrain.h"
-#include <objidl.h>
-#include <gdiplus.h> 
-#pragma comment( lib, "gdiplus.lib" ) 
+
 using namespace std;
 using namespace Gdiplus;
 using namespace graphic;
 
-// global constants
-enum {
-	CELL_COL_COUNT = 64,
-	CELL_ROW_COUNT = 64,
-	VERTEX_COL_COUNT = CELL_COL_COUNT+1,
-	VERTEX_ROW_COUNT = CELL_ROW_COUNT+1,
-	CELL_SIZE = 50,
-	WIDTH = CELL_COL_COUNT * CELL_SIZE,
-	HEIGHT = CELL_ROW_COUNT * CELL_SIZE,
-};
 
 
-ULONG_PTR g_gdiplusToken;
-GdiplusStartupInput g_gdiplusStartupInput; 
-
-cTerrain::cTerrain()
+cTerrain::cTerrain() :
+	m_rowCellCount(0)
+,	m_colCellCount(0)
+,	m_cellSize(0)
+,	m_textureUVFactor(1.f)
+,	m_heightFactor(3.f)
+,	m_modelShader(NULL)
 {
-	static bool onlyOne = false;
-	if (!onlyOne)
-	{	
-		Gdiplus::GdiplusStartup(&g_gdiplusToken, &g_gdiplusStartupInput, NULL); 
-		onlyOne = true;
-	}
+	m_rigids.reserve(32);
+
+	m_modelShader = cResourceManager::Get()->LoadShader(  "hlsl_rigid.fx" );
+
 }
 
 cTerrain::~cTerrain()
 {
-	static bool onlyOne = false;
-	if (!onlyOne)
-	{
-		Gdiplus::GdiplusShutdown(g_gdiplusToken);
-		onlyOne = true;
-	}
+	Clear();
 }
 
 
 bool cTerrain::CreateFromHeightMap( const string &heightMapFileName, 
-	const string &textureFileName, const float heightFactor ) // heightFactor=3.f
+	const string &textureFileName, const float heightFactor, const float textureUVFactor )
+	// heightFactor=3.f, textureUVFactor=1.f
 {
-	const wstring wfileName = common::str2wstr(heightMapFileName);
-	Bitmap bmp(wfileName.c_str());
-	
-	m_grid.Create(CELL_ROW_COUNT, CELL_COL_COUNT, CELL_SIZE, 1.f);
+	CreateTerrain(64, 64, 50.f, textureUVFactor);
+	UpdateHeightMap(heightMapFileName, textureFileName, heightFactor );
+	return true;
+}
 
-	const float incX = (float)(bmp.GetWidth()-1) / (float)CELL_COL_COUNT;
-	const float incY = (float)(bmp.GetHeight()-1) /(float) CELL_ROW_COUNT;
+
+// 지형 텍스쳐 생성.
+bool cTerrain::CreateTerrainTexture( const string &textureFileName )
+{
+	m_grid.GetTexture().Clear();
+	return m_grid.GetTexture().Create( textureFileName );
+}
+
+
+// 지형 생성.
+bool cTerrain::CreateTerrain( const int rowCellCount, const int colCellCount, const float cellSize
+	,const float textureUVFactor)
+	// rowCellCount=64, colCellCount=64, cellSize=50.f, textureUVFactor=1.f
+{
+	Clear();
+
+	m_rowCellCount = rowCellCount;
+	m_colCellCount = colCellCount;
+	m_cellSize = cellSize;
+	m_textureUVFactor = textureUVFactor;
+	m_grid.Create(rowCellCount, colCellCount, cellSize, textureUVFactor);
+
+	return true;
+}
+
+
+// 텍스쳐 파일 정보로 높이 정보를 채운다.
+// m_grid 가 생성된 상태여야 한다.
+bool cTerrain::UpdateHeightMap( const string &heightMapFileName, 
+	const string &textureFileName, const float heightFactor )
+{
+	m_heightFactor = heightFactor;
+	m_heightMapFileName = heightMapFileName;
+
+	const wstring wfileName = common::str2wstr(heightMapFileName);
+	Gdiplus::Bitmap bmp(wfileName.c_str());
+
+	const int VERTEX_COL_COUNT = m_colCellCount + 1;
+	const int VERTEX_ROW_COUNT = m_rowCellCount + 1;
+	const float WIDTH = m_colCellCount * m_cellSize;
+	const float HEIGHT = m_rowCellCount * m_cellSize;
+
+	const float incX = (float)(bmp.GetWidth()-1) / (float)m_colCellCount;
+	const float incY = (float)(bmp.GetHeight()-1) /(float) m_rowCellCount;
 
 	sVertexNormTex *pv = (sVertexNormTex*)m_grid.GetVertexBuffer().Lock();
 
@@ -63,7 +90,7 @@ bool cTerrain::CreateFromHeightMap( const string &heightMapFileName,
 		{
 			sVertexNormTex *vtx = pv + (k*VERTEX_COL_COUNT) + i;
 
-			Color color;
+			Gdiplus::Color color;
 			bmp.GetPixel(i*incX, k*incY, &color);
 			const float h = ((color.GetR() + color.GetG() + color.GetB()) / 3.f) 
 				* heightFactor;
@@ -75,8 +102,10 @@ bool cTerrain::CreateFromHeightMap( const string &heightMapFileName,
 
 	m_grid.CalculateNormals();
 	m_grid.GetTexture().Create( textureFileName );
+
 	return true;
 }
+
 
 
 void cTerrain::Render()
@@ -91,6 +120,58 @@ void cTerrain::RenderShader(cShader &shader)
 	shader.SetVector( "vFog", fog);
 
 	m_grid.RenderShader(shader);
+
+	if (m_modelShader)
+		RenderShaderRigidModels(*m_modelShader);
+}
+
+//추가
+void cTerrain::RenderShader(cShader &shader, cCamera* pCam)
+{
+	Vector3 fog(1.f, 10000.f, 0);  // near, far
+	shader.SetVector( "vFog", fog);
+
+	m_grid.RenderShader(shader);
+
+	if (m_modelShader)
+		RenderShaderRigidModels(*m_modelShader, pCam);
+//		RenderShaderRigidModels(*m_modelShader);
+}
+
+// 정적 모델 출력
+void cTerrain::RenderRigidModels()
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->Render();
+	}
+}
+
+
+// 정적 모델 출력.
+void cTerrain::RenderShaderRigidModels(cShader &shader)
+{
+//	shader.SetMatrix( "mVP", camera.GetViewProjectionMatrix());
+//	shader.SetVector( "vLightDir", Vector3(0,-1,0) );
+//	shader.SetVector( "vEyePos", camera.GetEyePos());
+
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->RenderShader(shader);
+	}
+}
+
+//추가
+void cTerrain::RenderShaderRigidModels(cShader &shader, cCamera* pCam)
+{
+	shader.SetMatrix( "mVP", pCam->GetView() * pCam->GetProjection() );
+	shader.SetVector( "vLightDir", Vector3(0,-1,0) );
+	shader.SetVector( "vEyePos", pCam->GetPosition() );
+
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->RenderShader(shader);
+	}
 }
 
 
@@ -103,11 +184,14 @@ float Lerp(float p1, float p2, float alpha)
 // x/z평면에서 월드 좌표 x,z 위치에 해당하는 높이 값 y를 리턴한다.
 float cTerrain::GetHeight(const float x, const float z)
 {
+	const float WIDTH = m_colCellCount * m_cellSize;
+	const float HEIGHT = m_rowCellCount * m_cellSize;
+
 	float newX = x + (WIDTH / 2.0f);
 	float newZ = HEIGHT - (z + (HEIGHT / 2.0f));
 
-	newX /= CELL_SIZE;
-	newZ /= CELL_SIZE;
+	newX /= m_cellSize;
+	newZ /= m_cellSize;
 
 	const float col = ::floorf( newX );
 	const float row = ::floorf( newZ );
@@ -146,6 +230,9 @@ float cTerrain::GetHeight(const float x, const float z)
 // 맵을 2차원 배열로 봤을 때, row, col 인덱스의 높이 값을 리턴한다.
 float cTerrain::GetHeightMapEntry( int row, int col )
 {
+	const int VERTEX_COL_COUNT = m_colCellCount + 1;
+	const int VERTEX_ROW_COUNT = m_rowCellCount + 1;
+
 	const int vtxSize = (VERTEX_COL_COUNT) * (VERTEX_ROW_COUNT);
 
 	if( 0 > row || 0 > col )
@@ -173,7 +260,88 @@ float cTerrain::GetHeightFromRay( const Vector3 &orig, const Vector3 &dir, OUT V
 
 
 // 피킹 처리.
-bool cTerrain::Pick(const int x, const int y, const Vector3 &orig, const Vector3 &dir, OUT Vector3 &out)
+bool cTerrain::Pick(const Vector3 &orig, const Vector3 &dir, OUT Vector3 &out)
 {
 	return m_grid.Pick(orig, dir, out);
+}
+
+
+// 모델 피킹.
+cModel* cTerrain::PickModel(const Vector3 &orig, const Vector3 &dir)
+{
+	BOOST_FOREACH (auto &model, m_rigids)
+	{
+		if (model->Pick(orig, dir))
+			return model;
+	}
+	return NULL;
+}
+
+
+// 초기화.
+void cTerrain::Clear()
+{
+	m_rowCellCount = 0;
+	m_colCellCount = 0;
+	m_cellSize = 0;
+	m_heightFactor = 3.f;
+	m_textureUVFactor = 1.f;
+	m_heightMapFileName.clear();
+	m_grid.Clear();
+
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		SAFE_DELETE(model);
+	}
+	m_rigids.clear();
+}
+
+
+const string& cTerrain::GetTextureName()
+{
+	return m_grid.GetTexture().GetTextureName();
+}
+
+
+// 정적 모델 추가
+bool cTerrain::AddRigidModel(const cModel &model)
+{
+	RETV(FindRigidModel(model.GetId()), false); // already exist return
+
+	m_rigids.push_back(model.Clone());
+//추가
+	m_rigids.back()->CreateCube();
+	return true;
+}
+
+
+// 정적 모델 찾기.
+cModel* cTerrain::FindRigidModel(const int id)
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		if (model->GetId() == id)
+			return model;
+	}
+	return NULL;
+}
+
+
+// 정적 모델 제거
+// destruct : true 이면 메모리를 소거한다.
+bool cTerrain::RemoveRigidModel(cModel *model, const bool destruct) // destruct=true
+{
+	const bool result = common::removevector(m_rigids, model);
+	if (destruct)
+		SAFE_DELETE(model);
+	return result;
+}
+
+
+// 정적 모델 제거.
+bool cTerrain::RemoveRigidModel(const int id, const bool destruct) //destruct=true
+{
+	cModel *model = FindRigidModel(id);
+	RETV(!model, false);
+	return RemoveRigidModel(model, destruct);
 }

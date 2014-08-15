@@ -21,6 +21,8 @@ cBoneNode::cBoneNode(const int id, vector<Matrix44> &palette, const sRawBone &ra
 ,	m_incPlayTime(0)
 ,	m_isAni(false)
 ,	m_isLoop(false)
+//추가
+, m_moveControl(false)
 {
 	m_offset = rawBone.worldTm.Inverse();
 	m_localTM = rawBone.localTm;
@@ -128,6 +130,13 @@ bool cBoneNode::Move(const float elapseTime)
 	{
 		m_accTM._41 = m_localTM._41;
 		m_accTM._42 = m_localTM._42;
+		m_accTM._43 = m_localTM._43;
+	}
+//추가
+	else if( m_moveControl == true )
+	{
+		m_accTM._41 = m_localTM._41;
+		m_accTM._42 = m_aniTM._42;
 		m_accTM._43 = m_localTM._43;
 	}
 	else	// pos키값을 좌표값으로 적용한다(이렇게 하지 않으면 TM의 pos성분이 두번적용된다)

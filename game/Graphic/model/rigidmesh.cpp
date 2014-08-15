@@ -71,3 +71,9 @@ void cRigidMesh::RenderShader( const Matrix44 &parentTm )
 		cMesh::RenderShader(*shader, parentTm);
 	}
 }
+
+//Ãß°¡
+void cRigidMesh::RenderShader( cShader &shader, const Matrix44 &parentTm )
+{
+	cMesh::RenderShader(shader, parentTm);
+}

@@ -5,6 +5,9 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 
+#include <objidl.h>
+#include <gdiplus.h> 
+
 #include "../Common/common.h"
 using namespace common;
 
@@ -24,8 +27,9 @@ using namespace common;
 #include "base/line.h"
 #include "base/cube.h"
 #include "base/shader.h"
-//#include "base/camera.h"  //카메라 헤더 중복 에러 발생
+//#include "base/camera.h"
 #include "base/skybox.h"
+#include "base/sphere.h"
 #include "model/node.h"
 
 #include "collision/boundingbox.h"
@@ -41,19 +45,23 @@ using namespace common;
 #include "model/model.h"
 #include "model/bonemgr.h"
 #include "model/bonenode.h"
-
+//추가
 #include "camera.h"
 #include "model/character.h"
 
 #include "sprite/sprite.h"
 
+#include "terrain/rawterrain.h"
 #include "terrain/terrain.h"
+//#include "terrain/terraincursor.h"
+#include "terrain/terraineditor.h"
+#include "terrain/terrainimporter.h"
+#include "terrain/terrainexporter.h"
+
 
 #include "manager/Renderer.h"
 #include "manager/resourcemanager.h"
 
 #pragma comment( lib, "d3d9.lib" )
 #pragma comment( lib, "d3dx9.lib" )
-
-//추가
-//#include "Image.h"
+#pragma comment( lib, "gdiplus.lib" ) 

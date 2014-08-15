@@ -199,9 +199,47 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 	SetCapture();
 	m_LButtonDown = true;
 	m_curPos = point;
+	CView::OnLButtonDown(nFlags, point);
+}
 
+
+void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	ReleaseCapture();
+
+	// 지형위에 모델을 위치 시킨다.
+	if (m_LButtonDown && 
+		(cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_MODEL))
+	{
+		// 모델이 선택되어 있는 상태라면, 모델을 지형위에 위치 시킨다.
+		if (cMapController::Get()->GetTerrainCursor().IsSelectModel())
+		{
+			if (const graphic::cModel *model = cMapController::Get()->GetTerrainCursor().GetSelectModel())
+			{
+				cMapController::Get()->GetTerrain().AddRigidModel(*model);
+				cMapController::Get()->UpdatePlaceModel();
+			}
+		}
+		else
+		{
+			// 모델이 선택되어 있지 않다면, 지형위의 모델을 피킹해서 선택한다.
+			cCamera &camera = cMapController::Get()->GetCamera();
+			m_ray.Create(point.x, point.y, VIEW_WIDTH, VIEW_HEIGHT, 
+				camera.GetProjectionMatrix(), camera.GetViewMatrix() );
+
+			// 모델 피킹.
+			if (graphic::cModel *model = 
+				cMapController::Get()->GetTerrain().PickModel(m_ray.orig, m_ray.dir))
+			{
+				cMapController::Get()->GetTerrain().RemoveRigidModel(model, false);
+				cMapController::Get()->GetTerrainCursor().SelectModel(model);
+				cMapController::Get()->UpdatePlaceModel();
+			}
+		}
+	}
 //추가
-	if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
+	if( m_LButtonDown && 
+		cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
 	{	
 		graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject();
 		m_ray.Create(point.x, point.y, VIEW_WIDTH, VIEW_HEIGHT, 
@@ -243,46 +281,6 @@ void CMapView::OnLButtonDown(UINT nFlags, CPoint point)
 		}  //else if
 	}  //if
 
-	CView::OnLButtonDown(nFlags, point);
-}
-
-
-void CMapView::OnLButtonUp(UINT nFlags, CPoint point)
-{
-	ReleaseCapture();
-
-	// 지형위에 모델을 위치 시킨다.
-	if (m_LButtonDown && 
-		(cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_MODEL))
-	{
-		// 모델이 선택되어 있는 상태라면, 모델을 지형위에 위치 시킨다.
-		if (cMapController::Get()->GetTerrainCursor().IsSelectModel())
-		{
-			if (const graphic::cModel *model = cMapController::Get()->GetTerrainCursor().GetSelectModel())
-			{
-				cMapController::Get()->GetTerrain().AddRigidModel(*model);
-				cMapController::Get()->UpdatePlaceModel();
-			}
-		}
-		else
-		{
-			// 모델이 선택되어 있지 않다면, 지형위의 모델을 피킹해서 선택한다.
-
-			cCamera &camera = cMapController::Get()->GetCamera();
-			m_ray.Create(point.x, point.y, VIEW_WIDTH, VIEW_HEIGHT, 
-				camera.GetProjectionMatrix(), camera.GetViewMatrix() );
-
-			// 모델 피킹.
-			Vector3 pickPos;
-			if (graphic::cModel *model = 
-				cMapController::Get()->GetTerrain().PickModel(m_ray.orig, m_ray.dir))
-			{
-				cMapController::Get()->GetTerrainCursor().SelectModel(model);
-			}
-
-		}
-	}
-
 	m_LButtonDown = false;
 	CView::OnLButtonUp(nFlags, point);
 }
@@ -319,17 +317,6 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 		{
 			cMapController::Get()->Brush(point);
 		}
-		else if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
-		{
-			if( m_currSelectObj )
-			{
-				Quaternion q( Vector3(0,1,0), pos.x * -0.005f );
-				Matrix44 matR = q.GetMatrix();
-				m_currSelectObj->SetTM( matR * m_currSelectObj->GetTM() );
-				m_currSelectObj->GetCube().SetTransform( m_currSelectObj->GetTM() );
-			}
-		}
-
 	}
 	else if (m_RButtonDown)
 	{
@@ -354,6 +341,7 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 //추가
 	else if( cMapController::Get()->GetEditMode() == EDIT_MODE::MODE_OBJECT )
 	{
+		CPoint pos = point - m_curPos;
 		m_curPos = point;
 
 		if( graphic::cModel* pCurrObject = cMapController::Get()->GetCurrObject() )
@@ -367,6 +355,14 @@ void CMapView::OnMouseMove(UINT nFlags, CPoint point)
 			Matrix44 matT;
 			matT.SetTranslate( pickPos );
 			pCurrObject->SetTM( matT );
+		}
+		//추가
+		else if( m_currSelectObj )
+		{
+			Quaternion q( Vector3(0,1,0), pos.x * -0.005f );
+			Matrix44 matR = q.GetMatrix();
+			m_currSelectObj->SetTM( matR * m_currSelectObj->GetTM() );
+			m_currSelectObj->GetCube().SetTransform( m_currSelectObj->GetTM() );
 		}
 	}
 	else
@@ -440,6 +436,31 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			cMapController::Get()->GetTerrainCursor().CancelSelectModel();
 		//추가
 			cMapController::Get()->DeleteCurrObject();
+
+			if(m_currSelectObj)
+				m_currSelectObj = NULL;
+		}
+		break;
+
+	case VK_DELETE:
+		{
+			if( m_currSelectObj )
+			{			
+				vector<graphic::cModel*>& rObj = cMapController::Get()->GetObject();
+
+				if( rObj.empty() == false )
+				{
+					for( auto it = rObj.begin(); it != rObj.end(); ++it )
+					{
+						if( (*it) == m_currSelectObj )
+						{
+							rObj.erase(it);
+							m_currSelectObj = NULL;
+							break;
+						}  //if
+					}  //for
+				}  //if
+			}  //if
 		}
 		break;
 	}

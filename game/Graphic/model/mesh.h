@@ -19,6 +19,8 @@ namespace graphic
 		virtual void RenderShadow(cShader &shader, const Matrix44 &parentTm) override;
 
 		void CreateBoundingBox(OUT cCube &out);
+	//Ãß°¡
+		const cCube& CreateBoundingBox();
 		void RenderBoundingBox(const Matrix44 &tm);
 		const cCube& GetBoundingBox() const;
 		

@@ -164,7 +164,7 @@ void cCamera::Yaw2( const float radian )
 	v *= mat;
 	m_eyePos = m_lookAt + v;
 
-	UpdateViewMatrix();	
+	UpdateViewMatrix();
 }
 
 
@@ -209,6 +209,15 @@ void cCamera::MoveUp( const float len )
 void cCamera::MoveRight( const float len )
 {
 	const Vector3 dir = GetRight();
+	m_lookAt += dir * len;
+	m_eyePos += dir * len;
+	UpdateViewMatrix();
+}
+
+
+// dir 방향으로 이동한다.
+void cCamera::MoveAxis( const Vector3 &dir, const float len )
+{
 	m_lookAt += dir * len;
 	m_eyePos += dir * len;
 	UpdateViewMatrix();

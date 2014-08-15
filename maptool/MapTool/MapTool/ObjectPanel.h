@@ -30,4 +30,5 @@ public:
 	CListBox m_objectList;
 	virtual BOOL OnInitDialog();
 	afx_msg void OnLbnSelchangeListObjectLoad();
+	afx_msg void OnBnClickedButtonSave();
 };

@@ -6,6 +6,7 @@
 #include "ObjectPanel.h"
 #include "afxdialogex.h"
 
+#include <fstream>
 
 // CObjectPanel 대화 상자입니다.
 
@@ -32,6 +33,7 @@ BEGIN_MESSAGE_MAP(CObjectPanel, CDialogEx)
 	ON_BN_CLICKED(IDOK, &CObjectPanel::OnBnClickedOk)
 	ON_BN_CLICKED(IDCANCEL, &CObjectPanel::OnBnClickedCancel)
 	ON_LBN_SELCHANGE(IDC_LIST_OBJECT_LOAD, &CObjectPanel::OnLbnSelchangeListObjectLoad)
+	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CObjectPanel::OnBnClickedButtonSave)
 END_MESSAGE_MAP()
 
 
@@ -104,4 +106,34 @@ void CObjectPanel::UpdateObjectList()
 		const wstring wstr = str2wstr(fileName);
 		m_objectList.InsertString(m_objectList.GetCount(), wstr.c_str());
 	}
+}
+
+
+void CObjectPanel::OnBnClickedButtonSave()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	using namespace std;
+
+	ofstream fs;
+	fs.open("mapobject.map", ios_base::binary);
+
+	vector<graphic::cModel*> rObject = cMapController::Get()->GetObject();
+
+	int objectCount = (int)rObject.size();
+	fs.write( (char*)&objectCount, sizeof(int) );
+
+	for(int i=0; i<(int)rObject.size(); ++i)
+	{
+		int nSize = rObject[i]->GetFileName().length();
+		char* cFileName = new char[nSize + 1];
+		::strcpy_s( cFileName, nSize + 1, rObject[i]->GetFileName().c_str() );
+		fs.write((char*)&nSize, sizeof(int));
+	//	fs.write((char*)&rObject[i]->GetFileName(), nSize);
+		fs.write(cFileName, nSize + 1);
+		fs.write((char*)&rObject[i]->GetTM(), sizeof(Matrix44));
+
+		delete[] cFileName;
+	}
+
+	::AfxMessageBox(L"Save Complete");
 }

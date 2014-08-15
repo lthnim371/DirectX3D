@@ -341,3 +341,21 @@ void cMesh::CreateBoundingBox(OUT cCube &out)
 
 	out.SetCube(mm.Min, mm.Max);
 }
+
+//Ãß°¡
+const cCube& cMesh::CreateBoundingBox()
+{
+	sMinMax mm;
+
+	sVertexNormTexSkin* pv = (sVertexNormTexSkin*)m_vtxBuff.Lock();
+	for (int i = 0; i < m_vtxBuff.GetVertexCount(); i++)
+	{
+		const Vector3 pos = pv[ i].p;
+		mm.Update(pos);
+	}
+	m_vtxBuff.Unlock();
+
+	m_boundingBox.SetCube(mm.Min, mm.Max);
+
+	return m_boundingBox;
+}

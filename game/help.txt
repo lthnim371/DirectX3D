@@ -198,3 +198,9 @@ graphic의 character클래스 수정
 common 전부 교체
 graphic의 manager, terrain 전부 교체
 graphic의 mesh클래스 수정
+
+
+140816
+★ update
+graphic의 boundingbox클래스, model클래스의 pick함수 수정
+graphic의 bonemgr클래스, bonenode클래스 추가 및 수정 : bonenode의 애니로 인한 이동을 제한하는 movecontrol

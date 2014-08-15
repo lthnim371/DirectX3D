@@ -1,8 +1,12 @@
 
 #include "stdafx.h"
 #include "terraineditor.h"
+#include <objidl.h>
+#include <gdiplus.h> 
 
+using namespace Gdiplus;
 using namespace graphic;
+
 
 cTerrainEditor::cTerrainEditor() : 
 	m_numLayer(0)
@@ -15,6 +19,40 @@ cTerrainEditor::cTerrainEditor() :
 
 cTerrainEditor::~cTerrainEditor()
 {
+
+}
+
+
+// 지형 파일 로드
+bool cTerrainEditor::LoadTerrain( const string &fileName )
+{
+
+	return true;
+}
+
+
+// 지형정보를 sRawTerrain에 저장한다.
+void cTerrainEditor::GetRawTerrain( OUT sRawTerrain &out )
+{
+	out.rowCellCount = m_rowCellCount;
+	out.colCellCount = m_colCellCount;
+	out.cellSize = m_cellSize;
+	out.textureFactor = m_textureUVFactor;
+	out.heightFactor = m_heightFactor;
+
+	for (int i=0; i < m_numLayer; ++i)
+	{
+		if (m_layer[ i].texture)
+			out.layer[ i].texture = m_layer[ i].texture->GetTextureName();
+	}
+
+	out.models.reserve( m_rigids.size() );
+	for (u_int i=0; i < m_rigids.size(); ++i)
+	{
+		out.models.push_back( sRawTerrrainModel() );
+		out.models.back().fileName = m_rigids[ i]->GetFileName();
+		out.models.back().tm = m_rigids[ i]->GetTM();
+	}
 
 }
 
@@ -37,8 +75,8 @@ void cTerrainEditor::RenderShader(cShader &shader)
 	{
 		shader.SetTexture( "SplattingAlphaMap", m_alphaTexture );
 		shader.SetFloat( "alphaUVFactor", GetTextureUVFactor() );
-		const string texName[] = {"Tex1", "Tex2", "Tex3", "Tex4" };
 
+		const string texName[] = {"Tex1", "Tex2", "Tex3", "Tex4" };
 		for (int i=0; i < m_numLayer; ++i)
 			shader.SetTexture( texName[ i], *m_layer[ i].texture );
 		for (int i=m_numLayer; i < MAX_LAYER; ++i)
@@ -53,7 +91,7 @@ void cTerrainEditor::RenderShader(cShader &shader)
 	}
 }
 
-
+/*
 void cTerrainEditor::Brush( const cTerrainCursor &cursor )
 {
 	RET(!cursor.GetBrushTexture());
@@ -67,6 +105,7 @@ void cTerrainEditor::Brush( const cTerrainCursor &cursor )
 
 	sSplatLayer &curLayer = GetTopLayer();
 	curLayer.texture = (cTexture*)cursor.GetBrushTexture();
+	const int MASK = ~(0xFF << (24 - (curLayer.layer * 8)));
 
 	float u, v;
 	GetTextureUV(cursor.GetCursorPos(), u, v);
@@ -99,12 +138,12 @@ void cTerrainEditor::Brush( const cTerrainCursor &cursor )
 				int color = (int)(255.f * cursor.GetInnerBrushAlpha());
 				color = color << (24 - (curLayer.layer * 8));
 
-				*ppixel |= color;
+				*ppixel = color | (*ppixel & MASK);
 			}
 			else if (len <= cursor.GetOuterBrushRadius())
 			{
 				// 보간
-				const float w = cursor.GetOuterBrushRadius() - cursor.GetInnerBrushAlpha();
+				const float w = cursor.GetOuterBrushRadius() - cursor.GetInnerBrushRadius();
 				const float delta = 1.f - ((len - cursor.GetInnerBrushRadius()) / w);
 				int color = (int)(cursor.GetInnerBrushAlpha() * delta * 255.f);
 
@@ -112,7 +151,7 @@ void cTerrainEditor::Brush( const cTerrainCursor &cursor )
 				if (color > dest)
 				{
 					color = color << (24 - (curLayer.layer * 8));
-					*ppixel |= color;
+					*ppixel = color | (*ppixel & MASK);
 				}
 			}
 		}
@@ -120,7 +159,7 @@ void cTerrainEditor::Brush( const cTerrainCursor &cursor )
 
 	m_alphaTexture.Unlock();
 }
-
+*/
 
 void cTerrainEditor::InitLayer()
 {
@@ -176,4 +215,58 @@ void cTerrainEditor::Clear()
 	cTerrain::Clear();
 	InitLayer();
 
+}
+
+
+// heightFactor 값을 수정한다.
+// 이미 지형이 로딩된 상태라면, 높이 값을 heightFactor 값에 맞춰
+// 수정한다.
+void cTerrainEditor::SetHeightFactor(const float heightFactor)
+{
+	m_heightFactor = heightFactor;
+	if (m_colCellCount <= 0)
+		return; // 아직 지형이 로딩되지 않아서 리턴한다.
+	
+	const wstring wfileName = common::str2wstr(m_heightMapFileName);
+	Bitmap bmp(wfileName.c_str());
+	if (Ok != bmp.GetLastStatus())
+		return;
+
+	const int VERTEX_COL_COUNT = m_colCellCount + 1;
+	const int VERTEX_ROW_COUNT = m_rowCellCount + 1;
+	const float WIDTH = m_colCellCount * m_cellSize;
+	const float HEIGHT = m_rowCellCount * m_cellSize;
+
+	const float incX = (float)(bmp.GetWidth()-1) / (float)m_colCellCount;
+	const float incY = (float)(bmp.GetHeight()-1) /(float) m_rowCellCount;
+
+	sVertexNormTex *pv = (sVertexNormTex*)m_grid.GetVertexBuffer().Lock();
+
+	for (int i=0; i < VERTEX_COL_COUNT; ++i)
+	{
+		for (int k=0; k < VERTEX_ROW_COUNT; ++k)
+		{
+			sVertexNormTex *vtx = pv + (k*VERTEX_COL_COUNT) + i;
+
+			Color color;
+			bmp.GetPixel(i*incX, k*incY, &color);
+			const float h = ((color.GetR() + color.GetG() + color.GetB()) / 3.f) 
+				* heightFactor;
+			vtx->p.y = h;
+		}
+	}
+
+	m_grid.GetVertexBuffer().Unlock();
+
+	m_grid.CalculateNormals();
+}
+
+
+// textureUVFactor 값을 수정한다.
+// 이미 지형이 로딩된 상태라면, UV 값을 textureUVFactor 값에 맞춰
+// 수정한다.
+void cTerrainEditor::SetTextureUVFactor(const float textureUVFactor)
+{
+	m_textureUVFactor = textureUVFactor;
+	m_grid.SetTextureUVFactor(textureUVFactor);
 }
