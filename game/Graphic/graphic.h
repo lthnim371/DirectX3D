@@ -47,9 +47,8 @@ using namespace common;
 #include "model/bonenode.h"
 //Ãß°¡
 #include "camera.h"
-#include "model/character.h"
-
 #include "sprite/sprite.h"
+#include "model/character.h"
 
 #include "terrain/rawterrain.h"
 #include "terrain/terrain.h"

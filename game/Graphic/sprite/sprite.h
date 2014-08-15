@@ -19,6 +19,8 @@ namespace graphic
 		const Vector3& GetScale() const;
 		bool IsContain(const Vector2 &pos);
 
+	//추가
+		void SetRect(const sRect rc);
 
 	private:
 		LPD3DXSPRITE m_sprite; // reference
@@ -36,4 +38,6 @@ namespace graphic
 	inline const Vector3& cSprite::GetPos() const { return m_pos; }
 	inline void cSprite::SetScale(const Vector3 &scale) { m_scale = scale; }
 	inline const Vector3& cSprite::GetScale() const { return m_scale; }
+//추가	
+	inline void cSprite::SetRect(const sRect rc) { m_rect = rc; }
 }

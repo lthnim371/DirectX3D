@@ -34,11 +34,12 @@ namespace graphic
 		cCube* GetWeaponCube() const;
 		cCube* GetCharacterCube() const;
 		void SetAttackSuccess();
+		bool GetAttackSuccess() const;
 		int GetMode() const;
 		void UpdateBeHit(const bool bAniState, const Vector3& sourPos, const float fAniPosGap);
 		float GetAniPosGap() const;
 		cCamera* GetCamera();
-		void MoveControl(const bool bCtl);
+		void MoveControl(const bool bCtl);  //애니메이션 이동값 적용 여부 결정
 
 	//debug
 		void SetMode( const int stage );
@@ -85,6 +86,10 @@ namespace graphic
 
 		cCamera* m_camera;
 //		ID3DXFont* m_font;
+
+		LPD3DXSPRITE m_sprite;
+		cSprite* m_hpImage;
+//		cSprite* m_hpImage2;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }
@@ -93,6 +98,7 @@ namespace graphic
 	inline cCube* cCharacter::GetWeaponCube() const { return m_weaponCube; }
 	inline cCube* cCharacter::GetCharacterCube() const { return m_characterCube; }
 	inline void cCharacter::SetAttackSuccess() { m_cubeCheck = false; m_targetAttackCheck = true; }
+	inline bool cCharacter::GetAttackSuccess() const { return m_targetAttackCheck; }
 	inline int cCharacter::GetMode() const { return m_mode; }
 	inline float cCharacter::GetAniPosGap() const { return m_aniPosGap; }
 	inline cCamera* cCharacter::GetCamera() { return m_camera; }

@@ -204,3 +204,4 @@ graphic의 mesh클래스 수정
 ★ update
 graphic의 boundingbox클래스, model클래스의 pick함수 수정
 graphic의 bonemgr클래스, bonenode클래스 추가 및 수정 : bonenode의 애니로 인한 이동을 제한하는 movecontrol
+graphic의 sprite클래스 코드 추가

@@ -49,6 +49,8 @@ cCharacter::~cCharacter()
 {
 	SAFE_DELETE(m_weapon);
 	SAFE_DELETE(m_camera);
+	SAFE_DELETE(m_hpImage);
+	m_sprite->Release();
 }
 
 
@@ -65,6 +67,19 @@ bool cCharacter::Create(const string &modelName)
 //	SetRenderMesh(false);
 
 	m_camera = new cCamera();
+	
+	D3DXCreateSprite(GetDevice(), &m_sprite);
+	m_hpImage = new cSprite( m_sprite, 0, "Hp_Back" );
+	m_hpImage->Create("../media/image/HP_back.png");
+	m_hpImage->SetPos( Vector3(10.f, 600.f, 0.f) );
+	cSprite* pHpImage2 = new cSprite( m_sprite, 1, "Hp_Front" );
+	pHpImage2->Create("../media/image/HP_front.png");
+	pHpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
+	m_hpImage->InsertChild( pHpImage2 );
+
+/*	m_hpImage2 = new cSprite( m_sprite, 1, "Hp_Front" );
+	m_hpImage2->Create("../media/image/HP_front.png");
+	m_hpImage2->SetPos( Vector3(10.f, 600.f, 0.f) );	*/
 		
 	return bResult;
 }
@@ -211,6 +226,12 @@ void cCharacter::RenderShader(cShader &shader)
 
 	if (m_weapon)
 		m_weapon->RenderShader(shader);
+
+	cSprite* pImg = dynamic_cast<cSprite*>(m_hpImage->GetChildren()[0]);
+	pImg->SetRect( sRect( 0, 0, (int)( (m_hp * 0.01f) * 256 ), 64 ) );
+	m_hpImage->Render( Matrix44() );
+//	m_hpImage2->SetRect( sRect( 0, 0, (int)( (m_hp * 0.01f) * 256 ), 64 ) );
+//	m_hpImage2->Render( Matrix44() );
 
 //test
 	if(m_characterCube)
@@ -906,7 +927,7 @@ void cCharacter::MoveControl(const bool bCtl)
 {
 	m_moveControl = bCtl;
 
-	if( m_moveControl )
+	if( m_moveControl )  //공격상태일 때 오브젝트에 닿으면 최종 위치를 결정함
 	{
 		Vector3 finalPos = GetCamera()->GetLook();
 		Matrix44 mat;
