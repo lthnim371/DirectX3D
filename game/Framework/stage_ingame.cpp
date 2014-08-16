@@ -4,6 +4,8 @@
 
 using namespace framework;
 
+static const UINT MAP_SIZE = 256;
+
 cStage_Ingame::cStage_Ingame()
 {
 	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
@@ -22,21 +24,47 @@ cStage_Ingame::~cStage_Ingame()
 	SAFE_DELETE(m_terrainShader);
 	SAFE_DELETE(m_terrain);
 	SAFE_RELEASE(m_font);
+	SAFE_DELETE(m_hpImage);
+	m_sprite->Release();
 }
 
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId)
 {
-//font 생성
+// 그림자 텍스처 생성
+	if (FAILED(graphic::GetDevice()->CreateTexture(MAP_SIZE, MAP_SIZE, 1, 
+		D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8,
+		D3DPOOL_DEFAULT, &m_pShadowTex, NULL)))
+		return;
+	if (FAILED(m_pShadowTex->GetSurfaceLevel(0, &m_pShadowSurf)))
+		return;
+	if (FAILED(graphic::GetDevice()->CreateDepthStencilSurface(
+		MAP_SIZE, MAP_SIZE, D3DFMT_D24S8, 
+		D3DMULTISAMPLE_NONE, 0, TRUE,
+		&m_pShadowTexZ, NULL)))
+		return;
+
+//폰트 생성
 	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
+
+//스프라이트 생성
+	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
+	m_hpImage = new graphic::cSprite( m_sprite, 0, "Hp_Back" );
+	m_hpImage->Create("../media/image/HP_back.png");
+	m_hpImage->SetPos( Vector3(10.f, 600.f, 0.f) );
+	graphic::cSprite* pHpImage2 = new graphic::cSprite( m_sprite, 1, "Hp_Front" );
+	pHpImage2->Create("../media/image/HP_front.png");
+	pHpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
+	m_hpImage->InsertChild( pHpImage2 );
 
 //바닥 생성
 	m_terrain = new graphic::cTerrain();
 	m_terrain->CreateTerrain(128, 128, 100.f);
 	m_terrain->CreateTerrainTexture( "../media/texture/map/Grassbland01_T.tga" );
 	m_terrainShader = new graphic::cShader();
-	m_terrainShader->Create( "../media/shader/hlsl_terrain_splatting.fx", "TShader" );
+//	m_terrainShader->Create( "../media/shader/hlsl_terrain_splatting.fx", "TShader" );
+	m_terrainShader->Create( "../media/shader/hlsl_rigid_phong.fx", "TShader" );
 	LoadMapObject( "../media/mapobject.map" );
 
 	m_infoSend.nId = nId;  //사용자 식별
@@ -294,7 +322,7 @@ void cStage_Ingame::Update(const float elapseTime)
 */
 		}
 		else  //받아올 패킷이 없었다면..
-		{
+		{			
 		//1번, 2번 캐릭터 각각 공격모드인 경우에만 다시 업데이트하고 그 외의 상태일 경우 무시
 			if( character1->GetMode() < character1->LATTACK )
 			{
@@ -309,7 +337,7 @@ void cStage_Ingame::Update(const float elapseTime)
 		}  //if( PacketReceive(packetRecv) )
 
 //	}
-		
+
 	ObjectCollisionCheck();
 
 //새롭게 갱신된 정보대로 적용시킴
@@ -357,26 +385,130 @@ void cStage_Ingame::Render(const float elapseTime)
 
 	//fps 및 그리드 출력
 //		graphic::GetRenderer()->RenderGrid();
+/*
 		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
 		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
 		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition() );
 		m_terrainShader->SetRenderPass(1);
 		m_terrain->RenderShader( *m_terrainShader, pMe->GetCamera() );
+*/
 		graphic::GetRenderer()->RenderAxis();
 		graphic::GetRenderer()->RenderFPS();
 
 //		character1->Render();
 //		character2->Render();
 
+		//---------------------------------------------------------------
+		// 모델 출력 + 그림자.
+		LPDIRECT3DSURFACE9 pOldBackBuffer, pOldZBuffer;
+		D3DVIEWPORT9 oldViewport;
+
+		graphic::GetDevice()->GetRenderTarget(0, &pOldBackBuffer);
+		graphic::GetDevice()->GetDepthStencilSurface(&pOldZBuffer);
+		graphic::GetDevice()->GetViewport(&oldViewport);
+
+		graphic::GetDevice()->SetRenderTarget(0, m_pShadowSurf);
+		graphic::GetDevice()->SetDepthStencilSurface(m_pShadowTexZ);
+		// 뷰포트변경  x y  width    height   minz maxz
+		D3DVIEWPORT9 viewport = {0,0, MAP_SIZE,MAP_SIZE,0.0f,1.0f};
+		graphic::GetDevice()->SetViewport(&viewport);
+
+		// 그림자맵 클리어
+		graphic::GetDevice()->Clear(0L, NULL
+			, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER
+			, 0x00000000, 1.0f, 0L);
+
+		Vector3 pos = pMe->GetCamera()->GetLook();
+		Vector3 light = Vector3(500,1000,0);
+
+		Matrix44 matView;// 뷰 행렬
+		matView.SetView2( light, pos, Vector3(0,1,0));
+
+		Matrix44 matProj;// 투영 행렬
+		matProj.SetProjection( D3DX_PI/2.5f, 1, 0.1f, 5000);
+
+		m_shader->SetMatrix( "mVP", matView * matProj);
+		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
+
+		m_shader->SetRenderPass(1);
+		character1->RenderShader( *m_shader );
+		character2->RenderShader( *m_shader );
+
+		//-----------------------------------------------------
+		// 렌더링타겟 복구
+		//-----------------------------------------------------
+		graphic::GetDevice()->SetRenderTarget(0, pOldBackBuffer);
+		graphic::GetDevice()->SetDepthStencilSurface(pOldZBuffer);
+		graphic::GetDevice()->SetViewport(&oldViewport);
+		pOldBackBuffer->Release();
+		pOldZBuffer->Release();
+		graphic::GetDevice()->SetTransform( D3DTS_VIEW, (D3DXMATRIX*)&( pMe->GetCamera()->GetView() ) );
+		graphic::GetDevice()->SetTransform( D3DTS_PROJECTION, (D3DXMATRIX*)&( pMe->GetCamera()->GetProjection() ) );
+
+		m_shader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
+		m_shader->SetRenderPass(0);
+		character1->RenderShader( *m_shader );
+		character2->RenderShader( *m_shader );
+
+		//------------------------------------------------------------------------
+		// 지형 출력.
+		//------------------------------------------------------------------------
+		D3DXMATRIX mTT;
+		mTT = D3DXMATRIX(0.5f, 0.0f, 0.0f, 0.0f
+			, 0.0f,-0.5f, 0.0f, 0.0f
+			, 0.0f, 0.0f, 1.0f, 0.0f
+			, 0.5f, 0.5f, 0.0f, 1.0f);
+		Matrix44 mT = *(Matrix44*)&mTT;
+
+		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection());
+		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
+		m_terrainShader->SetTexture("ShadowMap", m_pShadowTex);
+
+		Matrix44 m = matView * matProj * mT;
+		m_terrainShader->SetMatrix( "mWVPT", m );
+
+		m_terrainShader->SetRenderPass(2);
+		m_terrain->RenderShader( *m_terrainShader , pMe->GetCamera() );
+
+#if 1 // 디버그용 텍스처 출력
+		{
+			graphic::GetDevice()->SetTextureStageState(0,D3DTSS_COLOROP,	D3DTOP_SELECTARG1);
+			graphic::GetDevice()->SetTextureStageState(0,D3DTSS_COLORARG1,	D3DTA_TEXTURE);
+			graphic::GetDevice()->SetTextureStageState(1,D3DTSS_COLOROP,    D3DTOP_DISABLE);
+			float scale = 128.0f;
+			typedef struct {FLOAT p[4]; FLOAT tu, tv;} TVERTEX;
+
+			TVERTEX Vertex[4] = {
+				// x  y  z rhw tu tv
+				{0, scale, 0, 1, 0, 0,},
+				{scale, scale,0, 1, 1, 0,},
+				{scale, scale+scale,0, 1, 1, 1,},
+				{0, scale+scale,0, 1, 0, 1,},
+			};
+			graphic::GetDevice()->SetTexture( 0, m_pShadowTex );
+			graphic::GetDevice()->SetVertexShader(NULL);
+			graphic::GetDevice()->SetFVF( D3DFVF_XYZRHW | D3DFVF_TEX1 );
+			graphic::GetDevice()->SetPixelShader(0);
+			graphic::GetDevice()->DrawPrimitiveUP( D3DPT_TRIANGLEFAN, 2, Vertex, sizeof( TVERTEX ) );
+		}
+#endif
+
 	//test
-		Matrix44 VP;
+/*		Matrix44 VP;
 		VP = pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection();
 		m_shader->SetMatrix( "mVP", VP );
 		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl에 디폴트 값으로 되어있음
 		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition() );
-		character1->RenderShader( *m_shader );
-		character2->RenderShader( *m_shader );
+*/
+//		character1->RenderShader( *m_shader );
+//		character2->RenderShader( *m_shader );		
 		
+		graphic::cSprite* pImg = dynamic_cast<graphic::cSprite*>(m_hpImage->GetChildren()[0]);
+		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetHP() * 0.01f) * 256 ), 64 ) );
+		m_hpImage->Render( Matrix44() );
+
 		if( m_font )
 		{
 			char buff[16];

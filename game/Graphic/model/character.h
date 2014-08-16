@@ -86,10 +86,6 @@ namespace graphic
 
 		cCamera* m_camera;
 //		ID3DXFont* m_font;
-
-		LPD3DXSPRITE m_sprite;
-		cSprite* m_hpImage;
-//		cSprite* m_hpImage2;
 	};
 
 	inline bool cCharacter::GetCubeCheck() const { return m_cubeCheck; }

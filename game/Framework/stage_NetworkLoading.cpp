@@ -19,8 +19,8 @@ cStage_NetworkLoading::~cStage_NetworkLoading()
 void cStage_NetworkLoading::Init(const int nId)
 {
 //debug
-//	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
-//	GetStageMgr()->GetStage()->Init(nId);
+	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
+	GetStageMgr()->GetStage()->Init(nId);
 //
 	m_acceseInfo.nId = nId;
 	m_acceseInfo.bAccess = true;

@@ -50,5 +50,12 @@ namespace framework
 
 		graphic::cTerrain* m_terrain;
 		graphic::cShader* m_terrainShader;
+
+		LPD3DXSPRITE m_sprite;
+		graphic::cSprite* m_hpImage;
+
+		LPDIRECT3DTEXTURE9 m_pShadowTex;
+		LPDIRECT3DSURFACE9 m_pShadowSurf;
+		LPDIRECT3DSURFACE9 m_pShadowTexZ;
 	};
 }
