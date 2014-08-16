@@ -419,7 +419,7 @@ void cStage_Ingame::Render(const float elapseTime)
 			, 0x00000000, 1.0f, 0L);
 
 		Vector3 pos = pMe->GetCamera()->GetLook();
-		Vector3 light = Vector3(500,1000,0);
+		Vector3 light = Vector3(1000,1000,0);
 
 		Matrix44 matView;// 뷰 행렬
 		matView.SetView2( light, pos, Vector3(0,1,0));
@@ -432,8 +432,14 @@ void cStage_Ingame::Render(const float elapseTime)
 		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
 
 		m_shader->SetRenderPass(1);
-		character1->RenderShader( *m_shader );
-		character2->RenderShader( *m_shader );
+		character1->RenderShadow( *m_shader );
+		character2->RenderShadow( *m_shader );
+		
+		m_terrainShader->SetMatrix( "mVP", matView * matProj);
+		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
+		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
+		m_terrainShader->SetRenderPass(3);
+		m_terrain->RenderShadowRigidModels( *m_terrainShader, light, matProj );
 
 		//-----------------------------------------------------
 		// 렌더링타겟 복구
@@ -450,6 +456,10 @@ void cStage_Ingame::Render(const float elapseTime)
 		m_shader->SetRenderPass(0);
 		character1->RenderShader( *m_shader );
 		character2->RenderShader( *m_shader );
+
+		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
+		m_terrainShader->SetRenderPass(0);
+		m_terrain->RenderShaderRigidModels( *m_terrainShader );
 
 		//------------------------------------------------------------------------
 		// 지형 출력.

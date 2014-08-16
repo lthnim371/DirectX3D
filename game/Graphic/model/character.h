@@ -21,7 +21,8 @@ namespace graphic
 		void LoadWeapon(const string &fileName);//, const string &fileName2);
 		virtual bool Move(const float elapseTime) override;
 		virtual void Render() override;
-		virtual void RenderShader(cShader &shader);
+		virtual void RenderShader(cShader &shader) override;
+		virtual void RenderShadow(cShader &shader) override;
 		
 //Ãß°¡
 	public:

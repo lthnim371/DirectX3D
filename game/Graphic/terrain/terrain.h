@@ -31,6 +31,8 @@ namespace graphic
 		virtual void RenderShader(cShader &shader);
 	//추가
 		void RenderShader(cShader &shader, cCamera* pCam);
+		void RenderShadowRigidModels(cShader &shader, const Vector3& light, const Matrix44& proj);
+		void RenderShaderRigidModels(cShader &shader);
 
 		int GetRowCellCount() const;
 		int GetColCellCount() const;
@@ -49,7 +51,7 @@ namespace graphic
 		bool UpdateHeightMap( const string &heightMapFileName, 
 			const string &textureFileName, const float heightFactor );
 		void RenderRigidModels();
-		void RenderShaderRigidModels(cShader &shader);
+//		void RenderShaderRigidModels(cShader &shader);
 	//추가
 		void RenderShaderRigidModels(cShader &shader, cCamera* pCam);
 

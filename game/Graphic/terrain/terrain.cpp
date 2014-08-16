@@ -133,8 +133,8 @@ void cTerrain::RenderShader(cShader &shader, cCamera* pCam)
 
 	m_grid.RenderShader(shader);
 
-	if (m_modelShader)
-		RenderShaderRigidModels(*m_modelShader, pCam);
+//	if (m_modelShader)
+//		RenderShaderRigidModels(*m_modelShader, pCam);
 //		RenderShaderRigidModels(*m_modelShader);
 }
 
@@ -174,6 +174,17 @@ void cTerrain::RenderShaderRigidModels(cShader &shader, cCamera* pCam)
 	}
 }
 
+void cTerrain::RenderShadowRigidModels(cShader &shader, const Vector3& light, const Matrix44& proj)
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+/*		Matrix44 matView;// ºä Çà·Ä
+		matView.SetView2( light, model->GetTM().GetPosition(), Vector3(0,1,0));
+		shader.SetMatrix( "mVP", matView * proj);
+*/
+		model->RenderShadow(shader);
+	}
+}
 
 float Lerp(float p1, float p2, float alpha)
 {

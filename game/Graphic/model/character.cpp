@@ -219,6 +219,14 @@ void cCharacter::RenderShader(cShader &shader)
 		m_weaponCube->Render( Matrix44() );
 }
 
+void cCharacter::RenderShadow(cShader &shader)
+{
+	cModel::RenderShadow(shader);
+
+	if (m_weapon)
+		m_weapon->RenderShadow(shader);
+}
+
 void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
 {
 	if( m_mode == BEHIT || m_mode == GUARD_BE_HIT )
