@@ -27,7 +27,8 @@ namespace framework
 	//	bool PacketSend(const network::InfoProtocol packetInfo);
 		bool PacketReceive(OUT network::InfoProtocol& packetInfo);
 		void LoadMapObject(const string& fileName);
-		void ObjectCollisionCheck();  //맵오브젝트들과 충돌 확인
+		void ObjectCollisionCheck(const float elapseTime);  //맵오브젝트들과 충돌 확인
+		void CharacterCollisionCheck(const float elapseTime);
 
 	private:
 		POINT m_currMouse;

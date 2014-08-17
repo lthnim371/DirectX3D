@@ -26,7 +26,7 @@ namespace graphic
 		
 //추가
 	public:
-		void Update(const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
+		void Update(const float elapseTime, const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool GetCubeCheck() const;
 		bool CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
 		bool CollisionCheck2( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
@@ -40,7 +40,7 @@ namespace graphic
 		void UpdateBeHit(const bool bAniState, const Vector3& sourPos, const float fAniPosGap);
 		float GetAniPosGap() const;
 		cCamera* GetCamera();
-		void MoveControl(const bool bCtl);  //애니메이션 이동값 적용 여부 결정
+		void MoveControl(const bool bCtl, const bool bOnlyJump = false);  //애니메이션 이동값 적용 여부 결정
 
 	//debug
 		void SetMode( const int stage );

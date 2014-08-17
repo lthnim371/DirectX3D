@@ -207,3 +207,9 @@ graphic의 bonemgr클래스, bonenode클래스 추가 및 수정 : bonenode의 애니로 인한 이
 graphic의 sprite클래스 코드 추가
 
 framework의 stage_ingame클래스 render함수에 그림자 코드 추가(정리 필요)
+
+
+140817
+★ update
+framework의 stage_ingame클래스 오브젝트 충돌 확인에 점프 코드 추가
+graphic의 character클래스 점프 코드 수정(안정화)

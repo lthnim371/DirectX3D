@@ -227,7 +227,7 @@ void cCharacter::RenderShadow(cShader &shader)
 		m_weapon->RenderShadow(shader);
 }
 
-void cCharacter::Update(const short state, const float x, const float y)  //x = 0, y = 0
+void cCharacter::Update(const float elapseTime, const short state, const float x, const float y)  //x = 0, y = 0
 {
 	if( m_mode == BEHIT || m_mode == GUARD_BE_HIT )
 		return;
@@ -277,7 +277,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = FORWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 5.f );  //카메라가 바라보는 방향으로
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
 			MultiplyTM( mat );  //현재 위치에 더해주기
 			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
 		break;
@@ -289,7 +289,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = BACKWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_backward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * -5.f );
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (-5.f - elapseTime) );
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -302,7 +302,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );  //카메라의 좌우방향으로
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //카메라의 좌우방향으로
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -315,7 +315,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
+			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
 			MultiplyTM( mat );
 			GetCamera()->SetPosition( GetTM() );
 		break;
@@ -327,7 +327,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 				m_mode = DASH;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * 10.f );  //카메라가 바라보는 방향으로
+			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
 			MultiplyTM( mat );  //현재 위치에 더해주기
 			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
 		break;
@@ -351,7 +351,7 @@ void cCharacter::Update(const short state, const float x, const float y)  //x = 
 		//			m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 		//			m_cubePos *= 100.f;
 				}
-				else if( m_jumpCnt == 2 )
+				else if( 1 <= m_jumpCnt && m_jumpCnt <= 2 )
 				{
 					m_currJumpAttack = true;
 					m_bone->SetAniLoop(false);
@@ -578,7 +578,7 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 	//	if( GetBoneMgr()->GetRoot()->GetMoveControl() )
 	//		GetBoneMgr()->MoveControl(false);
 		MoveControl(false);
-
+		
 	//	m_weapon->SetAnimation("..\\media\\valle\\valle_normal.ani");
 /*
 		m_cubeCheck = false;
@@ -622,15 +622,17 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 	Vector3 camDir( GetCamera()->GetDirection().Normal() );
 	Vector3 camRight( GetCamera()->GetRight() );
 	Matrix44 mat;
+	float y = GetTM().GetPosition().y;
 		
 	if( bAniState == false )
 	{			
 		if( m_currJumpAttack )
 		{
+			m_jumpCnt = m_jumpCnt == 1 ? 2 : m_jumpCnt;
 			m_currJumpAttack = false;
 			m_prevJumpAttack = true;			
 		//	if(m_jumpSpeed > -7.5f)
-			if( GetTM().GetPosition().y > 30.f )
+			if( y > 30.f )//GetTM().GetPosition().y
 			{
 				m_bone->SetAniLoop(true);
 				SetAnimation( "..\\media\\ani\\valle\\valle1_jump2.ani" );
@@ -643,7 +645,7 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			m_jumpCnt++;
 		}
 	}
-	else if( m_currJumpAttack == true )
+	else if( m_currJumpAttack == true && m_targetAttackCheck == false)
 	{
 		short currFrame = m_bone->GetRoot()->GetCurrentFrame();
 				
@@ -661,62 +663,9 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			m_cubeCheck = false;
 		}
 	}
-	
-	if( m_jumpCnt == 2 && //m_jumpSpeed <= -7.5f )
-		m_jumpSpeed <= -7.5f )
-	{		
-		switch( m_currJumpAttack )
-		{
-			case false:
-				m_jumpCnt++;
-				m_bone->SetAniLoop(false);
-				SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
-			break;
-
-			case true:
-				mat = GetTM();
-				float y = mat.GetPosition().y;
-
-				if(y <= 10.f)
-					return;
-				else if(y > 10.f)
-					m_jumpSpeed += ( 30.f * elapseTime );
-			break;
-		}
-	}
-//	m_jumpSpeed -= 0.2f;
-	m_jumpSpeed -= ( 30.f * elapseTime );
-	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
-	MultiplyTM( mat );
-	GetCamera()->SetPosition( GetTM() );
-
-	if( m_mode != JUMP )
+	else if(y < 0.f)
 	{
-		switch(m_mode)
-		{
-			case FRONTJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 5.f );
-				MultiplyTM( mat );
-			break;
-			case BACKJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -5.f );
-				MultiplyTM( mat );
-			break;
-			case LEFTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -5.f );
-				MultiplyTM( mat );
-			break;
-			case RIGHTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 5.f );
-				MultiplyTM( mat );
-			break;
-		}
-	}
-
-	mat = GetTM();
-	float y = mat.GetPosition().y;
-	if(y <= 0.f)
-	{
+		mat = GetTM();
 		mat._42 = 0.f;
 		SetTM(mat);
 		GetCamera()->SetPosition( GetTM() );
@@ -731,6 +680,9 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 
 		m_cubeStartFrame = 0;
 		m_cubeMaximumFrame = 0;
+
+		m_moveControl = false;
+		m_targetAttackCheck = false;
 /*
 		if(m_weaponCube)
 		{
@@ -740,6 +692,61 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 */
 		return;
 	}
+	
+	m_jumpSpeed = y >= 350.f ? 0.f : m_jumpSpeed;
+
+	if( m_jumpCnt != 3 && m_jumpSpeed < 0 && y <= 15.f )
+	{		
+		switch( m_currJumpAttack )
+		{
+			case false:
+				m_jumpCnt++;
+				m_bone->SetAniLoop(false);
+				SetAnimation( "..\\media\\ani\\valle\\valle1_jump3.ani" );
+			break;
+
+			case true:
+				return;
+			/*	mat = GetTM();
+				float y = mat.GetPosition().y;
+
+				if(y <= 10.f)
+					return;
+				else if(y > 10.f)
+					m_jumpSpeed += ( 0.1f + elapseTime );
+			break;	*/
+		}
+	}
+	m_jumpSpeed -= (0.05f - elapseTime);
+	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
+	MultiplyTM( mat );
+	GetCamera()->SetPosition( GetTM() );
+
+	if( m_mode != JUMP && m_moveControl == false )
+	{
+		switch(m_mode)
+		{
+			case FRONTJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );
+				MultiplyTM( mat );
+			break;
+			case BACKJUMP:
+				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (-5.f - elapseTime) );
+				MultiplyTM( mat );
+			break;
+			case LEFTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );
+				MultiplyTM( mat );
+			break;
+			case RIGHTJUMP:
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
+				MultiplyTM( mat );
+			break;
+		}
+	}
+
+//	mat = GetTM();
+//	float y = mat.GetPosition().y;
 }
 
 void cCharacter::UpdateBeHit(const bool bAniState, const Vector3& sourDir, const float fAniPosGap)
@@ -773,10 +780,11 @@ void cCharacter::FindWeapon()
 	//무기 bone 정보 가져오기
 	vector<cBoneNode*>& weaponNode = m_weapon->GetBoneMgr()->GetAllBoneNode();
 
-	for(auto it = weaponNode.begin(); it != weaponNode.end(); ++it)
+//	for(auto it = weaponNode.begin(); it != weaponNode.end(); ++it)
+	BOOST_FOREACH(auto it, weaponNode)
 	{
 		//무기 bone 이름으로 캐릭터의 동일한 bone 찾아서 주소 가져오기
-		cBoneNode* pNode = m_bone->FindBone( (*it)->GetName() );
+		cBoneNode* pNode = m_bone->FindBone( (*it).GetName() );
 		
 	//	if( !pNode )
 	//		continue;
@@ -910,11 +918,13 @@ bool cCharacter::CollisionCheck2( cCube& sourCube, const Vector3& sourPos, const
 	return false;
 }
 
-void cCharacter::MoveControl(const bool bCtl)
+void cCharacter::MoveControl(const bool bCtl, const bool bOnlyJump)
 {
 	m_moveControl = bCtl;
 
-	if( m_moveControl )  //공격상태일 때 오브젝트에 닿으면 최종 위치를 결정함
+	if( bOnlyJump )
+		return;
+	else if( m_moveControl )  //공격상태일 때 오브젝트에 닿으면 최종 위치를 결정함
 	{
 		Vector3 finalPos = GetCamera()->GetLook();
 		Matrix44 mat;

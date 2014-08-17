@@ -53,7 +53,7 @@ void cStage_NetworkLoading::Init(const int nId)
 void cStage_NetworkLoading::Input(const float elapseTime)
 {
 	fTick += elapseTime;
-	if( fTick >= 0.1f )
+	if( fTick >= 0.01f )
 	{
 		fTick = 0.f;
 
