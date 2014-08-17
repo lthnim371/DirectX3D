@@ -1,4 +1,4 @@
-#pragma once
+Ôªø#pragma once
 
 //#include "../Network/Network/network.h"
 //using namespace network;
@@ -27,7 +27,7 @@ namespace framework
 	//	bool PacketSend(const network::InfoProtocol packetInfo);
 		bool PacketReceive(OUT network::InfoProtocol& packetInfo);
 		void LoadMapObject(const string& fileName);
-		void ObjectCollisionCheck(const float elapseTime);  //∏ ø¿∫Í¡ß∆ÆµÈ∞˙ √Êµπ »Æ¿Œ
+		void ObjectCollisionCheck(const float elapseTime);  //ÎßµÏò§Î∏åÏ†ùÌä∏Îì§Í≥º Ï∂©Îèå ÌôïÏù∏
 		void CharacterCollisionCheck(const float elapseTime);
 
 	private:
@@ -58,5 +58,7 @@ namespace framework
 		LPDIRECT3DTEXTURE9 m_pShadowTex;
 		LPDIRECT3DSURFACE9 m_pShadowSurf;
 		LPDIRECT3DSURFACE9 m_pShadowTexZ;
+
+		graphic::cModel* m_skybox;
 	};
 }

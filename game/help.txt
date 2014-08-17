@@ -213,3 +213,6 @@ framework의 stage_ingame클래스 render함수에 그림자 코드 추가(정리 필요)
 ★ update
 framework의 stage_ingame클래스 오브젝트 충돌 확인에 점프 코드 추가
 graphic의 character클래스 점프 코드 수정(안정화)
+
+framework의 stage_ingame클래스에 캐릭터 이동 충돌 함수 추가 : 캐릭터 이동할 때 서로 충돌하는지 확인
+graphic의 camera클래스에 상하회전 코드 추가

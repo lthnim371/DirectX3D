@@ -64,8 +64,8 @@ bool cMapController::SaveTerrainFile(const string &fileName)
 // 지형 생성.
 bool cMapController::CreateDefaultTerrain()
 {
-	m_terrain.CreateTerrain(64, 64, 50.f, 8.f);
-	m_terrain.CreateTerrainTexture( "../../media/terrain/모래1.jpg");
+	m_terrain.CreateTerrain(128, 128, 100.f, 8.f);
+	m_terrain.CreateTerrainTexture( "../../media/texture/map/Grassbland01_T.tga");
 
 	NotifyObserver();
 	return true;

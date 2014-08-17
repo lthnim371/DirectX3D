@@ -456,6 +456,7 @@ void CMapView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 						{
 							rObj.erase(it);
 							m_currSelectObj = NULL;
+							m_objectCount--;
 							break;
 						}  //if
 					}  //for

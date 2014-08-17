@@ -65,7 +65,7 @@ bool cCharacter::Create(const string &modelName)
 //	SetRenderMesh(false);
 
 	m_camera = new cCamera();
-				
+			
 	return bResult;
 }
 
@@ -206,7 +206,7 @@ void cCharacter::Render()
 }
 
 void cCharacter::RenderShader(cShader &shader)
-{
+{	
 	cModel::RenderShader(shader);
 
 	if (m_weapon)
@@ -693,7 +693,7 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 		return;
 	}
 	
-	m_jumpSpeed = y >= 350.f ? 0.f : m_jumpSpeed;
+	m_jumpSpeed = y >= 350.f ? -MATH_EPSILON : m_jumpSpeed;
 
 	if( m_jumpCnt != 3 && m_jumpSpeed < 0 && y <= 15.f )
 	{		
@@ -717,7 +717,7 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			break;	*/
 		}
 	}
-	m_jumpSpeed -= (0.05f - elapseTime);
+	m_jumpSpeed -= (0.07f - elapseTime);
 	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 	MultiplyTM( mat );
 	GetCamera()->SetPosition( GetTM() );

@@ -49,7 +49,7 @@ namespace graphic
 	//Ãß°¡
 		void SetAniLoop(const bool loop);
 //		void SetBoneMgr(cBoneMgr* const bone);
-		void CreateCube();
+		void CreateCube(const float fScale = 1.f);
 		cCube& GetCube();
 
 	protected:

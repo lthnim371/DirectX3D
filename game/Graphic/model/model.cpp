@@ -281,7 +281,7 @@ void cModel::SetAniLoop(const bool loop)
 	m_bone->SetAniLoop(loop);
 }
 
-void cModel::CreateCube()
+void cModel::CreateCube(const float fScale)
 {
 	sMinMax mm;
 	BOOST_FOREACH (auto &mesh, m_meshes)
@@ -291,7 +291,7 @@ void cModel::CreateCube()
 		mm.Update(cube.GetMax());
 	}
 	
-	m_cube.SetCube( mm.Min, mm.Max );
+	m_cube.SetCube( mm.Min * fScale, mm.Max * fScale);
 	m_cube.SetTransform( GetTM() );
 
 	m_isRenderBoundingBox = true;

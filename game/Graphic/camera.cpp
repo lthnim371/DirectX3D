@@ -25,7 +25,7 @@ void cCamera::Init(const Vector3& look, const Vector3& pos)
 	const int WINSIZE_X = 1024;	//초기 윈도우 가로 크기
 	const int WINSIZE_Y = 768;	//초기 윈도우 세로 크기
 	
-	m_proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 5000.0f) ;
+	m_proj.SetProjection(D3DX_PI * 0.5f, (float)WINSIZE_X / (float) WINSIZE_Y, 1.f, 15000.0f) ;
 	graphic::GetDevice()->SetTransform(D3DTS_PROJECTION, (D3DXMATRIX*)&m_proj) ;
 /*
 	m_font = NULL;
@@ -101,17 +101,29 @@ void cCamera::SetRotation(const float x, const float y)  //x = 0, y = 0
 //		dbg::Print( "%f,%f", m_pos.x,m_pos.z);
 	}
 
-	//if( y != 0 )
-	//{ // rotate X-Axis		
-	//	if(m_pos.y >= 50.f && m_pos.y <= 300)
-	//	{
-	//		Quaternion q( m_right, y * 0.005f ); 
-	//		Matrix44 m = q.GetMatrix();
-	//		Vector3 currDir(m_pos - m_look);
-	//		currDir *= m;
-	//		m_pos = m_look + currDir;
-	//	}
-	//}
+	if( y != 0 )
+	{ // rotate X-Axis
+		
+		m_pos.y += -y;
+		if( m_pos.y <= MATH_EPSILON )
+			m_pos.y += y;
+		else if( m_pos.y >= 500.f )
+			m_pos.y += y;
+
+/*		if(m_pos.y >= 50.f && fCurrAngle > 0.1f )
+		{
+			Quaternion q( m_right, -y * 0.005f ); 
+			Matrix44 m = q.GetMatrix();
+			Vector3 currDir(m_pos - m_look);
+			currDir *= m;
+			m_pos = m_look + currDir;
+		}
+		else if( m_pos.y < 50.f )
+			m_pos.y += 5.f;
+		else if( fCurrAngle <= 0.1f )
+			m_pos *= ;
+*/
+	}
 
 	Update();
 }

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "stage_ingame.h"
 #include <fstream>
 
@@ -26,12 +26,20 @@ cStage_Ingame::~cStage_Ingame()
 	SAFE_RELEASE(m_font);
 	SAFE_DELETE(m_hpImage);
 	m_sprite->Release();
+	SAFE_DELETE(m_skybox);
 }
 
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId)
 {
-// ±×¸²ÀÚ ÅØ½ºÃ³ »ı¼º
+//ìŠ¤ì¹´ì´ë°•ìŠ¤ ìƒì„±
+	m_skybox = new graphic::cModel(7777);
+	m_skybox->Create( "../media/mesh/map/skybox.dat", graphic::MODEL_TYPE::RIGID );
+	Matrix44 s;
+	s.SetScale( Vector3(0.9f, 1.f, 0.9f) );
+	m_skybox->MultiplyTM( s );
+
+// ê·¸ë¦¼ì í…ìŠ¤ì²˜ ìƒì„±
 	if (FAILED(graphic::GetDevice()->CreateTexture(MAP_SIZE, MAP_SIZE, 1, 
 		D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8,
 		D3DPOOL_DEFAULT, &m_pShadowTex, NULL)))
@@ -44,11 +52,11 @@ void cStage_Ingame::Init(const int nId)
 		&m_pShadowTexZ, NULL)))
 		return;
 
-//ÆùÆ® »ı¼º
+//í°íŠ¸ ìƒì„±
 	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
-	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "±¼¸²", &m_font );
+	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "êµ´ë¦¼", &m_font );
 
-//½ºÇÁ¶óÀÌÆ® »ı¼º
+//ìŠ¤í”„ë¼ì´íŠ¸ ìƒì„±
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 	m_hpImage = new graphic::cSprite( m_sprite, 0, "Hp_Back" );
 	m_hpImage->Create("../media/image/HP_back.png");
@@ -58,7 +66,7 @@ void cStage_Ingame::Init(const int nId)
 	pHpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
 	m_hpImage->InsertChild( pHpImage2 );
 
-//¹Ù´Ú »ı¼º
+//ë°”ë‹¥ ìƒì„±
 	m_terrain = new graphic::cTerrain();
 	m_terrain->CreateTerrain(128, 128, 100.f);
 	m_terrain->CreateTerrainTexture( "../media/texture/map/Grassbland01_T.tga" );
@@ -67,7 +75,7 @@ void cStage_Ingame::Init(const int nId)
 	m_terrainShader->Create( "../media/shader/hlsl_rigid_phong.fx", "TShader" );
 	LoadMapObject( "../media/mapobject.map" );
 
-	m_infoSend.nId = nId;  //»ç¿ëÀÚ ½Äº°
+	m_infoSend.nId = nId;  //ì‚¬ìš©ì ì‹ë³„
 //	m_info2.nId = ( nId == 0 ? 1 : 0 );
 
 	m_shader = new graphic::cShader();
@@ -106,7 +114,7 @@ void cStage_Ingame::Init(const int nId)
 		//Matrix44 rot;
 		//rot.SetRotationY( -1.f );
 		Matrix44 pos;
-		pos.SetTranslate( Vector3( 0, 0, -1500.f) );
+		pos.SetTranslate( Vector3( 0, 0, -3000.f) );
 		character1->MultiplyTM( pos);
 	//	character1->GetCamera()->Init( character1->GetTM().GetPosition() );
 
@@ -122,12 +130,12 @@ void cStage_Ingame::Init(const int nId)
 
 		//Matrix44 rot;
 		//rot.SetRotationY( 180.f );
-		pos.SetTranslate( Vector3( 0, 0, 1500.f) );
+		pos.SetTranslate( Vector3( 0, 0, 3000.f) );
 		character2->MultiplyTM( pos);
 	//	character2->GetCamera()->SetPosition( character2->GetTM() );
 
 	//	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
-	//»ç¿ëÀÚ¸¦ ½Äº°ÇÏ¿© ÇØ´çÄ³¸¯ÅÍ À§Ä¡·Î Ä«¸Ş¶ó ¼ÂÆÃ -> ±×·¯³ª ±»ÀÌ ±¸ºĞÇÒ ÇÊ¿ä°¡ ¾øÀ»µíÇÏ´Ù
+	//ì‚¬ìš©ìë¥¼ ì‹ë³„í•˜ì—¬ í•´ë‹¹ìºë¦­í„° ìœ„ì¹˜ë¡œ ì¹´ë©”ë¼ ì…‹íŒ… -> ê·¸ëŸ¬ë‚˜ êµ³ì´ êµ¬ë¶„í•  í•„ìš”ê°€ ì—†ì„ë“¯í•˜ë‹¤
 //		if( m_infoSend.nId == 1 )
 //		{
 			Vector3 characterPos( character1->GetTM().GetPosition() );
@@ -139,7 +147,7 @@ void cStage_Ingame::Init(const int nId)
 			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
 //		}
 
-//ÃÊ±â ¸¶¿ì½ºÀ§Ä¡ °ª º¸°ü
+//ì´ˆê¸° ë§ˆìš°ìŠ¤ìœ„ì¹˜ ê°’ ë³´ê´€
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
 }
@@ -150,14 +158,14 @@ void cStage_Ingame::Input(const float elapseTime)
 //	if( !m_access )
 //		GetStageMgr()->SetSocket();
 
-//ÆĞÅ¶ Àü¼Û¿¡ ÇÊ¿äÇÑ º¯¼öµé »ı¼º ¹× ÃÊ±âÈ­
+//íŒ¨í‚· ì „ì†¡ì— í•„ìš”í•œ ë³€ìˆ˜ë“¤ ìƒì„± ë° ì´ˆê¸°í™”
 	POINT ptMouse;
 	ptMouse.x = 0;
 	ptMouse.y = 0;
 	network::PROTOCOL::TYPE nState1 = network::PROTOCOL::NONE;
 	network::PROTOCOL::TYPE nState2 = network::PROTOCOL::NONE;
 
-//È¸Àü È®ÀÎ
+//íšŒì „ í™•ì¸
 	m_prevMouse = m_currMouse;
 	::GetCursorPos( &m_currMouse );
 	::ScreenToClient( GetStageMgr()->GetWindowHandle(), &m_currMouse );
@@ -175,16 +183,16 @@ void cStage_Ingame::Input(const float elapseTime)
 			nState1 = network::PROTOCOL::LEFTROTATION;
 	}
 	
-/*	//Ä«¸Ş¶ó ³ôÀÌ Á¶Àı(ÇÁ·Î±×·¥ Å×½ºÆ®)
+	//ì¹´ë©”ë¼ ë†’ì´ ì¡°ì ˆ(í”„ë¡œê·¸ë¨ í…ŒìŠ¤íŠ¸)
 //	else if( InputMgr->isOnceKeyDown('1') )
 	if( InputMgr->isOnceKeyDown('1') )
 	{
-		graphic::GetCamera()->SetHeight(-10.f);
+		character1->GetCamera()->SetHeight(-10.f);
 	}
 	else if( InputMgr->isOnceKeyDown('2') )
 	{
-		graphic::GetCamera()->SetHeight(10.f);
-	}*/
+		character1->GetCamera()->SetHeight(10.f);
+	}
 
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
@@ -266,7 +274,7 @@ void cStage_Ingame::Input(const float elapseTime)
 	//	character1->Update( character1->NORMAL );
 	}
 
-//ÀÌÀü Àü¼ÛµÈ ÆĞÅ¶°ú ´Ù¸¦ °æ¿ì¿¡¸¸ Àü¼Û
+//ì´ì „ ì „ì†¡ëœ íŒ¨í‚·ê³¼ ë‹¤ë¥¼ ê²½ìš°ì—ë§Œ ì „ì†¡
 	if( nState2 != m_infoSend.header2.protocol || nState1 != m_infoSend.header1.protocol )
 	{
 		PacketSend(nState1, nState2, ptMouse);
@@ -282,25 +290,25 @@ void cStage_Ingame::Update(const float elapseTime)
 //	if(fTick2 >= 0.2f)
 //	{
 //		fTick2 = 0.f;
-	//¼­¹ö·ÎºÎÅÍ ÆĞÅ¶ ¹Ş¾Æ¿À±â
+	//ì„œë²„ë¡œë¶€í„° íŒ¨í‚· ë°›ì•„ì˜¤ê¸°
 		network::InfoProtocol packetRecv;
 		ZeroMemory(&packetRecv, sizeof(packetRecv));
-		if( PacketReceive(packetRecv) )  //ÆĞÅ¶À» ¹Ş¾Æ¿Ô´Ù¸é..
+		if( PacketReceive(packetRecv) )  //íŒ¨í‚·ì„ ë°›ì•„ì™”ë‹¤ë©´..
 		{
 //			graphic::cCharacter* pMe = ( packetRecv.nId != 1 ? character1 : character2 );
 //			pMe->GetCamera()->SetCamera( packetRecv.camLook, packetRecv.camPos );
 
-				if( packetRecv.nId == 1 )  //»ç¿ëÀÚ ½Äº°¹øÈ£°¡ 1¹øÀÌ¶ó¸é..
+				if( packetRecv.nId == 1 )  //ì‚¬ìš©ì ì‹ë³„ë²ˆí˜¸ê°€ 1ë²ˆì´ë¼ë©´..
 				{
-					m_info1 = packetRecv;  //¹Ş¾Æ¿Â ÆĞÅ¶ º¸°üÇØµÎ±â
-					if( m_infoSend.nId != m_info1.nId )  //¹Ş¾Æ¿Â ½Äº°¹øÈ£¿Í Áö±İ ½ÇÇàÇÏ°í ÀÖ´Â »ç¿ëÀÚ¿Í ´Ù¸£´Ù¸é...(Áï, ÇöÀç »ç¿ëÀÚ°¡ 2¹øÀÌ¶ó¸é..)
+					m_info1 = packetRecv;  //ë°›ì•„ì˜¨ íŒ¨í‚· ë³´ê´€í•´ë‘ê¸°
+					if( m_infoSend.nId != m_info1.nId )  //ë°›ì•„ì˜¨ ì‹ë³„ë²ˆí˜¸ì™€ ì§€ê¸ˆ ì‹¤í–‰í•˜ê³  ìˆëŠ” ì‚¬ìš©ìì™€ ë‹¤ë¥´ë‹¤ë©´...(ì¦‰, í˜„ì¬ ì‚¬ìš©ìê°€ 2ë²ˆì´ë¼ë©´..)
 					{
-					//1¹øÄ³¸¯ÅÍ À§Ä¡ °»½Å
+					//1ë²ˆìºë¦­í„° ìœ„ì¹˜ ê°±ì‹ 
 						character1->GetCamera()->SetCamera( m_info1.camLook, m_info1.camPos );
 						character1->SetTM( m_info1.character );
 					}
 				}
-				else if( packetRecv.nId == 2 )  //»ç¿ëÀÚ ½Äº°¹øÈ£°¡ 2¹øÀÌ¶ó¸é..
+				else if( packetRecv.nId == 2 )  //ì‚¬ìš©ì ì‹ë³„ë²ˆí˜¸ê°€ 2ë²ˆì´ë¼ë©´..
 				{
 					m_info2 = packetRecv;
 					if( m_infoSend.nId != m_info2.nId )
@@ -310,7 +318,7 @@ void cStage_Ingame::Update(const float elapseTime)
 					}
 				}  //if( packetRecv.nId == 1 )
 		
-			//¹Ş¾Æ¿Â ÆĞÅ¶Á¤º¸·Î ÇØ´ç Ä³¸¯ÅÍ¸¦ »õ·Ó°Ô °»½ÅÇÏ°í ´Ù¸¥ Ä³¸¯ÅÍ´Â ÀÌÀü ÆĞÅ¶Á¤º¸ ±×´ë·Î ´Ù½Ã Àû¿ë
+			//ë°›ì•„ì˜¨ íŒ¨í‚·ì •ë³´ë¡œ í•´ë‹¹ ìºë¦­í„°ë¥¼ ìƒˆë¡­ê²Œ ê°±ì‹ í•˜ê³  ë‹¤ë¥¸ ìºë¦­í„°ëŠ” ì´ì „ íŒ¨í‚·ì •ë³´ ê·¸ëŒ€ë¡œ ë‹¤ì‹œ ì ìš©
 				character1->Update( elapseTime, m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
 				character1->Update( elapseTime, m_info1.header2.protocol );
 				character2->Update( elapseTime, m_info2.header1.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
@@ -322,9 +330,9 @@ void cStage_Ingame::Update(const float elapseTime)
 					pMe->Update( packetRecv.header2.protocol );
 */
 		}
-		else  //¹Ş¾Æ¿Ã ÆĞÅ¶ÀÌ ¾ø¾ú´Ù¸é..
+		else  //ë°›ì•„ì˜¬ íŒ¨í‚·ì´ ì—†ì—ˆë‹¤ë©´..
 		{			
-		//1¹ø, 2¹ø Ä³¸¯ÅÍ °¢°¢ °ø°İ¸ğµåÀÎ °æ¿ì¿¡¸¸ ´Ù½Ã ¾÷µ¥ÀÌÆ®ÇÏ°í ±× ¿ÜÀÇ »óÅÂÀÏ °æ¿ì ¹«½Ã
+		//1ë²ˆ, 2ë²ˆ ìºë¦­í„° ê°ê° ê³µê²©ëª¨ë“œì¸ ê²½ìš°ì—ë§Œ ë‹¤ì‹œ ì—…ë°ì´íŠ¸í•˜ê³  ê·¸ ì™¸ì˜ ìƒíƒœì¼ ê²½ìš° ë¬´ì‹œ
 			if( character1->GetMode() < character1->LATTACK )
 			{
 				character1->Update( elapseTime, m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
@@ -340,19 +348,20 @@ void cStage_Ingame::Update(const float elapseTime)
 //	}
 
 	ObjectCollisionCheck(elapseTime);
+	CharacterCollisionCheck(elapseTime);
 
-//»õ·Ó°Ô °»½ÅµÈ Á¤º¸´ë·Î Àû¿ë½ÃÅ´
+//ìƒˆë¡­ê²Œ ê°±ì‹ ëœ ì •ë³´ëŒ€ë¡œ ì ìš©ì‹œí‚´
 	bool bAniState1 = character1->Move(elapseTime);
 	bool bAniState2 = character2->Move(elapseTime);
 //	graphic::GetCamera()->SetPosition( character1->GetTM() );
 	
-	//ÇöÀç »ç¿ëÀÚ°¡ °ø°İÀÌ ÀûÁßÇÒ ¼ø°£ÀÏ ‹š »ç¿ëÀÚÀÇ ¹«±â¿Í »ó´ë¹æÀÇ ¸öÅëÀÌ Ãæµ¹ÇÏ¿´´ÂÁö È®ÀÎ
-		if( character1->GetCubeCheck() == true )  //°ø°İÀÌ ÀûÁßÇÒ ¼ø°£ÀÌ¶ó¸é..
+	//í˜„ì¬ ì‚¬ìš©ìê°€ ê³µê²©ì´ ì ì¤‘í•  ìˆœê°„ì¼ ë–„ ì‚¬ìš©ìì˜ ë¬´ê¸°ì™€ ìƒëŒ€ë°©ì˜ ëª¸í†µì´ ì¶©ëŒí•˜ì˜€ëŠ”ì§€ í™•ì¸
+		if( character1->GetCubeCheck() == true )  //ê³µê²©ì´ ì ì¤‘í•  ìˆœê°„ì´ë¼ë©´..
 		{
-		//»ó´ë¹æÀ» ±âÁØÀ¸·Î Ãæµ¹À» È®ÀÎ
+		//ìƒëŒ€ë°©ì„ ê¸°ì¤€ìœ¼ë¡œ ì¶©ëŒì„ í™•ì¸
 			if( true == character2->CollisionCheck1( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook() ) )
 			{
-				character1->SetAttackSuccess();  //»ó´ë¹æÀÌ ¸Â¾Ò´Ù¸é »óÅÂ ¼ÂÆÃ
+				character1->SetAttackSuccess();  //ìƒëŒ€ë°©ì´ ë§ì•˜ë‹¤ë©´ ìƒíƒœ ì…‹íŒ…
 			}
 		}
 		else if( character2->GetCubeCheck() == true )
@@ -363,7 +372,7 @@ void cStage_Ingame::Update(const float elapseTime)
 			}
 		}  //if( character1->GetCubeCheck() == true )
 
-	//ÇöÀç »ç¿ëÀÚ°¡ °ø°İ»óÅÂÀÏ ¶§ »ç¿ëÀÚÀÇ ¸öÅë°ú »ó´ë¹æÀÇ ¸öÅëÀÌ Ãæµ¹ÇÏ¿´´ÂÁö È®ÀÎ
+	//í˜„ì¬ ì‚¬ìš©ìê°€ ê³µê²©ìƒíƒœì¼ ë•Œ ì‚¬ìš©ìì˜ ëª¸í†µê³¼ ìƒëŒ€ë°©ì˜ ëª¸í†µì´ ì¶©ëŒí•˜ì˜€ëŠ”ì§€ í™•ì¸
 		if( character1->GetMode() == character1->LATTACK ||
 			character1->GetMode() == character1->RATTACK)
 		{
@@ -381,10 +390,12 @@ void cStage_Ingame::Update(const float elapseTime)
 //void cStage_Ingame::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Render(const float elapseTime)
 {
+	m_skybox->Render();
+
 		graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 		pMe->GetCamera()->SetView();
 
-	//fps ¹× ±×¸®µå Ãâ·Â
+	//fps ë° ê·¸ë¦¬ë“œ ì¶œë ¥
 //		graphic::GetRenderer()->RenderGrid();
 /*
 		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
@@ -400,7 +411,7 @@ void cStage_Ingame::Render(const float elapseTime)
 //		character2->Render();
 
 		//---------------------------------------------------------------
-		// ¸ğµ¨ Ãâ·Â + ±×¸²ÀÚ.
+		// ëª¨ë¸ ì¶œë ¥ + ê·¸ë¦¼ì.
 		LPDIRECT3DSURFACE9 pOldBackBuffer, pOldZBuffer;
 		D3DVIEWPORT9 oldViewport;
 
@@ -410,24 +421,26 @@ void cStage_Ingame::Render(const float elapseTime)
 
 		graphic::GetDevice()->SetRenderTarget(0, m_pShadowSurf);
 		graphic::GetDevice()->SetDepthStencilSurface(m_pShadowTexZ);
-		// ºäÆ÷Æ®º¯°æ  x y  width    height   minz maxz
+		// ë·°í¬íŠ¸ë³€ê²½  x y  width    height   minz maxz
 		D3DVIEWPORT9 viewport = {0,0, MAP_SIZE,MAP_SIZE,0.0f,1.0f};
 		graphic::GetDevice()->SetViewport(&viewport);
 
-		// ±×¸²ÀÚ¸Ê Å¬¸®¾î
+		// ê·¸ë¦¼ìë§µ í´ë¦¬ì–´
 		graphic::GetDevice()->Clear(0L, NULL
 			, D3DCLEAR_TARGET | D3DCLEAR_ZBUFFER
 			, 0x00000000, 1.0f, 0L);
 
-		Vector3 pos = pMe->GetCamera()->GetLook();
-		Vector3 light = Vector3(1000,1000,0);
+//		Vector3 pos = pMe->GetCamera()->GetLook();
+		Vector3 light = Vector3(1111,1111,0);
 
-		Matrix44 matView;// ºä Çà·Ä
-		matView.SetView2( light, pos, Vector3(0,1,0));
+		Matrix44 matView;// ë·° í–‰ë ¬
+//		matView.SetView2( light, pos, Vector3(0,1,0));
+	//test
+		matView.SetView2( light, pMe->GetCamera()->GetLook(), Vector3(0,1,0));
 
-		Matrix44 matProj;// Åõ¿µ Çà·Ä
-		matProj.SetProjection( D3DX_PI/2.5f, 1, 0.1f, 10000);
-	//	matProj.SetProjection( D3DX_PI * 0.25f, 1, 0.1f, 5000);
+		Matrix44 matProj;// íˆ¬ì˜ í–‰ë ¬
+	//	matProj.SetProjection( D3DX_PI/2.5f, 1, 0.1f, 10000);
+		matProj.SetProjection( D3DX_PI * 0.37f, 1, 0.1f, 7777);
 
 		m_shader->SetMatrix( "mVP", matView * matProj);
 		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );
@@ -436,15 +449,17 @@ void cStage_Ingame::Render(const float elapseTime)
 		m_shader->SetRenderPass(1);
 		character1->RenderShadow( *m_shader );
 		character2->RenderShadow( *m_shader );
-		
+
+/*
 		m_terrainShader->SetMatrix( "mVP", matView * matProj);
 		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
 		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
 		m_terrainShader->SetRenderPass(3);
 		m_terrain->RenderShadowRigidModels( *m_terrainShader, light, matProj );
+*/
 
 		//-----------------------------------------------------
-		// ·»´õ¸µÅ¸°Ù º¹±¸
+		// ë Œë”ë§íƒ€ê²Ÿ ë³µêµ¬
 		//-----------------------------------------------------
 		graphic::GetDevice()->SetRenderTarget(0, pOldBackBuffer);
 		graphic::GetDevice()->SetDepthStencilSurface(pOldZBuffer);
@@ -459,12 +474,14 @@ void cStage_Ingame::Render(const float elapseTime)
 		character1->RenderShader( *m_shader );
 		character2->RenderShader( *m_shader );
 
+/*
 		m_terrainShader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
 		m_terrainShader->SetRenderPass(0);
 		m_terrain->RenderShaderRigidModels( *m_terrainShader );
+*/
 
 		//------------------------------------------------------------------------
-		// ÁöÇü Ãâ·Â.
+		// ì§€í˜• ì¶œë ¥.
 		//------------------------------------------------------------------------
 		D3DXMATRIX mTT;
 		mTT = D3DXMATRIX(0.5f, 0.0f, 0.0f, 0.0f
@@ -477,14 +494,14 @@ void cStage_Ingame::Render(const float elapseTime)
 		m_terrainShader->SetVector( "vLightDir", Vector3(0,-1,0) );
 		m_terrainShader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
 		m_terrainShader->SetTexture("ShadowMap", m_pShadowTex);
-
+		
 		Matrix44 m = matView * matProj * mT;
 		m_terrainShader->SetMatrix( "mWVPT", m );
 
 		m_terrainShader->SetRenderPass(2);
 		m_terrain->RenderShader( *m_terrainShader , pMe->GetCamera() );
 
-#if 1 // µğ¹ö±×¿ë ÅØ½ºÃ³ Ãâ·Â
+#if 1 // ë””ë²„ê·¸ìš© í…ìŠ¤ì²˜ ì¶œë ¥
 		{
 			graphic::GetDevice()->SetTextureStageState(0,D3DTSS_COLOROP,	D3DTOP_SELECTARG1);
 			graphic::GetDevice()->SetTextureStageState(0,D3DTSS_COLORARG1,	D3DTA_TEXTURE);
@@ -511,7 +528,7 @@ void cStage_Ingame::Render(const float elapseTime)
 /*		Matrix44 VP;
 		VP = pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection();
 		m_shader->SetMatrix( "mVP", VP );
-		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl¿¡ µğÆúÆ® °ªÀ¸·Î µÇ¾îÀÖÀ½
+		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );  //hlslì— ë””í´íŠ¸ ê°’ìœ¼ë¡œ ë˜ì–´ìˆìŒ
 		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition() );
 */
 //		character1->RenderShader( *m_shader );
@@ -542,7 +559,7 @@ void cStage_Ingame::Render(const float elapseTime)
 
 			ID3DXFont* font = NULL;
 			HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 20, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
-			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "±¼¸²", &font );
+			DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "êµ´ë¦¼", &font );
 			::_itoa_s( (int)pMe->GetCamera()->GetPosition().y, buff, sizeof(buff), 10 );
 			str.assign("camHeight : ");
 			str.append( format(buff) );
@@ -568,9 +585,9 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 	m_infoSend.camPos = pMe->GetCamera()->GetPosition();
 	m_infoSend.character = pMe->GetTM();
 
-	char buff[ 128];  //¹è¿­ Å©±â´Â ¹Ì¸® Á¤ÇØÁø ¾à¼ÓÀÌ¾î¾ß ÇÑ´Ù. Áï, Ã¤¿ì·Á´Â µ¥ÀÌÅÍ°¡ Àû¾îµµ ¹è¿­Å©±â·Î ´Ù Ã¤¿ö¾ßÇÑ´Ù.
+	char buff[ 128];  //ë°°ì—´ í¬ê¸°ëŠ” ë¯¸ë¦¬ ì •í•´ì§„ ì•½ì†ì´ì–´ì•¼ í•œë‹¤. ì¦‰, ì±„ìš°ë ¤ëŠ” ë°ì´í„°ê°€ ì ì–´ë„ ë°°ì—´í¬ê¸°ë¡œ ë‹¤ ì±„ì›Œì•¼í•œë‹¤.
 	ZeroMemory(buff, sizeof(buff));
-	memcpy(buff, &m_infoSend, sizeof(m_infoSend));  //µ¥ÀÌÅÍ Ã¤¿ì±â
+	memcpy(buff, &m_infoSend, sizeof(m_infoSend));  //ë°ì´í„° ì±„ìš°ê¸°
 
 	const int result = send( GetStageMgr()->GetSocket(), buff, sizeof(buff), 0 );
 	if (result == INVALID_SOCKET)
@@ -585,17 +602,17 @@ bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const netw
 bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 {
 //	const timeval t = {0, 10}; // 10 millisecond
-	const timeval t = {0, 1};  //select ÇÔ¼ö°¡ ¾ó¸¶³ª ´ë±âÇØ¼­ ÆĞÅ¶À» ±â´Ù¸±Áö¸¦ ³ªÅ¸³»´Â º¯¼öÀÔ´Ï´Ù.
+	const timeval t = {0, 1};  //select í•¨ìˆ˜ê°€ ì–¼ë§ˆë‚˜ ëŒ€ê¸°í•´ì„œ íŒ¨í‚·ì„ ê¸°ë‹¤ë¦´ì§€ë¥¼ ë‚˜íƒ€ë‚´ëŠ” ë³€ìˆ˜ì…ë‹ˆë‹¤.
 	fd_set readSockets;
 	FD_ZERO(&readSockets);
 	FD_SET(GetStageMgr()->GetSocket(), &readSockets);
 
-	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );  //¼­¹ö·ÎºÎÅÍ ÆĞÅ¶ÀÌ ¿Ô´ÂÁö ÆÇ´Ü (= peekmessage¿Í ºñ½Á)
+	const int ret = select( readSockets.fd_count, &readSockets, NULL, NULL, &t );  //ì„œë²„ë¡œë¶€í„° íŒ¨í‚·ì´ ì™”ëŠ”ì§€ íŒë‹¨ (= peekmessageì™€ ë¹„ìŠ·)
 	if (ret != 0 && ret != SOCKET_ERROR)
 	{
 		char buff[ 128];
-		const int result = recv( readSockets.fd_array[ 0], buff, sizeof(buff), 0);  //¼­¹ö·ÎºÎÅÍ Á¤º¸¸¦ ¹Ş´Â´Ù. ¸¸¾à ¿À´Â Á¤º¸°¡ ¾øÀ¸¸é °è¼Ó ±â´Ù¸°´Ù //readSockets(¼ÒÄÏ)°¡ ÀÖÀ¸¸é ¾î¶² ¼­¹ö È¤Àº Å¬¶óÀÌ¾ğÆ®¿Í ¿¬°áµÇ¾ú´ÂÁö ¾Ë ¼ö ÀÖ´Ù.
-		if (result == SOCKET_ERROR || result == 0) // ¹ŞÀº ÆĞÅ¶»çÀÌÁî°¡ 0ÀÌ¸é ¼­¹ö¿Í Á¢¼ÓÀÌ ²÷°å´Ù´Â ÀÇ¹Ì´Ù.
+		const int result = recv( readSockets.fd_array[ 0], buff, sizeof(buff), 0);  //ì„œë²„ë¡œë¶€í„° ì •ë³´ë¥¼ ë°›ëŠ”ë‹¤. ë§Œì•½ ì˜¤ëŠ” ì •ë³´ê°€ ì—†ìœ¼ë©´ ê³„ì† ê¸°ë‹¤ë¦°ë‹¤ //readSockets(ì†Œì¼“)ê°€ ìˆìœ¼ë©´ ì–´ë–¤ ì„œë²„ í˜¹ì€ í´ë¼ì´ì–¸íŠ¸ì™€ ì—°ê²°ë˜ì—ˆëŠ”ì§€ ì•Œ ìˆ˜ ìˆë‹¤.
+		if (result == SOCKET_ERROR || result == 0) // ë°›ì€ íŒ¨í‚·ì‚¬ì´ì¦ˆê°€ 0ì´ë©´ ì„œë²„ì™€ ì ‘ì†ì´ ëŠê²¼ë‹¤ëŠ” ì˜ë¯¸ë‹¤.
 		{
 			GetStageMgr()->Release();
 			//if( false == GetStageMgr()->SetSocket() )
@@ -603,7 +620,7 @@ bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 		}
 		else
 		{
-		//	ParsePacket(buff);  //ÆĞÅ¶ÀÌ ¿Ô´Ù¸é È£Ãâ
+		//	ParsePacket(buff);  //íŒ¨í‚·ì´ ì™”ë‹¤ë©´ í˜¸ì¶œ
 
 			const network::InfoProtocol* protocol = (network::InfoProtocol*)buff;
 			packetInfo.nId = protocol->nId;
@@ -652,7 +669,11 @@ void cStage_Ingame::LoadMapObject(const string& fileName)
 		graphic::cModel* pNewObj = new graphic::cModel( i );
 		pNewObj->Create( fileName, graphic::MODEL_TYPE::RIGID );
 		pNewObj->SetTM( tm );
-		pNewObj->CreateCube();
+
+		if( fileName == "../media/mesh/map/BaseBroken_SM.dat" )
+			pNewObj->CreateCube(7.f);
+		else
+			pNewObj->CreateCube();
 
 //		m_terrain->AddRigidModel( *pNewObj );
 //		delete pNewObj;
@@ -663,15 +684,15 @@ void cStage_Ingame::LoadMapObject(const string& fileName)
 
 void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 {
-	vector<graphic::cModel*>& rTerrainObj = m_terrain->GetRigidModels();  //¸Ê¿ÀºêÁ§Æ® ¸ñ·Ï °¡Á®¿À±â
-//	for(auto it = rTerrainObj.begin(); it != rTerrainObj.end(); ++it)  //ÀüºÎ È®ÀÎ
+	vector<graphic::cModel*>& rTerrainObj = m_terrain->GetRigidModels();  //ë§µì˜¤ë¸Œì íŠ¸ ëª©ë¡ ê°€ì ¸ì˜¤ê¸°
+//	for(auto it = rTerrainObj.begin(); it != rTerrainObj.end(); ++it)  //ì „ë¶€ í™•ì¸
 	BOOST_FOREACH( auto it, rTerrainObj )
 	{			
-		Vector3 objHalfDis = (*it).GetCube().GetMax();  //ÇØ´ç ¿ÀºêÁ§Æ®ÀÇ Àı¹İ Å©±â °¡Á®¿À±â(±æÀÌor³ĞÀÌ)
+		Vector3 objHalfDis = (*it).GetCube().GetMax();  //í•´ë‹¹ ì˜¤ë¸Œì íŠ¸ì˜ ì ˆë°˜ í¬ê¸° ê°€ì ¸ì˜¤ê¸°(ê¸¸ì´orë„“ì´)
 
-		if( objHalfDis.y <= 15.f )  //¸¸¾à Ãæµ¹È®ÀÎÀÌ ÇÊ¿äÇÏÁö ¾ÊÀº ¿ÀºêÁ§Æ®¶ó¸é ÆĞ½º
+		if( objHalfDis.y <= 30.f )  //ë§Œì•½ ì¶©ëŒí™•ì¸ì´ í•„ìš”í•˜ì§€ ì•Šì€ ì˜¤ë¸Œì íŠ¸ë¼ë©´ íŒ¨ìŠ¤
 			continue;
-	//È®ÀÎÇÏ´Âµ¥ ÇÊ¿äÇÑ º¯¼öµé »ı¼º ¹× ÃÊ±âÈ­
+	//í™•ì¸í•˜ëŠ”ë° í•„ìš”í•œ ë³€ìˆ˜ë“¤ ìƒì„± ë° ì´ˆê¸°í™”
 		Vector3 objPos = (*it).GetTM().GetPosition();
 		Vector3 up(0.f, 1.f, 0.f);
 		Vector3 cam1_newLook = character1->GetCamera()->GetLook();
@@ -698,25 +719,28 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 
 		float fT = 0.f;
 
-		if( distance1.Length() <= objHalfDis.Length() )  //1¹ø Ä³¸¯ÅÍ¿Í ¿ÀºêÁ§Æ®¿ÍÀÇ °Å¸® È®ÀÎ
+		if( distance1.Length() <= objHalfDis.Length() )  //1ë²ˆ ìºë¦­í„°ì™€ ì˜¤ë¸Œì íŠ¸ì™€ì˜ ê±°ë¦¬ í™•ì¸
 		{
 			switch( character1->GetMode() )
 			{
 			case character1->FORWARD:
 			case character1->DASH:
 				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) *
-					( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime);  //Update¿¡¼­ ÀÌ¹Ì ÀÌµ¿ÇÏ¿´±â¶§¹®¿¡ ´Ù½Ã ÀÌÀü°ªÀ¸·Î µ¹·Á¼­ °Ë»çÇØ¾ß ÇÔ
-				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )  //ÇØ´ç ¿ÀºêÁ§Æ®¿¡ ÇöÀç Ä³¸¯ÅÍ À§Ä¡¸¦ ÀÌ¿ëÇÏ¿© ÇÈÅ··¹ÀÌ È®ÀÎ
+					( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime);  //Updateì—ì„œ ì´ë¯¸ ì´ë™í•˜ì˜€ê¸°ë•Œë¬¸ì— ë‹¤ì‹œ ì´ì „ê°’ìœ¼ë¡œ ëŒë ¤ì„œ ê²€ì‚¬í•´ì•¼ í•¨
+				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )  //í•´ë‹¹ ì˜¤ë¸Œì íŠ¸ì— í˜„ì¬ ìºë¦­í„° ìœ„ì¹˜ë¥¼ ì´ìš©í•˜ì—¬ í”½í‚¹ë ˆì´ í™•ì¸
 				{
 				//	if( 0 <= fT && fT <= 10.f) {}
-					if( fT < 0.f )  //¿ÀºêÁ§Æ® ¾È¿¡¼­ ºüÁ®³ª¿ÀÁö ¸øÇÏ´Â ¹®Á¦¸¦ ¹æÁö
+					if( fT < 0.f )  //ì˜¤ë¸Œì íŠ¸ ì•ˆì—ì„œ ë¹ ì ¸ë‚˜ì˜¤ì§€ ëª»í•˜ëŠ” ë¬¸ì œë¥¼ ë°©ì§€
 						break;
-					//Ãæµ¹ È®ÀÎÀÌ µÇ¾úÀ¸¸é Ä³¸¯ÅÍ À§Ä¡¸¦ µÇµ¹¸®±â
+					else if( fT < 37.f )
+					{
+					//ì¶©ëŒ í™•ì¸ì´ ë˜ì—ˆìœ¼ë©´ ìºë¦­í„° ìœ„ì¹˜ë¥¼ ë˜ëŒë¦¬ê¸°
 						Matrix44 matT;
 						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f,	cam1_newDir.z ) *
-							( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character1->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character1->GetCamera()->SetPosition( character1->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
+							( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 
@@ -726,12 +750,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-					
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * (5.f + elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character1->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character1->GetCamera()->SetPosition( character1->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 
@@ -741,12 +766,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-				
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (5.f + elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character1->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character1->GetCamera()->SetPosition( character1->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 
@@ -756,12 +782,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-					
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (-5.f - elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character1->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character1->GetCamera()->SetPosition( character1->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (-5.f - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 			
@@ -770,7 +797,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )
 				{
 				//	if( character1->GetBoneMgr()->GetRoot()->GetMoveControl() == false )
-						character1->MoveControl( true );  //Àû¿ëÇÏ°í ÀÖ´Â ¾Ö´ÏÀÇ ÀÌµ¿°ªÀÌ Àû¿ëµÇ´Â °ÍÀ» ¸·´Â´Ù.
+						character1->MoveControl( true );  //ì ìš©í•˜ê³  ìˆëŠ” ì• ë‹ˆì˜ ì´ë™ê°’ì´ ì ìš©ë˜ëŠ” ê²ƒì„ ë§‰ëŠ”ë‹¤.
 				}
 				break;
 
@@ -786,35 +813,36 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			case character1->GUARD:
 			case character1->GUARD_BE_HIT:
 			case character1->BEHIT:
-				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )  //»ó´ë¹æÇÑÅ× ¸Â°í ÀÖÀ» °æ¿ì ÀûÀÇ À§Ä¡¿Í ¹æÇâÀ¸·Î È®ÀÎÇÏ¿©
+				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )  //ìƒëŒ€ë°©í•œí…Œ ë§ê³  ìˆì„ ê²½ìš° ì ì˜ ìœ„ì¹˜ì™€ ë°©í–¥ìœ¼ë¡œ í™•ì¸í•˜ì—¬
 				{
-					if( fT < 37.f )  //ÇöÀç »ç¿ëÀÚ Ä³¸¯ÅÍ°¡ ¿ÀºêÁ§Æ®¿¡ ´ê¾Æ ÀÖ´Â °ø°£¸¸Å­ÀÇ (¿¹»ó)ÀÏÁ¤ ¼öÄ¡ ³»¿¡ »ó´ë¹æÀÌ ÀÖÀ» °æ¿ì
-						character2->MoveControl( true );  //»ó´ë¹æ Ä³¸¯ÅÍÀÇ ¾Ö´Ï ÀÌµ¿°ª Àû¿ëÀ» ¸·´Â´Ù. -> ±×·¯¸é »ç¿ëÀÚ Ä³¸¯ÅÍµµ ¿ÀºêÁ§Æ®¿¡ ´ê±â¸¸ ÇÑ »óÅÂ°¡ µÈ´Ù.
+					if( fT < 37.f )  //í˜„ì¬ ì‚¬ìš©ì ìºë¦­í„°ê°€ ì˜¤ë¸Œì íŠ¸ì— ë‹¿ì•„ ìˆëŠ” ê³µê°„ë§Œí¼ì˜ (ì˜ˆìƒ)ì¼ì • ìˆ˜ì¹˜ ë‚´ì— ìƒëŒ€ë°©ì´ ìˆì„ ê²½ìš°
+						character2->MoveControl( true );  //ìƒëŒ€ë°© ìºë¦­í„°ì˜ ì• ë‹ˆ ì´ë™ê°’ ì ìš©ì„ ë§‰ëŠ”ë‹¤. -> ê·¸ëŸ¬ë©´ ì‚¬ìš©ì ìºë¦­í„°ë„ ì˜¤ë¸Œì íŠ¸ì— ë‹¿ê¸°ë§Œ í•œ ìƒíƒœê°€ ëœë‹¤.
 				}
 				break;
-			}  //switch( character1->GetMode() )
+			}  //switch( character1->GetMode() )			
 		}  //if( distance1.Length() <= objHalfDis.Length() )
 		
-		if( distance2.Length() <= objHalfDis.Length() )  //2¹ø Ä³¸¯ÅÍµµ À§¿Í µ¿ÀÏÇÏ°Ô ÇÑ´Ù.
+		if( distance2.Length() <= objHalfDis.Length() )  //2ë²ˆ ìºë¦­í„°ë„ ìœ„ì™€ ë™ì¼í•˜ê²Œ í•œë‹¤.
 		{			
 			switch( character2->GetMode() )
 			{
 			case character2->FORWARD:
 			case character2->DASH:
 				cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
-					( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime);  //Update¿¡¼­ ÀÌ¹Ì ÀÌµ¿ÇÏ¿´±â¶§¹®¿¡ ´Ù½Ã ÀÌÀü°ªÀ¸·Î µ¹·Á¼­ °Ë»çÇØ¾ß ÇÔ
+					( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime);  //Updateì—ì„œ ì´ë¯¸ ì´ë™í•˜ì˜€ê¸°ë•Œë¬¸ì— ë‹¤ì‹œ ì´ì „ê°’ìœ¼ë¡œ ëŒë ¤ì„œ ê²€ì‚¬í•´ì•¼ í•¨
 				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )
 				{
 				//	if( 0 <= fT && fT <= 20.f) {}
 					if( fT < 0.f )
 						break;
-					
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
 						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
-							( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character2->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character2->GetCamera()->SetPosition( character2->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-								
+							( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}	
 				}
 				break;
 
@@ -824,12 +852,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-					
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character2->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character2->GetCamera()->SetPosition( character2->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 
@@ -839,12 +868,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-				
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character2->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character2->GetCamera()->SetPosition( character2->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 
@@ -854,12 +884,13 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				{
 					if( fT < 0.f )
 						break;
-					
+					else if( fT < 37.f )
+					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime) );  //Ä«¸Ş¶ó°¡ ¹Ù¶óº¸´Â ¹æÇâÀ¸·Î
-						character2->MultiplyTM( matT );  //ÇöÀç À§Ä¡¿¡ ´õÇØÁÖ±â
-						character2->GetCamera()->SetPosition( character2->GetTM() );  //Ä«¸Ş¶ó À§Ä¡µµ °»½Å
-				
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+						character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+						character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+					}
 				}
 				break;
 			
@@ -888,16 +919,103 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 	}
 }
 
-void cStage_Ingame::CharacterCollisionCheck(const float elapsTime)
+void cStage_Ingame::CharacterCollisionCheck(const float elapseTime)
 {
+	int nChar1_mode = character1->GetMode();
+	int nChar2_mode = character2->GetMode();
+
+	bool bIsMove1 = nChar1_mode >= character1->FORWARD && nChar1_mode <= character1->DASH;
+	bool bIsMove2 = nChar2_mode >= character2->FORWARD && nChar2_mode <= character2->DASH;
+
+	if( bIsMove1 == false && bIsMove2 == false )
+		return;
+
 	Vector3 char1_pos(character1->GetCamera()->GetLook());
 	Vector3 char2_pos(character2->GetCamera()->GetLook());
 
-	if( char1_pos.y > 100.f || char2_pos.y > 100.f )
-		return;
+//for jump
+//	if( char1_pos.y > 111.f || char2_pos.y > 111.f )
+//		return;
 
 	float fDistance_x = char1_pos.x - char2_pos.x;
-	float fDistance_z = char1_pos.x - char2_pos.x;
+	float fDistance_z = char1_pos.z - char2_pos.z;
+
+	if( ::fabs(fDistance_x) > 40.f || ::fabs(fDistance_z) > 40.f)
+		return;
+
+	Matrix44 matT;
+
+	if( bIsMove1 )
+	{
+		Vector3 camRight( character1->GetCamera()->GetRight() );
+		Vector3 camDir( camRight.CrossProduct( Vector3(0.f, 1.f, 0.f) ) );
+		camDir.Normalize();
+
+		switch( nChar1_mode )
+		{
+			case character1->FORWARD:
+			case character1->DASH:
+					matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) *
+						( (nChar1_mode == character1->FORWARD ? -5.f : -11.f) - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+					character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character1->BACKWARD:
+					matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+					character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character1->LEFTWARD:
+					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+					character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character1->RIGHTWARD:
+					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+					character1->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+					character1->GetCamera()->SetPosition( character1->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+		}  //switch( nChar1_mode )
+	}  //if( bIsMove1 )
+
+	if( bIsMove2 )
+	{
+		Vector3 camRight( character2->GetCamera()->GetRight() );
+		Vector3 camDir( camRight.CrossProduct( Vector3(0.f, 1.f, 0.f) ) );
+		camDir.Normalize();
+
+		switch( nChar2_mode )
+		{
+			case character2->FORWARD:
+			case character2->DASH:
+				matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) *
+					( (nChar2_mode == character2->FORWARD ? -5.f : -10.f) - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+				character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+				character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character2->BACKWARD:
+				matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+				character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+				character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character2->LEFTWARD:
+				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+				character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+				character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+
+			case character2->RIGHTWARD:
+				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //ì¹´ë©”ë¼ê°€ ë°”ë¼ë³´ëŠ” ë°©í–¥ìœ¼ë¡œ
+				character2->MultiplyTM( matT );  //í˜„ì¬ ìœ„ì¹˜ì— ë”í•´ì£¼ê¸°
+				character2->GetCamera()->SetPosition( character2->GetTM() );  //ì¹´ë©”ë¼ ìœ„ì¹˜ë„ ê°±ì‹ 
+				break;
+		}  //switch( nChar2_mode )
+	}  //if( bIsMove2 )
 }
 
 /*  Input Backup

@@ -35,14 +35,14 @@
     <ClInclude Include="stagemanager.h">
       <Filter>stage</Filter>
     </ClInclude>
-    <ClInclude Include="stage_ingame.h">
-      <Filter>stage</Filter>
-    </ClInclude>
     <ClInclude Include="TestScene.h" />
     <ClInclude Include="stage_NetworkLoading.h">
       <Filter>stage</Filter>
     </ClInclude>
     <ClInclude Include="stage_NetworkSelect.h">
+      <Filter>stage</Filter>
+    </ClInclude>
+    <ClInclude Include="stage_ingame.h">
       <Filter>stage</Filter>
     </ClInclude>
   </ItemGroup>
@@ -73,14 +73,14 @@
     <ClCompile Include="stagemanager.cpp">
       <Filter>stage</Filter>
     </ClCompile>
-    <ClCompile Include="stage_ingame.cpp">
-      <Filter>stage</Filter>
-    </ClCompile>
     <ClCompile Include="TestScene.cpp" />
     <ClCompile Include="stage_NetworkLoading.cpp">
       <Filter>stage</Filter>
     </ClCompile>
     <ClCompile Include="stage_NetworkSelect.cpp">
+      <Filter>stage</Filter>
+    </ClCompile>
+    <ClCompile Include="stage_ingame.cpp">
       <Filter>stage</Filter>
     </ClCompile>
   </ItemGroup>
