@@ -45,6 +45,9 @@
     <ClInclude Include="stage_ingame.h">
       <Filter>stage</Filter>
     </ClInclude>
+    <ClInclude Include="stage_CharacterSelect.h">
+      <Filter>stage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -81,6 +84,9 @@
       <Filter>stage</Filter>
     </ClCompile>
     <ClCompile Include="stage_ingame.cpp">
+      <Filter>stage</Filter>
+    </ClCompile>
+    <ClCompile Include="stage_CharacterSelect.cpp">
       <Filter>stage</Filter>
     </ClCompile>
   </ItemGroup>

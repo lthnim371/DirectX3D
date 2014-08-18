@@ -16,12 +16,14 @@ namespace framework
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;  //메인화면 애니메이션
+		virtual void Release() override;
 		
 		bool MessageProc( UINT message, WPARAM wParam, LPARAM lParam);  //버튼 클릭 인식
 
 	private:
 		LPD3DXSPRITE m_sprite;
 		cTestScene* m_scene;  //메인화면 객체
+		cButton* m_button1;
 
 		u_short usCount;  //메인화면 애니메이션을 위한 count
 	};

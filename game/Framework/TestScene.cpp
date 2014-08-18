@@ -16,13 +16,21 @@ cTestScene::~cTestScene()
 
 }
 
-void cTestScene::Button1Click(framework::cEvent &event)
+void cTestScene::Button_main_1Click(framework::cEvent &event)
 {
+//	GetStageMgr()->GetStage()->Release();
+	GetStageMgr()->SetStage( GetStageMgr()->CHARACTER_SELECT );
+	GetStageMgr()->GetStage()->Init();
+}
+
+void cTestScene::Button_CS_1Click(framework::cEvent &event)
+{	
+//	GetStageMgr()->GetStage()->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->NETWORK_SELECT );
 	GetStageMgr()->GetStage()->Init();
 }
 
-void cTestScene::Button2Click(framework::cEvent &event)
+void cTestScene::Button_NS_1Click(framework::cEvent &event)
 {
 	//if( m_clickLimit )
 	//	return;
@@ -32,11 +40,12 @@ void cTestScene::Button2Click(framework::cEvent &event)
 	if( false == GetStageMgr()->SetSocket() )
 		return;
 
+//	GetStageMgr()->GetStage()->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->NETWORK_LOADING );
 	GetStageMgr()->GetStage()->Init(1);
 }
 
-void cTestScene::Button3Click(framework::cEvent &event)
+void cTestScene::Button_NS_2Click(framework::cEvent &event)
 {
 	//if( m_clickLimit )
 	//	return;
@@ -46,6 +55,7 @@ void cTestScene::Button3Click(framework::cEvent &event)
 	if( false == GetStageMgr()->SetSocket() )
 		return;
 
+//	GetStageMgr()->GetStage()->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->NETWORK_LOADING );
 	GetStageMgr()->GetStage()->Init(2);
 }

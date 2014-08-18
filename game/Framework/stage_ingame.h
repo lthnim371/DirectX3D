@@ -20,6 +20,7 @@ namespace framework
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;
+		virtual void Release() override;
 
 	protected:
 		bool PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse);
@@ -54,6 +55,7 @@ namespace framework
 
 		LPD3DXSPRITE m_sprite;
 		graphic::cSprite* m_hpImage;
+		graphic::cSprite* m_spImage;
 
 		LPDIRECT3DTEXTURE9 m_pShadowTex;
 		LPDIRECT3DSURFACE9 m_pShadowSurf;

@@ -9,11 +9,14 @@ namespace framework
 		virtual ~cTestScene();
 
 	//main
-		void Button1Click(framework::cEvent &event);
+		void Button_main_1Click(framework::cEvent &event);
 	
+	//character select
+		void Button_CS_1Click(framework::cEvent &event);
+
 	//network select
-		void Button2Click(framework::cEvent &event);
-		void Button3Click(framework::cEvent &event);
+		void Button_NS_1Click(framework::cEvent &event);
+		void Button_NS_2Click(framework::cEvent &event);
 
 	private:
 	//	bool m_clickLimit;

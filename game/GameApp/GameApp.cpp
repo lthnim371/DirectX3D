@@ -22,6 +22,8 @@ cGameApp::~cGameApp()
 {
 //	SAFE_DELETE(character1);
 //	SAFE_DELETE(character2);
+	SAFE_DELETE(m_mouseCursor);
+	m_sprite->Release();
 }
 
 
@@ -42,23 +44,26 @@ bool cGameApp::OnInit()
 		0, // 활성화/ 비활성화 하려는 광원 리스트 내의 요소
 		true); // true = 활성화 ， false = 비활성화
 
-/*  마우스 가두기
-	sRect rc;
-	::GetClientRect(m_hWnd, &rc);
-	POINT lt = {rc.left, rc.top};
-	POINT rb = {rc.right, rc.bottom};
+	//마우스 가두기 및 숨기기
+	bClipCursor = true;
+	POINT lt = {m_windowRect.left, m_windowRect.top};
+	POINT rb = {m_windowRect.right, m_windowRect.bottom};
 	::ClientToScreen(m_hWnd, &lt);
 	::ClientToScreen(m_hWnd, &rb);
-	rc = sRect(lt.x, lt.y, rb.x, rb.y);
+	RECT rc = sRect(lt.x, lt.y, rb.x - 20, rb.y - 20);
 	::ClipCursor( &rc );
-*/
-/*
-//마우스 초기 위치 받아오기
-	::GetCursorPos( &m_currMouse );
-	::ScreenToClient( m_hWnd, &m_currMouse );
-//	m_prevMouse = m_currMouse;
-	m_bMouse = false;
-*/
+	::ShowCursor(FALSE);
+
+	//마우스 초기 위치 받아오기
+	POINT ptCurrMouse;
+	::GetCursorPos( &ptCurrMouse );
+	::ScreenToClient( m_hWnd, &ptCurrMouse );
+
+	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
+	m_mouseCursor = new framework::cTestScene(m_sprite, 0, "MouseCursor");
+	m_mouseCursor->Create("../media/image/Cursor_I2.tga");
+	m_mouseCursor->SetPos( Vector3( (float)ptCurrMouse.x, (float)ptCurrMouse.y, 0.f ) );
+
 	framework::GetStageMgr()->SetWindowHandle(m_hWnd);
 	framework::GetStageMgr()->GetStage()->Init();
 
@@ -67,6 +72,31 @@ bool cGameApp::OnInit()
 
 void cGameApp::OnInput(const float elapseT)
 {
+	//마우스 가두기 및 숨기기
+	if(	InputMgr->isOnceKeyDown( VK_BACK ) )
+	{
+		if( ::GetFocus() == m_hWnd )
+		{
+			bClipCursor = !bClipCursor;
+
+			if( bClipCursor )
+			{
+				POINT lt = {m_windowRect.left, m_windowRect.top};
+				POINT rb = {m_windowRect.right, m_windowRect.bottom};
+				::ClientToScreen(m_hWnd, &lt);
+				::ClientToScreen(m_hWnd, &rb);
+				RECT rc = sRect(lt.x, lt.y, rb.x - 20, rb.y - 20);
+				::ClipCursor( &rc );
+				::ShowCursor(FALSE);
+			}
+			else if( !bClipCursor )
+			{
+				::ClipCursor( NULL );
+				::ShowCursor(TRUE);
+			}
+		}
+	}
+
 	if( m_hWnd == ::GetFocus() )  //활성화가 된 클라이언트만 입력키 받게끔 설정
 		framework::GetStageMgr()->GetStage()->Input( elapseT );
 	//	framework::GetStageMgr()->GetStage()->Input( elapseT, character1, character2 );
@@ -99,6 +129,12 @@ void cGameApp::OnRender(const float elapseT)
 		
 //		framework::GetStageMgr()->GetStage()->Render( elapseT, character1, character2  );
 		framework::GetStageMgr()->GetStage()->Render( elapseT );
+
+		POINT ptCurrMouse;
+		::GetCursorPos( &ptCurrMouse );
+		::ScreenToClient( m_hWnd, &ptCurrMouse );
+		m_mouseCursor->SetPos( Vector3( (float)ptCurrMouse.x, (float)ptCurrMouse.y, 0.f) );
+		m_mouseCursor->Render( Matrix44() );
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();
@@ -134,13 +170,19 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 							pMain->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 1:  //NETWORK_SELECT
+					case 1:  //CHARACTER_SELECT
+						{
+							framework::cStage_CharacterSelect* pCharSel = dynamic_cast<framework::cStage_CharacterSelect*>( framework::GetStageMgr()->GetStage() );
+							pCharSel->MessageProc(message, wParam, lParam);
+						}
+					break;
+					case 2:  //NETWORK_SELECT
 						{
 							framework::cStage_NetworkSelect* pNetSel = dynamic_cast<framework::cStage_NetworkSelect*>( framework::GetStageMgr()->GetStage() );
 							pNetSel->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 2:  //NETWORK_LOADING
+					case 3:  //NETWORK_LOADING
 						{
 							framework::cStage_NetworkLoading* pNetLoad = dynamic_cast<framework::cStage_NetworkLoading*>( framework::GetStageMgr()->GetStage() );
 							pNetLoad->MessageProc(message, wParam, lParam);

@@ -72,6 +72,7 @@
     <ClInclude Include="keyManager.h" />
     <ClInclude Include="stage.h" />
     <ClInclude Include="stagemanager.h" />
+    <ClInclude Include="stage_CharacterSelect.h" />
     <ClInclude Include="stage_ingame.h" />
     <ClInclude Include="stage_NetworkLoading.h" />
     <ClInclude Include="stage_main.h" />
@@ -90,6 +91,7 @@
     <ClCompile Include="gamemain\GameMain.cpp" />
     <ClCompile Include="keyManager.cpp" />
     <ClCompile Include="stagemanager.cpp" />
+    <ClCompile Include="stage_CharacterSelect.cpp" />
     <ClCompile Include="stage_ingame.cpp" />
     <ClCompile Include="stage_NetworkLoading.cpp" />
     <ClCompile Include="stage_main.cpp" />

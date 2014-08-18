@@ -25,11 +25,11 @@ private:
 	int m_FaceSize;
 	graphic::cMaterial m_mtrl;
 	graphic::cLight m_light;
-/*
-	POINT m_currMouse;
-	POINT m_prevMouse;
-	bool m_bMouse;
-*/
+
+	bool bClipCursor;
+	LPD3DXSPRITE m_sprite;
+	framework::cTestScene* m_mouseCursor;
+
 //	graphic::cCharacter* character1;
 //	graphic::cCharacter* character2;
 

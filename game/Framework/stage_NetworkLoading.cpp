@@ -7,12 +7,11 @@ cStage_NetworkLoading::cStage_NetworkLoading()
 {
 	ZeroMemory(&m_acceseInfo, sizeof(m_acceseInfo));
 	fTick = 0.f;
-	usCount = 7;
+//	usCount = 7;
 }
 cStage_NetworkLoading::~cStage_NetworkLoading()
 {
-	SAFE_DELETE(m_scene);
-	SAFE_DELETE(m_sprite);
+	Release();
 }
 
 //void cStage_Select::Init()
@@ -25,35 +24,49 @@ void cStage_NetworkLoading::Init(const int nId)
 	m_acceseInfo.nId = nId;
 	m_acceseInfo.bAccess = true;
 
-	if( PacketReceive(1000000) )
+/*
+	if( PacketReceive(100000) )
 	{
 		PacketSend();
+		GetStageMgr()->Release();
 		GetStageMgr()->SetStage( GetStageMgr()->INGAME );
 		GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
 	}
+*/
 
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");
-	m_scene->Create("../media/image/main_movie_I7.tga");
+	m_scene->Create("../media/image/select_screen_valle.png");
 	m_scene->SetPos( Vector3(0.f, 0.f, 0.f) );
 	
+/*
 	cButton* pBtn1 = new cButton(m_sprite, 1, "Button4");
 	pBtn1->Create( (m_acceseInfo.nId == 1 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
-	pBtn1->SetPos( Vector3(200.f, 300.f, 0.f ) );
+	pBtn1->SetPos( Vector3(150.f, 300.f, 0.f ) );
 	m_scene->InsertChild( pBtn1 );
 
 	cButton* pBtn2 = new cButton(m_sprite, 2, "Button5");
 	pBtn2->Create( (m_acceseInfo.nId == 2 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
-	pBtn2->SetPos( Vector3(500.f, 300.f, 0.f ) );
+	pBtn2->SetPos( Vector3(300.f, 300.f, 0.f ) );
 	m_scene->InsertChild( pBtn2 );
+*/
+	m_button1 = new cButton(m_sprite, 1, "Button4");
+	m_button1->Create( (m_acceseInfo.nId == 1 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
+	m_button1->SetPos( Vector3(150.f, 300.f, 0.f ) );
+	m_scene->InsertChild( m_button1 );
+
+	m_button2 = new cButton(m_sprite, 2, "Button5");
+	m_button2->Create( (m_acceseInfo.nId == 2 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
+	m_button2->SetPos( Vector3(300.f, 300.f, 0.f ) );
+	m_scene->InsertChild( m_button2 );
 }
 
 //void cStage_Select::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkLoading::Input(const float elapseTime)
 {
 	fTick += elapseTime;
-	if( fTick >= 0.01f )
+	if( fTick >= 0.1f )
 	{
 		fTick = 0.f;
 
@@ -64,17 +77,37 @@ void cStage_NetworkLoading::Input(const float elapseTime)
 //void cStage_Select::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkLoading::Update(const float elapseTime)
 {
-	if( PacketReceive(10) )
+	network::AccessProtocol packetInfo;
+
+	if( PacketReceive(packetInfo, 10) )
 	{
 		PacketSend();
+
+		if( m_acceseInfo.nId == 1 && packetInfo.nId == 2 )
+		{
+			cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[1]);
+			pBtn->Create( "../media/image/Connecting_2.tga" );
+		}
+		else if( m_acceseInfo.nId == 2 && packetInfo.nId == 1 )
+		{
+			cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[0]);
+			pBtn->Create( "../media/image/Connecting_2.tga" );
+		}
+
+	//	m_scene->Render( Matrix44() );
+
+	//	Release();
 		GetStageMgr()->SetStage( GetStageMgr()->INGAME );
 		GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
+
+		m_scene->Render( Matrix44() );
 	}
 }
 
 //void cStage_Select::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkLoading::Render(const float elapseTime)
 {
+/*
 	usCount += 2;
 	if( usCount >= 77 )
 		usCount = 7;
@@ -86,9 +119,17 @@ void cStage_NetworkLoading::Render(const float elapseTime)
 	str2.append( ".tga" );
 
 	m_scene->Create( str1 + str2 );
+*/
 	m_scene->Render( Matrix44() );
 }
 
+void cStage_NetworkLoading::Release()
+{
+	SAFE_DELETE(m_button1);
+	SAFE_DELETE(m_button2);
+	SAFE_DELETE(m_scene);
+	m_sprite->Release();
+}
 
 bool cStage_NetworkLoading::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -111,7 +152,7 @@ bool cStage_NetworkLoading::PacketSend()
 	return true;
 }
 
-bool cStage_NetworkLoading::PacketReceive(const u_int uDelay)
+bool cStage_NetworkLoading::PacketReceive(OUT network::AccessProtocol& out, const u_int uDelay)
 {
 	const timeval t = {0, uDelay};  //select 함수가 얼마나 대기해서 패킷을 기다릴지를 나타내는 변수입니다.
 	fd_set readSockets;
@@ -136,7 +177,11 @@ bool cStage_NetworkLoading::PacketReceive(const u_int uDelay)
 			const network::AccessProtocol* protocol = (network::AccessProtocol*)buff;
 	
 			if( m_acceseInfo.nId != protocol->nId && protocol->bAccess == true )
+			{
+				out.nId = protocol->nId;
+				out.bAccess = protocol->bAccess;
 				return true;
+			}
 		}
 	}
 

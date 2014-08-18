@@ -43,6 +43,7 @@ cCharacter::cCharacter(const int id) :
 	m_weaponCubeNumber = 0;
 	m_targetAttackCheck = false;
 	m_moveControl = false;
+	m_tick = 0.f;
 }
 
 cCharacter::~cCharacter()
@@ -229,6 +230,13 @@ void cCharacter::RenderShadow(cShader &shader)
 
 void cCharacter::Update(const float elapseTime, const short state, const float x, const float y)  //x = 0, y = 0
 {
+	m_tick += elapseTime;
+	if( m_tick > 1 )
+	{
+		m_tick = 0.f;
+		m_sp = m_sp >= 100 ? 100.f : m_sp + 0.5f;
+	}
+
 	if( m_mode == BEHIT || m_mode == GUARD_BE_HIT )
 		return;
 	else if(m_mode >= JUMP)  //공격 상태 확인
@@ -240,6 +248,7 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 		else if( m_currJumpAttack || m_prevJumpAttack )
 			return;
 	}
+
 
 	//연산에 필요한 지역변수 및 객체들 생성
 	Matrix44 mat;
@@ -321,7 +330,20 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 		break;
 
 		case DASH:
-			if( m_mode != DASH )  //입력키가 처음 눌러졌다면..
+			if( m_sp <= 0.05f )
+			{
+				if( m_mode != FORWARD )  //입력키가 처음 눌러졌다면..
+				{	//한번만 셋팅
+					SetAnimation( "..\\media\\ani\\valle\\valle1_forward.ani" );
+					m_mode = FORWARD;
+				//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
+				}
+				mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+				MultiplyTM( mat );  //현재 위치에 더해주기
+				GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+				break;
+			}
+			else if( m_mode != DASH )  //입력키가 처음 눌러졌다면..
 			{	//한번만 셋팅
 				SetAnimation( "..\\media\\ani\\valle\\valle1_dash.ani" );
 				m_mode = DASH;
@@ -330,6 +352,7 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
 			MultiplyTM( mat );  //현재 위치에 더해주기
 			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+			m_sp -= ( 0.05f + elapseTime );
 		break;
 				
 		case LATTACK:  //마우스 왼클릭

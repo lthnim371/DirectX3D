@@ -18,6 +18,11 @@ cStage_Ingame::cStage_Ingame()
 }
 cStage_Ingame::~cStage_Ingame()
 {
+	Release();
+}
+
+void cStage_Ingame::Release()
+{
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
 	SAFE_DELETE(m_shader);
@@ -25,6 +30,7 @@ cStage_Ingame::~cStage_Ingame()
 	SAFE_DELETE(m_terrain);
 	SAFE_RELEASE(m_font);
 	SAFE_DELETE(m_hpImage);
+	SAFE_DELETE(m_spImage);
 	m_sprite->Release();
 	SAFE_DELETE(m_skybox);
 }
@@ -58,13 +64,21 @@ void cStage_Ingame::Init(const int nId)
 
 //스프라이트 생성
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
-	m_hpImage = new graphic::cSprite( m_sprite, 0, "Hp_Back" );
+	m_hpImage = new graphic::cSprite( m_sprite, 0, "HP_Back" );
 	m_hpImage->Create("../media/image/HP_back.png");
 	m_hpImage->SetPos( Vector3(10.f, 600.f, 0.f) );
-	graphic::cSprite* pHpImage2 = new graphic::cSprite( m_sprite, 1, "Hp_Front" );
+	graphic::cSprite* pHpImage2 = new graphic::cSprite( m_sprite, 1, "HP_Front" );
 	pHpImage2->Create("../media/image/HP_front.png");
 	pHpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
 	m_hpImage->InsertChild( pHpImage2 );
+
+	m_spImage = new graphic::cSprite( m_sprite, 0, "SP_Back" );
+	m_spImage->Create("../media/image/SP_back.png");
+	m_spImage->SetPos( Vector3(1000.f, 600.f, 0.f) );
+	graphic::cSprite* pSpImage2 = new graphic::cSprite( m_sprite, 1, "SP_Front" );
+	pSpImage2->Create("../media/image/SP_front.png");
+	pSpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
+	m_spImage->InsertChild( pSpImage2 );
 
 //바닥 생성
 	m_terrain = new graphic::cTerrain();
@@ -185,6 +199,7 @@ void cStage_Ingame::Input(const float elapseTime)
 	
 	//카메라 높이 조절(프로그램 테스트)
 //	else if( InputMgr->isOnceKeyDown('1') )
+/*
 	if( InputMgr->isOnceKeyDown('1') )
 	{
 		character1->GetCamera()->SetHeight(-10.f);
@@ -193,6 +208,7 @@ void cStage_Ingame::Input(const float elapseTime)
 	{
 		character1->GetCamera()->SetHeight(10.f);
 	}
+*/
 
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
@@ -535,8 +551,12 @@ void cStage_Ingame::Render(const float elapseTime)
 //		character2->RenderShader( *m_shader );		
 		
 		graphic::cSprite* pImg = dynamic_cast<graphic::cSprite*>(m_hpImage->GetChildren()[0]);
-		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetHP() * 0.01f) * 256 ), 64 ) );
+		pImg->SetRect( sRect( 0, 0, ( (pMe->GetHP() * 0.01f) * 256 ), 64 ) );
 		m_hpImage->Render( Matrix44() );
+
+		pImg = dynamic_cast<graphic::cSprite*>(m_spImage->GetChildren()[0]);
+		pImg->SetRect( sRect( 0, 0, ( (pMe->GetSP() * 0.01f) * 256 ), 64 ) );
+		m_spImage->Render( Matrix44() );
 
 		if( m_font )
 		{
@@ -690,7 +710,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 	{			
 		Vector3 objHalfDis = (*it).GetCube().GetMax();  //해당 오브젝트의 절반 크기 가져오기(길이or넓이)
 
-		if( objHalfDis.y <= 30.f )  //만약 충돌확인이 필요하지 않은 오브젝트라면 패스
+		if( objHalfDis.y <= 37.f )  //만약 충돌확인이 필요하지 않은 오브젝트라면 패스
 			continue;
 	//확인하는데 필요한 변수들 생성 및 초기화
 		Vector3 objPos = (*it).GetTM().GetPosition();
@@ -822,40 +842,41 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			}  //switch( character1->GetMode() )			
 		}  //if( distance1.Length() <= objHalfDis.Length() )
 		
-		if( distance2.Length() <= objHalfDis.Length() )  //2번 캐릭터도 위와 동일하게 한다.
-		{			
+		if( distance2.Length() <= objHalfDis.Length() )  //2번 캐릭터와 오브젝트와의 거리 확인
+		{
 			switch( character2->GetMode() )
 			{
 			case character2->FORWARD:
 			case character2->DASH:
-				cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
-					( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
-				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )
+			//	cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
+			//		( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
+				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )  //해당 오브젝트에 현재 캐릭터 위치를 이용하여 픽킹레이 확인
 				{
-				//	if( 0 <= fT && fT <= 20.f) {}
-					if( fT < 0.f )
+				//	if( 0 <= fT && fT <= 10.f) {}
+					if( fT < -1.f )  //오브젝트 안에서 빠져나오지 못하는 문제를 방지
 						break;
 					else if( fT < 37.f )
 					{
+					//충돌 확인이 되었으면 캐릭터 위치를 되돌리기
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
-							( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f,	cam2_newDir.z ) *
+							( (character2->GetMode() == character2->FORWARD ? -10.f : -20.f) - elapseTime) );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
-					}	
+					}
 				}
 				break;
 
 			case character2->BACKWARD:
-				cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime);
+			//	cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime);
 				if( (*it).Pick( cam2_newLook, -cam2_newDir, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -863,15 +884,15 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->LEFTWARD:
-				cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime);
+			//	cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime);
 				if( (*it).Pick( cam2_newLook, -cam2_newRight, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -879,15 +900,15 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->RIGHTWARD:
-				cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime);
+			//	cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime);
 				if( (*it).Pick( cam2_newLook, cam2_newRight, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-10.f - elapseTime) );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -898,9 +919,16 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			case character2->RATTACK:
 				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )
 				{
-				//	if( character2->GetBoneMgr()->GetRoot()->GetMoveControl() == false )
-						character2->MoveControl( true );
+				//	if( character1->GetBoneMgr()->GetRoot()->GetMoveControl() == false )
+						character2->MoveControl( true );  //적용하고 있는 애니의 이동값이 적용되는 것을 막는다.
 				}
+				break;
+
+			case character2->FRONTJUMP:
+			case character2->BACKJUMP:
+			case character2->LEFTJUMP:
+			case character2->RIGHTJUMP:
+				character2->MoveControl(true, true);
 				break;
 
 			case character2->NORMAL:
@@ -908,14 +936,14 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			case character2->GUARD:
 			case character2->GUARD_BE_HIT:
 			case character2->BEHIT:
-				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )
+				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )  //상대방한테 맞고 있을 경우 적의 위치와 방향으로 확인하여
 				{
-					if( fT < 37.f )
-						character1->MoveControl( true );
+					if( fT < 37.f )  //현재 사용자 캐릭터가 오브젝트에 닿아 있는 공간만큼의 (예상)일정 수치 내에 상대방이 있을 경우
+						character1->MoveControl( true );  //상대방 캐릭터의 애니 이동값 적용을 막는다. -> 그러면 사용자 캐릭터도 오브젝트에 닿기만 한 상태가 된다.
 				}
 				break;
-			}  //switch( character2->GetMode() )
-		}  //if( distance2.Length() <= objHalfDis.Length() )
+			}  //switch( character1->GetMode() )			
+		}  //if( distance1.Length() <= objHalfDis.Length() )
 	}
 }
 

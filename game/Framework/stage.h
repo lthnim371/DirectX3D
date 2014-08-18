@@ -13,5 +13,6 @@ namespace framework
 		virtual void Input(const float elapseTime) = 0;
 		virtual void Update(const float elapseTime) = 0;
 		virtual void Render(const float elapseTime) = 0;
+		virtual void Release() = 0;
 	};
 }
