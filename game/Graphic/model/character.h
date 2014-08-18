@@ -44,6 +44,7 @@ namespace graphic
 
 	//debug
 		void SetMode( const int stage );
+		void SetHp( const float hp );
 
 	protected:
 		bool UpdateAttack(const bool bAniState);
@@ -104,4 +105,5 @@ namespace graphic
 
 //debug
 	inline void cCharacter::SetMode( const int stage ) { m_mode = stage; }
+	inline void cCharacter::SetHp( const float hp ) { m_hp = hp; }
 }

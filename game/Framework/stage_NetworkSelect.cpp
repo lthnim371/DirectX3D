@@ -13,7 +13,7 @@ cStage_NetworkSelect::~cStage_NetworkSelect()
 }
 
 //void cStage_NetworkSelect::Init()
-void cStage_NetworkSelect::Init(const int nId)
+void cStage_NetworkSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 

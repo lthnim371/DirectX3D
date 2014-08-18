@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "stagemanager.h"
 
+#include <fstream>
+
 using namespace framework;
 
 cStageMgr::cStageMgr()
@@ -15,14 +17,28 @@ cStageMgr::cStageMgr()
 	m_list.insert( std::make_pair(NETWORK_LOADING, pNetload) );
 	cStage_Ingame* pIn = new cStage_Ingame;
 	m_list.insert( std::make_pair(INGAME, pIn) );
+	cStage_IngameEnd* pInEnd = new cStage_IngameEnd;
+	m_list.insert( std::make_pair(INGAMEEND, pInEnd) );
 
 	m_stage = pMain;
 	m_currentStage = MAIN;
 
 	m_socket = 0;
 //	m_ip.SetAddress(192,168,168,101);
-	m_ip = "192.168.168.101";
 	m_port = 10000;
+	m_ip = "192.168.168.101";  //우리집 ip주소
+
+//외부에서 편집한 ip주소 읽어오기
+	ifstream fsIn("../media/ip.txt");
+	if( fsIn.fail() )
+		return;
+
+	string buff1, buff2, buff3;
+	::getline( fsIn, buff1 );
+	fsIn >> buff1;
+	fsIn >> buff2;
+	fsIn >> buff3;
+	m_ip = buff3;
 }
 
 cStageMgr::~cStageMgr()

@@ -74,6 +74,7 @@
     <ClInclude Include="stagemanager.h" />
     <ClInclude Include="stage_CharacterSelect.h" />
     <ClInclude Include="stage_ingame.h" />
+    <ClInclude Include="stage_IngameEnd.h" />
     <ClInclude Include="stage_NetworkLoading.h" />
     <ClInclude Include="stage_main.h" />
     <ClInclude Include="stage_NetworkSelect.h" />
@@ -93,6 +94,7 @@
     <ClCompile Include="stagemanager.cpp" />
     <ClCompile Include="stage_CharacterSelect.cpp" />
     <ClCompile Include="stage_ingame.cpp" />
+    <ClCompile Include="stage_IngameEnd.cpp" />
     <ClCompile Include="stage_NetworkLoading.cpp" />
     <ClCompile Include="stage_main.cpp" />
     <ClCompile Include="stage_NetworkSelect.cpp" />

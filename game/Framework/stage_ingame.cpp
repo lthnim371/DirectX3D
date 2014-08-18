@@ -23,20 +23,22 @@ cStage_Ingame::~cStage_Ingame()
 
 void cStage_Ingame::Release()
 {
+	SAFE_RELEASE(m_font);
+	SAFE_DELETE(m_hpImage);
+	SAFE_DELETE(m_spImage);
+/*
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
 	SAFE_DELETE(m_shader);
 	SAFE_DELETE(m_terrainShader);
 	SAFE_DELETE(m_terrain);
-	SAFE_RELEASE(m_font);
-	SAFE_DELETE(m_hpImage);
-	SAFE_DELETE(m_spImage);
 	m_sprite->Release();
 	SAFE_DELETE(m_skybox);
+*/
 }
 
 //void cStage_Ingame::Init()
-void cStage_Ingame::Init(const int nId)
+void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 //스카이박스 생성
 	m_skybox = new graphic::cModel(7777);
@@ -168,10 +170,7 @@ void cStage_Ingame::Init(const int nId)
 
 //void cStage_Ingame::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Input(const float elapseTime)
-{
-//	if( !m_access )
-//		GetStageMgr()->SetSocket();
-
+{	
 //패킷 전송에 필요한 변수들 생성 및 초기화
 	POINT ptMouse;
 	ptMouse.x = 0;
@@ -199,7 +198,7 @@ void cStage_Ingame::Input(const float elapseTime)
 	
 	//카메라 높이 조절(프로그램 테스트)
 //	else if( InputMgr->isOnceKeyDown('1') )
-/*
+
 	if( InputMgr->isOnceKeyDown('1') )
 	{
 		character1->GetCamera()->SetHeight(-10.f);
@@ -208,7 +207,11 @@ void cStage_Ingame::Input(const float elapseTime)
 	{
 		character1->GetCamera()->SetHeight(10.f);
 	}
-*/
+	else if( InputMgr->isOnceKeyDown('4') )
+	{
+		character1->SetHp( 0 );
+	}
+
 
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
@@ -420,7 +423,7 @@ void cStage_Ingame::Render(const float elapseTime)
 		m_terrainShader->SetRenderPass(1);
 		m_terrain->RenderShader( *m_terrainShader, pMe->GetCamera() );
 */
-		graphic::GetRenderer()->RenderAxis();
+//		graphic::GetRenderer()->RenderAxis();
 		graphic::GetRenderer()->RenderFPS();
 
 //		character1->Render();
@@ -516,7 +519,7 @@ void cStage_Ingame::Render(const float elapseTime)
 
 		m_terrainShader->SetRenderPass(2);
 		m_terrain->RenderShader( *m_terrainShader , pMe->GetCamera() );
-
+/*
 #if 1 // 디버그용 텍스처 출력
 		{
 			graphic::GetDevice()->SetTextureStageState(0,D3DTSS_COLOROP,	D3DTOP_SELECTARG1);
@@ -539,9 +542,10 @@ void cStage_Ingame::Render(const float elapseTime)
 			graphic::GetDevice()->DrawPrimitiveUP( D3DPT_TRIANGLEFAN, 2, Vertex, sizeof( TVERTEX ) );
 		}
 #endif
-
+*/
+/*
 	//test
-/*		Matrix44 VP;
+		Matrix44 VP;
 		VP = pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection();
 		m_shader->SetMatrix( "mVP", VP );
 		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );  //hlsl에 디폴트 값으로 되어있음
@@ -551,13 +555,15 @@ void cStage_Ingame::Render(const float elapseTime)
 //		character2->RenderShader( *m_shader );		
 		
 		graphic::cSprite* pImg = dynamic_cast<graphic::cSprite*>(m_hpImage->GetChildren()[0]);
-		pImg->SetRect( sRect( 0, 0, ( (pMe->GetHP() * 0.01f) * 256 ), 64 ) );
+		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetHP() * 0.01f) * 256 ), 64 ) );
 		m_hpImage->Render( Matrix44() );
 
 		pImg = dynamic_cast<graphic::cSprite*>(m_spImage->GetChildren()[0]);
-		pImg->SetRect( sRect( 0, 0, ( (pMe->GetSP() * 0.01f) * 256 ), 64 ) );
+		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetSP() * 0.01f) * 256 ), 64 ) );
 		m_spImage->Render( Matrix44() );
 
+		MatchResult();
+/*
 		if( m_font )
 		{
 			char buff[16];
@@ -589,6 +595,7 @@ void cStage_Ingame::Render(const float elapseTime)
 				DT_NOCLIP, D3DXCOLOR( 0.0f, 0.0f, 1.0f, 1.0f ) );
 			SAFE_RELEASE(font);
 		}
+*/
 }
 
 bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse)
@@ -1044,6 +1051,33 @@ void cStage_Ingame::CharacterCollisionCheck(const float elapseTime)
 				break;
 		}  //switch( nChar2_mode )
 	}  //if( bIsMove2 )
+}
+
+void cStage_Ingame::MatchResult()
+{
+	if( character1->GetHP() <= 0.f || character2->GetHP() <= 0.f )
+	{
+		GetStageMgr()->Release();
+
+		tagIngameInfo sIngameInfo;
+		sIngameInfo.pCharacter1 = character1;
+		sIngameInfo.pCharacter2 = character2;
+		sIngameInfo.pShader = m_shader;
+		sIngameInfo.pTerrain = m_terrain;
+		sIngameInfo.pTerrainShader = m_terrainShader;
+		sIngameInfo.pSprite = m_sprite;
+		sIngameInfo.pShadowTex = m_pShadowTex;
+		sIngameInfo.pShadowSurf = m_pShadowSurf;
+		sIngameInfo.pShadowTexZ = m_pShadowTexZ;
+		sIngameInfo.pSkybox = m_skybox;
+		if( m_infoSend.nId == 1 )
+			sIngameInfo.bResult = character1->GetHP() <= 0.f ? false : true;
+		else if( m_infoSend.nId == 2 )
+			sIngameInfo.bResult = character2->GetHP() <= 0.f ? false : true;
+
+		GetStageMgr()->SetStage( GetStageMgr()->INGAMEEND );
+		GetStageMgr()->GetStage()->Init(m_infoSend.nId, &sIngameInfo);
+	}
 }
 
 /*  Input Backup

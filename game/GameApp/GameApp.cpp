@@ -188,6 +188,12 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 							pNetLoad->MessageProc(message, wParam, lParam);
 						}
 					break;
+					case 5:  //InGame_End
+						{
+							framework::cStage_IngameEnd* pInEnd = dynamic_cast<framework::cStage_IngameEnd*>( framework::GetStageMgr()->GetStage() );
+							//pInEnd->MessageProc(message, wParam, lParam);
+						}
+					break;
 				}
 			}
 		break;

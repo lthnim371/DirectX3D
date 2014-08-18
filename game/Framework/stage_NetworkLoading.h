@@ -12,7 +12,7 @@ namespace framework
 	//	virtual void Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
-		virtual void Init(const int nId) override;
+		virtual void Init(const int nId, tagIngameInfo* sIngameInfo) override;
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;

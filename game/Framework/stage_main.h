@@ -12,11 +12,11 @@ namespace framework
 	//	virtual void Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
-		virtual void Init(const int nId) override;  //메인화면 및 버튼 이미지 생성 및 등록
+		virtual void Init(const int nId, tagIngameInfo* sIngameInfo) override;  //메인화면 및 버튼 이미지 생성 및 등록
+		virtual void Release() override;
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;  //메인화면 애니메이션
-		virtual void Release() override;
 		
 		bool MessageProc( UINT message, WPARAM wParam, LPARAM lParam);  //버튼 클릭 인식
 

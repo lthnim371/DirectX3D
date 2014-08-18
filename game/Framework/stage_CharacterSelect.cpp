@@ -13,7 +13,7 @@ cStage_CharacterSelect::~cStage_CharacterSelect()
 }
 
 //void cStage_NetworkSelect::Init()
-void cStage_CharacterSelect::Init(const int nId)
+void cStage_CharacterSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 

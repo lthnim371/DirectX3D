@@ -16,11 +16,11 @@ namespace framework
 	//	virtual void Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
-		virtual void Init(const int nId) override;
+		virtual void Init(const int nId, tagIngameInfo* sIngameInfo) override;
+		virtual void Release() override;
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;
-		virtual void Release() override;
 
 	protected:
 		bool PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse);
@@ -30,6 +30,7 @@ namespace framework
 		void LoadMapObject(const string& fileName);
 		void ObjectCollisionCheck(const float elapseTime);  //맵오브젝트들과 충돌 확인
 		void CharacterCollisionCheck(const float elapseTime);
+		void MatchResult();  //게임이 끝났는지 확인
 
 	private:
 		POINT m_currMouse;

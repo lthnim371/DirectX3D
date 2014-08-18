@@ -14,7 +14,7 @@ cStage_Main::~cStage_Main()
 }
 
 //void cStage_Main::Init()
-void cStage_Main::Init(const int nId)
+void cStage_Main::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
@@ -34,6 +34,13 @@ void cStage_Main::Init(const int nId)
 	m_button1->SetPos( Vector3(150.f, 300.f, 0.f ) );
 	m_scene->InsertChild( m_button1 );
 	m_button1->EventConnect(m_button1, EVENT::BUTTON_CLICK, 1, (EventFunction)&cTestScene::Button_main_1Click);
+}
+
+void cStage_Main::Release()
+{
+	m_button1->EventDisconnect( m_button1, EVENT::BUTTON_CLICK , 1 );
+	SAFE_DELETE(m_scene);
+	m_sprite->Release();
 }
 
 //void cStage_Main::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
@@ -61,13 +68,6 @@ void cStage_Main::Render(const float elapseTime)
 
 	m_scene->Create( str1 + str2 );
 	m_scene->Render( Matrix44() );
-}
-
-void cStage_Main::Release()
-{
-	m_button1->EventDisconnect( m_button1, EVENT::BUTTON_CLICK , 1 );
-	SAFE_DELETE(m_scene);
-	m_sprite->Release();
 }
 
 bool cStage_Main::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)

@@ -42,4 +42,5 @@
 #include "stage_NetworkSelect.h"
 #include "stage_NetworkLoading.h"
 #include "stage_ingame.h"
+#include "stage_IngameEnd.h"
 #include "stagemanager.h"
