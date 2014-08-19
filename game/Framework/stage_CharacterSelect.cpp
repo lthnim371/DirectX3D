@@ -38,6 +38,46 @@ void cStage_CharacterSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_button1->SetPos( Vector3(100.f, 100.f, 0.f ) );
 	m_scene->InsertChild( m_button1 );
 	m_button1->EventConnect(m_button1, EVENT::BUTTON_CLICK, 1, (EventFunction)&cTestScene::Button_CS_1Click);
+
+	cButton* pBtn2 = new cButton(m_sprite, 2, "select_tiac");
+	pBtn2->Create( "../media/image/large_tiac.tga" );
+	pBtn2->SetPos( Vector3(250.f, 100.f, 0.f ) );
+	m_scene->InsertChild( pBtn2 );
+
+	cButton* pBtn3 = new cButton(m_sprite, 3, "select_elrath");
+	pBtn3->Create( "../media/image/large_elrath.tga" );
+	pBtn3->SetPos( Vector3(400.f, 100.f, 0.f ) );
+	m_scene->InsertChild( pBtn3 );
+
+	cButton* pBtn4 = new cButton(m_sprite, 4, "select_ridika");
+	pBtn4->Create( "../media/image/large_Ridika.tga" );
+	pBtn4->SetPos( Vector3(100.f, 250.f, 0.f ) );
+	m_scene->InsertChild( pBtn4 );
+
+	cButton* pBtn5 = new cButton(m_sprite, 5, "select_hyde");
+	pBtn5->Create( "../media/image/large_Hyde.tga" );
+	pBtn5->SetPos( Vector3(250.f, 250.f, 0.f ) );
+	m_scene->InsertChild( pBtn5 );
+
+	cButton* pBtn6 = new cButton(m_sprite, 6, "select_rehiney");
+	pBtn6->Create( "../media/image/large_rehiney_G.tga" );
+	pBtn6->SetPos( Vector3(400.f, 250.f, 0.f ) );
+	m_scene->InsertChild( pBtn6 );
+
+	cButton* pBtn7 = new cButton(m_sprite, 7, "select_elichea");
+	pBtn7->Create( "../media/image/large_elichea.tga" );
+	pBtn7->SetPos( Vector3(100.f, 400.f, 0.f ) );
+	m_scene->InsertChild( pBtn7 );
+
+	cButton* pBtn8 = new cButton(m_sprite, 8, "select_dick");
+	pBtn8->Create( "../media/image/large_dick.tga" );
+	pBtn8->SetPos( Vector3(250.f, 400.f, 0.f ) );
+	m_scene->InsertChild( pBtn8 );
+
+	cButton* pBtn9 = new cButton(m_sprite, 9, "select_renoah");
+	pBtn9->Create( "../media/image/large_renoah.tga" );
+	pBtn9->SetPos( Vector3(400.f, 400.f, 0.f ) );
+	m_scene->InsertChild( pBtn9 );
 		
 }
 

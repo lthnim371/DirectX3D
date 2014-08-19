@@ -18,6 +18,7 @@ cTestScene::~cTestScene()
 
 void cTestScene::Button_main_1Click(framework::cEvent &event)
 {
+	SndDepot->get( "Button" )->Play();
 //	GetStageMgr()->GetStage()->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->CHARACTER_SELECT );
 	GetStageMgr()->GetStage()->Init();
@@ -25,6 +26,7 @@ void cTestScene::Button_main_1Click(framework::cEvent &event)
 
 void cTestScene::Button_CS_1Click(framework::cEvent &event)
 {	
+	SndDepot->get( "Button" )->Play();
 //	GetStageMgr()->GetStage()->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->NETWORK_SELECT );
 	GetStageMgr()->GetStage()->Init();
@@ -36,6 +38,8 @@ void cTestScene::Button_NS_1Click(framework::cEvent &event)
 	//	return;
 	//else if( !m_clickLimit )
 	//	m_clickLimit = true;
+
+	SndDepot->get( "Button" )->Play();
 
 	if( false == GetStageMgr()->SetSocket() )
 		return;
@@ -52,6 +56,8 @@ void cTestScene::Button_NS_2Click(framework::cEvent &event)
 	//else if( !m_clickLimit )
 	//	m_clickLimit = true;
 
+	SndDepot->get( "Button" )->Play();
+
 	if( false == GetStageMgr()->SetSocket() )
 		return;
 
@@ -62,7 +68,9 @@ void cTestScene::Button_NS_2Click(framework::cEvent &event)
 
 void cTestScene::Button_ED_1Click(framework::cEvent &event)
 {
+	SndDepot->get( "Button" )->Play();
 //	GetStageMgr()->GetStage()->Release();
+	SndDepot->get( GetStageMgr()->GetSoundName() )->Stop();
 	cStageMgr::Get()->FindStage( cStageMgr::INGAMEEND )->Release();
 	GetStageMgr()->SetStage( GetStageMgr()->MAIN );
 }

@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "stage_ingame.h"
 #include <fstream>
+#include <time.h>
 
 using namespace framework;
 
@@ -19,6 +20,7 @@ void cStage_Ingame::Release()
 	SAFE_RELEASE(m_font);
 	SAFE_DELETE(m_hpImage);
 	SAFE_DELETE(m_spImage);
+	SAFE_DELETE(m_helpImage);
 /*
 	SAFE_DELETE(character1);
 	SAFE_DELETE(character2);
@@ -33,6 +35,12 @@ void cStage_Ingame::Release()
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	std::srand(unsigned int(NULL));
+/*
+	SndDepot->get( "MainTema1" )->Stop();
+	SndDepot->get( "MainTema2" )->Play();
+	GetStageMgr()->SetSoundName( "MainTema2" );
+*/
 	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
 	ZeroMemory(&m_info1, sizeof(m_info1));
 	ZeroMemory(&m_info2, sizeof(m_info2));
@@ -41,14 +49,20 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_font = NULL;
 	m_end = false;
 	m_cubeDraw = false;
+	m_attackSound = false;
 
+	m_infoSend.nId = nId;  //사용자 식별
+//	m_info2.nId = ( nId == 0 ? 1 : 0 );
+/*
 //스카이박스 생성
 	m_skybox = new graphic::cModel(7777);
 	m_skybox->Create( "../media/mesh/map/skybox.dat", graphic::MODEL_TYPE::RIGID );
 	Matrix44 s;
 	s.SetScale( Vector3(0.9f, 1.f, 0.9f) );
 	m_skybox->MultiplyTM( s );
-
+*/
+	m_skybox = sIngameInfo->pSkybox;
+/*
 // 그림자 텍스처 생성
 	if (FAILED(graphic::GetDevice()->CreateTexture(MAP_SIZE, MAP_SIZE, 1, 
 		D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8,
@@ -61,13 +75,17 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 		D3DMULTISAMPLE_NONE, 0, TRUE,
 		&m_pShadowTexZ, NULL)))
 		return;
-
+*/
+	m_pShadowTex = sIngameInfo->pShadowTex;
+	m_pShadowSurf = sIngameInfo->pShadowSurf;
+	m_pShadowTexZ = sIngameInfo->pShadowTexZ;
 //폰트 생성
 	HRESULT hr = D3DXCreateFontA( graphic::GetDevice(), 50, 0, FW_BOLD, 1, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, 
 	DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "굴림", &m_font );
 
 //스프라이트 생성
-	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
+//	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
+	m_sprite = sIngameInfo->pSprite;
 	m_hpImage = new graphic::cSprite( m_sprite, 0, "HP_Back" );
 	m_hpImage->Create("../media/image/HP_back.png");
 	m_hpImage->SetPos( Vector3(10.f, 650.f, 0.f) );
@@ -84,6 +102,10 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 	pSpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
 	m_spImage->InsertChild( pSpImage2 );
 
+	m_helpImage = new graphic::cSprite( m_sprite, 0, "Help" );
+	m_helpImage->Create("../media/image/help_valle.png");
+	m_helpImage->SetPos( Vector3(100.f, 10.f, 0.f) );
+/*
 //바닥 생성
 	m_terrain = new graphic::cTerrain();
 	m_terrain->CreateTerrain(128, 128, 100.f);
@@ -92,13 +114,15 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 //	m_terrainShader->Create( "../media/shader/hlsl_terrain_splatting.fx", "TShader" );
 	m_terrainShader->Create( "../media/shader/hlsl_rigid_phong.fx", "TShader" );
 	LoadMapObject( "../media/mapobject.map" );
-
-	m_infoSend.nId = nId;  //사용자 식별
-//	m_info2.nId = ( nId == 0 ? 1 : 0 );
-
+*/
+	m_terrain = sIngameInfo->pTerrain;
+	m_terrainShader = sIngameInfo->pTerrainShader;
+/*
 	m_shader = new graphic::cShader();
 	m_shader->Create( "../media/shader/hlsl_skinning_using_texcoord.fx", "TShader" );
-	
+*/
+	m_shader = sIngameInfo->pShader;
+/*
 	character1 = new graphic::cCharacter(1);
 	character2 = new graphic::cCharacter(2);
 
@@ -164,6 +188,10 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 			characterPos = Vector3( character2->GetTM().GetPosition() );
 			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
 //		}
+*/
+
+	character1 = sIngameInfo->pCharacter1;
+	character2 = sIngameInfo->pCharacter2;
 
 //초기 마우스위치 값 보관
 	::GetCursorPos( &m_currMouse );
@@ -205,7 +233,7 @@ void cStage_Ingame::Input(const float elapseTime)
 	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 	if( InputMgr->isOnceKeyDown('4') )  //바로 죽기
 	{
-		pMe->SetHp( 0 );
+		pMe->SetHp( 10 );
 	}
 	else if( InputMgr->isOnceKeyDown(VK_TAB) )  //바운딩박스 그리기
 	{
@@ -385,19 +413,42 @@ void cStage_Ingame::Update(const float elapseTime)
 	//현재 사용자가 공격이 적중할 순간일 떄 사용자의 무기와 상대방의 몸통이 충돌하였는지 확인
 		if( character1->GetCubeCheck() == true )  //공격이 적중할 순간이라면..
 		{
+			if( m_infoSend.nId == 1 && m_attackSound == false)
+			{
+				if( ::GetForegroundWindow() == ::GetFocus() )
+				{
+					m_attackSound = true;
+					char cNumber[8];
+					::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+					SndDepot->get( string(cNumber) )->Play();
+				}
+			}
 		//상대방을 기준으로 충돌을 확인
-			if( true == character2->CollisionCheck1( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook() ) )
+			if( true == character2->CollisionCheck1( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook(), character1->GetDamage() ) )
 			{
 				character1->SetAttackSuccess();  //상대방이 맞았다면 상태 셋팅
 			}
 		}
 		else if( character2->GetCubeCheck() == true )
 		{
-			if ( true == character1->CollisionCheck1( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook() ) )
+			if( m_infoSend.nId == 2 && m_attackSound == false)
+			{
+				if( ::GetForegroundWindow() == ::GetFocus() )
+				{
+					m_attackSound = true;
+					char cNumber[8];
+					::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+					SndDepot->get( string(cNumber) )->Play();
+				}
+			}
+		
+			if ( true == character1->CollisionCheck1( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook(), character2->GetDamage() ) )
 			{
 				character2->SetAttackSuccess();
 			}
 		}  //if( character1->GetCubeCheck() == true )
+		else
+			m_attackSound = false;
 
 	//현재 사용자가 공격상태일 때 사용자의 몸통과 상대방의 몸통이 충돌하였는지 확인
 		if( character1->GetMode() == character1->LATTACK ||
@@ -571,6 +622,10 @@ void cStage_Ingame::Render(const float elapseTime)
 		pImg = dynamic_cast<graphic::cSprite*>(m_spImage->GetChildren()[0]);
 		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetSP() * 0.01f) * 256 ), 64 ) );
 		m_spImage->Render( Matrix44() );
+
+		if( InputMgr->isStayKey( 'H' ) == true &&
+			( ::GetForegroundWindow() == ::GetFocus() ) == true )
+			m_helpImage->Render( Matrix44() );
 /*
 		if( m_font )
 		{
@@ -728,7 +783,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 	{			
 		Vector3 objHalfDis = (*it).GetCube().GetMax();  //해당 오브젝트의 절반 크기 가져오기(길이or넓이)
 
-		if( objHalfDis.y <= 37.f )  //만약 충돌확인이 필요하지 않은 오브젝트라면 패스
+		if( objHalfDis.y < 100.f )  //만약 충돌확인이 필요하지 않은 오브젝트라면 패스
 			continue;
 	//확인하는데 필요한 변수들 생성 및 초기화
 		Vector3 objPos = (*it).GetTM().GetPosition();
@@ -840,10 +895,43 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character1->FRONTJUMP:
+				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character1->MoveControl(true, true);
+				}
+				break;
+
 			case character1->BACKJUMP:
+				if( (*it).Pick( cam1_newLook, -cam1_newDir, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character1->MoveControl(true, true);
+				}
+				break;
+
 			case character1->LEFTJUMP:
+				if( (*it).Pick( cam1_newLook, -cam1_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character1->MoveControl(true, true);
+				}
+				break;
+
 			case character1->RIGHTJUMP:
-				character1->MoveControl(true, true);
+				if( (*it).Pick( cam1_newLook, cam1_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character1->MoveControl(true, true);
+				}
 				break;
 
 			case character1->NORMAL:
@@ -943,10 +1031,43 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->FRONTJUMP:
+				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character2->MoveControl(true, true);
+				}
+				break;
+
 			case character2->BACKJUMP:
+				if( (*it).Pick( cam2_newLook, -cam2_newDir, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character2->MoveControl(true, true);
+				}
+				break;
+
 			case character2->LEFTJUMP:
+				if( (*it).Pick( cam2_newLook, -cam2_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character2->MoveControl(true, true);
+				}
+				break;
+
 			case character2->RIGHTJUMP:
-				character2->MoveControl(true, true);
+				if( (*it).Pick( cam2_newLook, cam2_newRight, &fT ) )
+				{
+					if( fT < 0.f )
+						break;
+					else if( fT < 37.f )
+						character2->MoveControl(true, true);
+				}
 				break;
 
 			case character2->NORMAL:
@@ -1069,6 +1190,9 @@ void cStage_Ingame::MatchResult(const short sWinner, const bool bResult)
 	if( bResult )
 	{
 		GetStageMgr()->Release();
+
+		character1->UpdatePosition();
+		character2->UpdatePosition();
 
 		tagIngameInfo sIngameInfo;
 		sIngameInfo.pCharacter1 = character1;

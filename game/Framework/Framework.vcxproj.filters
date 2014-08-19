@@ -55,6 +55,9 @@
       <Filter>stage</Filter>
     </ClInclude>
     <ClInclude Include="Sound.h" />
+    <ClInclude Include="stage_IngameStart.h">
+      <Filter>stage</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -103,6 +106,9 @@
       <Filter>stage</Filter>
     </ClCompile>
     <ClCompile Include="Sound.cpp" />
+    <ClCompile Include="stage_IngameStart.cpp">
+      <Filter>stage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="window">

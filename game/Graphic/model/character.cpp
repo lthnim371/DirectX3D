@@ -5,6 +5,8 @@
 #include "stdafx.h"
 //#include "..\stdafx.h"
 #include "character.h"
+#include "../../Framework/Sound.h"
+#include <time.h>
 
 using namespace graphic;
 
@@ -44,6 +46,7 @@ cCharacter::cCharacter(const int id) :
 	m_targetAttackCheck = false;
 	m_moveControl = false;
 	m_tick = 0.f;
+	m_damage = 0.f;
 }
 
 cCharacter::~cCharacter()
@@ -66,6 +69,8 @@ bool cCharacter::Create(const string &modelName)
 //	SetRenderMesh(false);
 
 	m_camera = new cCamera();
+
+	::srand(unsigned int(NULL));
 			
 	return bResult;
 }
@@ -373,6 +378,8 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 					m_cubeStartFrame = 10;
 					m_cubeMaximumFrame = 13;
 
+					m_damage = 4.f;
+
 				//	m_weapon->SetAniLoop(false);
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
 
@@ -388,6 +395,12 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 
 					m_cubeStartFrame = 8;
 					m_cubeMaximumFrame = 11;
+
+					m_damage = 10.f;
+
+				/*	char cNumber[8];
+					::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+					framework::SoundManager::Get()->get( string(cNumber) )->Play();*/
 		//			m_weaponCube = new cCube( Vector3(-50,0,0), Vector3(50,200,150) );
 		//			m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 		//			m_cubePos *= 100.f;
@@ -411,6 +424,12 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 
 					m_cubeStartFrame = 15;
 					m_cubeMaximumFrame = 18;
+
+					m_damage = 4.f;
+
+				/*	char cNumber[8];
+					::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+					framework::SoundManager::Get()->get( string(cNumber) )->Play();*/
 			//	m_weapon->SetAniLoop(false);
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_LA.ani");
 
@@ -455,6 +474,8 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 				m_mode = GUARD;
 				m_bone->SetAniLoop(true);
 				SetAnimation( "..\\media\\ani\\valle\\valle1_guard_loop.ani" );
+				if( ::GetForegroundWindow() == ::GetFocus() )
+					framework::SoundManager::Get()->get( "Guard" )->Play();
 			}
 		break;
 	}
@@ -500,6 +521,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 				m_cubeStartFrame = 8;
 				m_cubeMaximumFrame = 11;
+
+				m_damage = 8.f;
 		//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 		//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 		//		m_cubePos *= 100.f;
@@ -513,6 +536,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 				m_cubeStartFrame = 18;
 				m_cubeMaximumFrame = 21;
+
+				m_damage = 12.f;
 		//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 		//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 		//		m_cubePos *= 100.f;
@@ -521,6 +546,10 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				return true;
 			break;
 			}
+
+		/*	char cNumber[8];
+			::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+			framework::SoundManager::Get()->get( string(cNumber) )->Play();*/
 		}
 		else if(m_reserveR)
 		{
@@ -536,6 +565,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 						m_cubeStartFrame = 4;
 						m_cubeMaximumFrame = 10;
+
+						m_damage = 7.f;
 				//		m_weaponCube->SetCube( Vector3(-175,0,0), Vector3(175,175,175) );
 				//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 				//		m_cubePos *= 100.f;
@@ -547,6 +578,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 						m_cubeStartFrame = 11;
 						m_cubeMaximumFrame = 14;
+
+						m_damage = 10.f;
 				//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 				//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 				//		m_cubePos *= 100.f;
@@ -564,6 +597,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 					m_cubeStartFrame = 3;
 					m_cubeMaximumFrame = 20;
+
+					m_damage = 10.f;
 			//		m_weaponCube->SetCube( Vector3(-200,0,0), Vector3(200,175,200) );
 			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 			//		m_cubePos *= 100.f;
@@ -574,6 +609,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 					
 					m_cubeStartFrame = 21;
 					m_cubeMaximumFrame = 24;
+
+					m_damage = 15.f;
 			//		m_weaponCube->SetCube( Vector3(-50,0,0), Vector3(50,200,200) );
 			//		m_cubePos = Vector3(camDir.x, 0.f, camDir.z);
 			//		m_cubePos *= 100.f;
@@ -585,6 +622,10 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 				return true;
 			break;
 			}
+
+		/*	char cNumber[8];
+			::_itoa_s( rand() % 4, cNumber, sizeof(cNumber) ,10);
+			framework::SoundManager::Get()->get( string(cNumber) )->Play();*/
 		}
 		
 		m_prevAniPos = 0.f;
@@ -626,6 +667,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 		if( m_cubeStartFrame <= currFrame && currFrame < m_cubeMaximumFrame )
 		{
 			m_cubeCheck = true;
+
+//			SndDepot
 	/*
 			Vector3 currPos = GetCamera()->GetLook();
 			currPos += m_cubePos;
@@ -862,7 +905,7 @@ void cCharacter::GetWeaponBoundingBox()
 	}
 }
 
-bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir )
+bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const float& damage, const Vector3& sourDir )
 {
 //	Vector3 MyDir( 0.f, 0.f, -1.f );  //임시로 무조건 앞만 보게끔 설정하였음...
 	Vector3 MyDir( m_camera->GetDirection().Normal() );  //현재 사용자의 카메라 방향
@@ -883,13 +926,14 @@ bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const
 				m_mode = GUARD_BE_HIT;
 				m_bone->SetAniLoop(false);
 				SetAnimation( "..\\media\\ani\\valle\\valle1_guard_hit1.ani" );
+				m_hp -= damage * 0.5f;
 				return true;
 			}
 		}
 		
 		//원래 하던 동작과 관련된 변수들 초기화
 			m_mode = BEHIT;
-			m_hp -= 10;
+			m_hp -= damage;
 		
 			m_prevAniPos = 0.f;
 			m_aniPosGap = 0.f;
@@ -919,6 +963,12 @@ bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const
 			else  //상대방이 후방에서 공격했다면..
 			{
 				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
+			}
+			if( ::GetForegroundWindow() == ::GetFocus() )
+			{
+				char cNumber[8];
+				::_itoa_s( (rand() % 4) + 10, cNumber, sizeof(cNumber) ,10);
+				framework::SoundManager::Get()->get( string(cNumber) )->Play();
 			}
 
 		return true;
@@ -969,4 +1019,13 @@ void cCharacter::SetDrawCube(const bool bCubeDraw)
 {
 	SetRenderBoundingBox( bCubeDraw );
 	m_weapon->SetRenderBoundingBox( bCubeDraw );
+}
+
+void cCharacter::UpdatePosition()
+{
+	Matrix44 mat;
+	mat.SetTranslate( GetCamera()->GetLook() - GetTM().GetPosition() );
+	MultiplyTM( mat );
+	m_characterCube->SetTransform( GetTM() );
+	UpdateWeapon();
 }

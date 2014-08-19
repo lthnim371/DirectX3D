@@ -21,6 +21,10 @@ void cStage_Main::Init(const int nId, tagIngameInfo* sIngameInfo)
 		return;
 	m_restart = true;
 
+//	SndDepot->get( "MainTema1" )->SetLoop(true);
+	SndDepot->get( "MainTema1" )->Play();
+	GetStageMgr()->SetSoundName( "MainTema1" );
+
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");
@@ -56,6 +60,22 @@ void cStage_Main::Input(const float elapseTime)
 //void cStage_Main::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Main::Update(const float elapseTime)
 {
+	/*
+	if( ::GetForegroundWindow() == ::GetFocus() )
+	{
+		if(SndDepot->get( "MainTema1" )->IsPaused() == true)
+		{
+			SndDepot->get( "MainTema1" )->Pause(false);
+		}
+	}
+	else if( ::GetForegroundWindow() != ::GetFocus() )
+	{
+		if(SndDepot->get( "MainTema1" )->IsPlaying() == true)
+		{
+			SndDepot->get( "MainTema1" )->Pause(true);
+		}
+	}
+	*/
 }
 
 //void cStage_Main::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)

@@ -28,11 +28,11 @@ void Sound::Load(LPCSTR lpszFileName, bool bFixed/*=true*/)
    //FMOD_RESULT F_API createSound (const char *name_or_data, FMOD_MODE mode, FMOD_CREATESOUNDEXINFO *exinfo, Sound **sound);
    if (bFixed)
    {
-	   SndDepot->createSound(lpszFileName, FMOD_SOFTWARE, 0, &hSound);
+	   SndDepot->getSystem()->createSound(lpszFileName, FMOD_SOFTWARE, 0, &hSound);
    }
    else
    {
-      SndDepot->createStream(lpszFileName, FMOD_SOFTWARE, 0, &hSound);
+      SndDepot->getSystem()->createStream(lpszFileName, FMOD_SOFTWARE, 0, &hSound);
    }
 }
 void Sound::Play()
@@ -42,7 +42,7 @@ void Sound::Play()
    for (int i = 0; i < maxchannel; i++)
    {
       FMOD::Channel *pCh;
-      SndDepot->getChannel(i, &pCh);
+      SndDepot->getSystem()->getChannel(i, &pCh);
       bool play = false;
       pCh->isPlaying(&play);
       if (!play)
@@ -51,13 +51,13 @@ void Sound::Play()
 
          if (bLoopRange)
          {
-            SndDepot->playSound(FMOD_CHANNEL_REUSE, hSound, true, &hChannel);
+            SndDepot->getSystem()->playSound(FMOD_CHANNEL_REUSE, hSound, true, &hChannel);
             hChannel->setPosition(range_from, FMOD_TIMEUNIT_MS);
             hChannel->setPaused(false);
          }
          else
          {
-            SndDepot->playSound(FMOD_CHANNEL_REUSE, hSound, false, &hChannel);
+            SndDepot->getSystem()->playSound(FMOD_CHANNEL_REUSE, hSound, false, &hChannel);
          }
 
          break;

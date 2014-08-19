@@ -72,10 +72,14 @@ bool cGameApp::OnInit()
 
 void cGameApp::OnInput(const float elapseT)
 {
-	//마우스 가두기 및 숨기기
-	if(	InputMgr->isOnceKeyDown( VK_BACK ) )
+	const string& strCurrSound = framework::GetStageMgr()->GetSoundName();
+		
+	if( ::GetFocus() == m_hWnd )
 	{
-		if( ::GetFocus() == m_hWnd )
+		framework::GetStageMgr()->GetStage()->Input( elapseT );
+
+	//마우스 가두기 및 숨기기
+		if(	InputMgr->isOnceKeyDown( VK_BACK ) )
 		{
 			bClipCursor = !bClipCursor;
 
@@ -95,10 +99,36 @@ void cGameApp::OnInput(const float elapseT)
 				::ShowCursor(TRUE);
 			}
 		}
+
+		if(SndDepot->get( strCurrSound )->IsPaused() == true)
+		{
+			SndDepot->get( strCurrSound )->Pause(false);
+		}
+		else if(SndDepot->get( strCurrSound )->IsPlaying() == false)
+		{
+			string strNextSound;
+
+			if( strCurrSound == "MainTema2")
+				strNextSound.assign( "MainTema3" );
+			else if( strCurrSound == "MainTema3")
+				strNextSound.assign( "MainTema4" );
+			else if( strCurrSound == "MainTema4")
+				strNextSound.assign( "MainTema5" );
+			else if( strCurrSound == "MainTema5")
+				strNextSound.assign( "MainTema2" );
+		//	else if( strCurrSound == "MainTema1" )
+		//		return;
+			SndDepot->get( strCurrSound )->Stop();
+			SndDepot->get( strNextSound )->Play();
+			framework::GetStageMgr()->SetSoundName( strNextSound );
+		}
+	}
+	else if(SndDepot->get( strCurrSound )->IsPlaying() == true)
+	{
+		SndDepot->get( strCurrSound )->Pause(true);
 	}
 
-	if( m_hWnd == ::GetFocus() )  //활성화가 된 클라이언트만 입력키 받게끔 설정
-		framework::GetStageMgr()->GetStage()->Input( elapseT );
+//	if( m_hWnd == ::GetFocus() )  //활성화가 된 클라이언트만 입력키 받게끔 설정
 	//	framework::GetStageMgr()->GetStage()->Input( elapseT, character1, character2 );
 		
 }
@@ -164,31 +194,31 @@ void cGameApp::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				switch( framework::GetStageMgr()->GetCurrentStage() )
 				{
-					case 0:  //MAIN
+					case framework::cStageMgr::MAIN:  //MAIN
 						{
 							framework::cStage_Main* pMain = dynamic_cast<framework::cStage_Main*>( framework::GetStageMgr()->GetStage() );
 							pMain->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 1:  //CHARACTER_SELECT
+					case framework::cStageMgr::CHARACTER_SELECT:  //CHARACTER_SELECT
 						{
 							framework::cStage_CharacterSelect* pCharSel = dynamic_cast<framework::cStage_CharacterSelect*>( framework::GetStageMgr()->GetStage() );
 							pCharSel->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 2:  //NETWORK_SELECT
+					case framework::cStageMgr::NETWORK_SELECT:  //NETWORK_SELECT
 						{
 							framework::cStage_NetworkSelect* pNetSel = dynamic_cast<framework::cStage_NetworkSelect*>( framework::GetStageMgr()->GetStage() );
 							pNetSel->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 3:  //NETWORK_LOADING
+					case framework::cStageMgr::NETWORK_LOADING:  //NETWORK_LOADING
 						{
 							framework::cStage_NetworkLoading* pNetLoad = dynamic_cast<framework::cStage_NetworkLoading*>( framework::GetStageMgr()->GetStage() );
 							pNetLoad->MessageProc(message, wParam, lParam);
 						}
 					break;
-					case 6:  //ENDING
+					case framework::cStageMgr::ENDING:  //ENDING
 						{
 							framework::cStage_Ending* pEnding = dynamic_cast<framework::cStage_Ending*>( framework::GetStageMgr()->GetStage() );
 							pEnding->MessageProc(message, wParam, lParam);

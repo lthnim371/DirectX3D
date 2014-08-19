@@ -19,7 +19,7 @@ cStage_NetworkLoading::~cStage_NetworkLoading()
 void cStage_NetworkLoading::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 //debug
-//	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
+//	GetStageMgr()->SetStage( GetStageMgr()->INGAMESTART );
 //	GetStageMgr()->GetStage()->Init(nId);
 //
 	ZeroMemory(&m_acceseInfo, sizeof(m_acceseInfo));
@@ -122,7 +122,8 @@ void cStage_NetworkLoading::Update(const float elapseTime)
 		if( fTick2 > 3.f )
 		{
 			fTick2 = 0.f;
-			GetStageMgr()->SetStage( GetStageMgr()->INGAME );
+		//	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
+			GetStageMgr()->SetStage( GetStageMgr()->INGAMESTART );
 			GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
 		}
 	}

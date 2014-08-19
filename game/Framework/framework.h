@@ -43,6 +43,7 @@
 #include "stage_CharacterSelect.h"
 #include "stage_NetworkSelect.h"
 #include "stage_NetworkLoading.h"
+#include "stage_IngameStart.h"
 #include "stage_ingame.h"
 #include "stage_IngameEnd.h"
 #include "stage_Ending.h"

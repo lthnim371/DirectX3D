@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#pragma comment(lib, "fmod\\fmodex_vc.lib")
+#pragma comment(lib, "..\\GameApp\\fmodex_vc.lib")
 
 #include <windows.h>
 #include <tchar.h>
 #include "../Common/utility/Utility.h"
 #include "../Common/etc/singleton.h"
 #include "../Common/utility/Manager.hpp"
-#include "../fmod/inc/fmod.hpp"
+#include "../GameApp/inc/fmod.hpp"
 
 namespace framework
 {
@@ -41,7 +41,7 @@ namespace framework
 
 	class SoundManager : public Manager<Sound>, public common::cSingleton<SoundManager>
 	{
-	   friend class singleton<SoundManager>;
+	   friend class common::cSingleton<SoundManager>;
 	   enum {maxchannel=100};
 	private :
 	   SoundManager();

@@ -45,11 +45,16 @@ void cStage_IngameEnd::Init(const int nId, tagIngameInfo* sIngameInfo)
 	{
 		m_image->Create("../media/image/result_victory.tga");
 		m_image->SetPos( Vector3(340.f, 40.f ,0.f) );
+	//	SndDepot->get( "MainTema1" )->SetLoop(true);
+		if( ::GetForegroundWindow() == ::GetFocus() )
+			SndDepot->get( "Victory" )->Play();
 	}
 	else if( m_user != sIngameInfo->sWinner )
 	{
 		m_image->Create("../media/image/result_defeat.tga");
 		m_image->SetPos( Vector3(400.f, 34.f ,0.f) );
+		if( ::GetForegroundWindow() == ::GetFocus() )
+			SndDepot->get( "Defeat" )->Play();
 	}
 }
 
@@ -76,7 +81,7 @@ void cStage_IngameEnd::Input(const float elapseTime)
 
 void cStage_IngameEnd::Update(const float elapseTime)
 {
-//	graphic::cCharacter* pMe = m_user == 1 ? character1 : character2;
+	graphic::cCharacter* pMe = m_user == 1 ? character1 : character2;
 
 //	if( m_camDirOriginal.DotProduct(pMe->GetCamera()->GetDirection()) < 1 )
 //		pMe->GetCamera()-
@@ -93,22 +98,27 @@ void cStage_IngameEnd::Update(const float elapseTime)
 		}
 	}
 
-	bool bAniState1 = character1->Move(elapseTime);
-	bool bAniState2 = character2->Move(elapseTime);
+//	bool bAniState1 = character1->Move(elapseTime);
+//	bool bAniState2 = character2->Move(elapseTime);
+	bool bAniState = pMe->Move(elapseTime);
 
-	if( bAniState1 == false && bAniState2 == false )
+//	if( bAniState1 == false && bAniState2 == false )
+	if( bAniState == false )
 	{
 		m_nextStage = true;
 
-		character1->GetBoneMgr()->SetAniLoop(true);
-		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
-		character2->GetBoneMgr()->SetAniLoop(true);
-		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+//		character1->GetBoneMgr()->SetAniLoop(true);
+//		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+//		character2->GetBoneMgr()->SetAniLoop(true);
+//		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+		pMe->GetBoneMgr()->SetAniLoop(true);
+		pMe->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 
 		Matrix44 matR;
 		matR.SetRotationY( MATH_PI );
-		character1->SetTM( matR * character1->GetTM() );
-		character2->SetTM( matR * character2->GetTM() );
+//		character1->SetTM( matR * character1->GetTM() );
+//		character2->SetTM( matR * character2->GetTM() );
+		pMe->SetTM( matR * pMe->GetTM() );
 	}
 }
 
@@ -157,8 +167,9 @@ void cStage_IngameEnd::Render(const float elapseTime)
 		m_shader->SetVector( "vEyePos", pMe->GetCamera()->GetPosition());
 
 		m_shader->SetRenderPass(1);
-		character1->RenderShadow( *m_shader );
-		character2->RenderShadow( *m_shader );
+//		character1->RenderShadow( *m_shader );
+//		character2->RenderShadow( *m_shader );
+		pMe->RenderShadow( *m_shader );
 
 		//-----------------------------------------------------
 		// 렌더링타겟 복구
@@ -173,8 +184,9 @@ void cStage_IngameEnd::Render(const float elapseTime)
 
 		m_shader->SetMatrix( "mVP", pMe->GetCamera()->GetView() * pMe->GetCamera()->GetProjection() );
 		m_shader->SetRenderPass(0);
-		character1->RenderShader( *m_shader );
-		character2->RenderShader( *m_shader );
+//		character1->RenderShader( *m_shader );
+//		character2->RenderShader( *m_shader );
+		pMe->RenderShader( *m_shader );
 
 		//------------------------------------------------------------------------
 		// 지형 출력.

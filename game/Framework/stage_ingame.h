@@ -58,6 +58,7 @@ namespace framework
 		LPD3DXSPRITE m_sprite;
 		graphic::cSprite* m_hpImage;
 		graphic::cSprite* m_spImage;
+		graphic::cSprite* m_helpImage;
 
 		LPDIRECT3DTEXTURE9 m_pShadowTex;
 		LPDIRECT3DSURFACE9 m_pShadowSurf;
@@ -67,5 +68,6 @@ namespace framework
 
 	//test
 		bool m_cubeDraw;
+		bool m_attackSound;
 	};
 }

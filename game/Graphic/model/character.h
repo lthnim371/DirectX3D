@@ -28,7 +28,7 @@ namespace graphic
 	public:
 		void Update(const float elapseTime, const short state, const float x = 0, const float y = 0);  //캐릭터 상태 변경
 		bool GetCubeCheck() const;
-		bool CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
+		bool CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const float& damage, const Vector3& sourDir = Vector3() );
 		bool CollisionCheck2( cCube& sourCube, const Vector3& sourPos, const Vector3& sourDir = Vector3() );
 		float GetHP() const;
 		float GetSP() const;
@@ -41,6 +41,8 @@ namespace graphic
 		float GetAniPosGap() const;
 		cCamera* GetCamera();
 		void MoveControl(const bool bCtl, const bool bOnlyJump = false);  //애니메이션 이동값 적용 여부 결정
+		void UpdatePosition();
+		float GetDamage() const;
 
 	//debug
 		void SetMode( const int stage );
@@ -87,6 +89,7 @@ namespace graphic
 		float m_sp;
 		bool m_moveControl;
 		float m_tick;
+		float m_damage;
 
 		cCamera* m_camera;
 //		ID3DXFont* m_font;
@@ -103,8 +106,9 @@ namespace graphic
 	inline float cCharacter::GetAniPosGap() const { return m_aniPosGap; }
 	inline cCamera* cCharacter::GetCamera() { return m_camera; }
 //	inline void cCharacter::MoveControl(const bool bCtl) { m_moveControl = bCtl; m_bone->MoveControl(bCtl); }
+	inline float cCharacter::GetDamage() const { return m_damage; }
 
 //debug
 	inline void cCharacter::SetMode( const int stage ) { m_mode = stage; }
-	inline void cCharacter::SetHp( const float hp ) { m_hp = hp; }
+	inline void cCharacter::SetHp( const float hp ) { m_hp -= hp; }
 }

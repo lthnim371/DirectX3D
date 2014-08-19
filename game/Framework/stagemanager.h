@@ -9,7 +9,7 @@ namespace framework
 		enum STAGE  //스테이지 명칭
 		{
 			MAIN, CHARACTER_SELECT, NETWORK_SELECT, NETWORK_LOADING,
-			INGAME, INGAMEEND, ENDING, 
+			INGAMESTART, INGAME, INGAMEEND, ENDING, 
 		};
 
 		cStageMgr();  //모든 스테이지 생성 및 현재 스테이지를 처음 메인 스테이지로
@@ -21,6 +21,7 @@ namespace framework
 		void SetStage(const int nId);  //현재 스테이지를 원하는 스테이지로 교체
 		void SetWindowHandle(const HWND& hWnd);  //gameapp으로부터 윈도우핸들을 받아올때 사용
 		bool SetSocket();  //네트워크 클라이언트로 접속
+		void SetSoundName(const string& strName);
 		
 		cStage* GetStage() const;
 		int GetCurrentStage() const;
@@ -29,6 +30,10 @@ namespace framework
 		int GetPort();
 		string& GetIpAddress();
 	//	DWORD GetIpAddress();
+		const string& GetSoundName() const;
+
+	protected:
+		void InitSound();
 
 	private:
 		std::map<int, cStage*> m_list;  //해당 스테이지 객체 주소를 보관
@@ -39,12 +44,14 @@ namespace framework
 	//	CIPAddressCtrl m_ip;
 		string m_ip;  //네트워크 접속을 위한 ip주소
 		int m_port;  //네트워크 접속을 위한 포트
+		string m_soundName;
 	};
 	
 	inline cStageMgr* GetStageMgr() { return cStageMgr::Get(); }
 
 	inline void cStageMgr::SetStage(const int nId) { m_stage = FindStage(nId); m_currentStage = nId; }
 	inline void cStageMgr::SetWindowHandle(const HWND& hWnd) { m_hWnd = hWnd; }
+	inline void cStageMgr::SetSoundName(const string& strName) { m_soundName = strName; }
 
 	inline cStage* cStageMgr::GetStage() const { return m_stage; }
 	inline int cStageMgr::GetCurrentStage() const { return m_currentStage; }
@@ -53,4 +60,5 @@ namespace framework
 	inline int cStageMgr::GetPort() { return m_port; }
 	inline string& cStageMgr::GetIpAddress() { return m_ip; }
 //	inline DWORD cStageMgr::GetIpAddress() { DWORD address; m_ip.GetAddress(address); return address; }
+	inline const string& cStageMgr::GetSoundName() const { return m_soundName; }
 }
