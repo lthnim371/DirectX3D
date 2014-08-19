@@ -13,6 +13,11 @@ namespace network
 	{
 		enum TYPE
 		{
+			ACCESS, INGAME, INGAMEEND,
+		};
+
+		enum STATE
+		{
 			NONE, NORMAL, ROTATION, LEFTROTATION, RIGHTROTATION,
 			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
 			DASH, GUARD, GUARD_BE_HIT,
@@ -30,24 +35,32 @@ namespace network
 
 	typedef struct tagInfoProtocol
 	{
-		sPacketHeader header1;
-		sPacketHeader header2;
-	//	PROTOCOL::TYPE header1;
-	//	PROTOCOL::TYPE header2;
-		int nId;
+		sPacketHeader header;
+		PROTOCOL::STATE state1;
+		PROTOCOL::STATE state2;
+		short nId;
 		POINT ptMouse;
 	//	bool bAccess;
 		common::Vector3 camLook;
 		common::Vector3 camPos;
 		common::Matrix44 character;
-
+		bool bResult;
+		short sWinner;
 	} InfoProtocol;
 
 	typedef struct tagAccessProtocol
 	{
+		sPacketHeader header;
 		int nId;
 		bool bAccess;
 	} AccessProtocol;
+
+	typedef struct tagResultProtocol
+	{
+		sPacketHeader header;
+		int nId;
+		bool bResult;
+	} ResultProtocol;
 
 #pragma pack()  //끝날때 다시 기본으로 되돌리기
 

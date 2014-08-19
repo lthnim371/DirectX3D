@@ -15,6 +15,8 @@ cStage_IngameEnd::~cStage_IngameEnd()
 
 void cStage_IngameEnd::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	m_tick = 0.f;
+	m_nextStage = false;
 	m_user = nId;
 
 	character1 = sIngameInfo->pCharacter1;
@@ -28,25 +30,26 @@ void cStage_IngameEnd::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_pShadowTexZ = sIngameInfo->pShadowTexZ;
 	m_skybox = sIngameInfo->pSkybox;
 
-	if( m_user == 1 )
+	m_camDirOriginal = m_user == 1 ? character1->GetCamera()->GetDirection() :
+		character2->GetCamera()->GetDirection();
+
+	character1->GetBoneMgr()->SetAniLoop(false);
+	character1->SetAnimation( sIngameInfo->sWinner == 1 ? 
+		"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
+	character2->GetBoneMgr()->SetAniLoop(false);
+	character2->SetAnimation( sIngameInfo->sWinner == 2 ? 
+		"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
+
+	m_image = new graphic::cSprite(m_sprite, 0, "Result");
+	if( m_user == sIngameInfo->sWinner )
 	{
-		m_camDirOriginal = character1->GetCamera()->GetDirection();
-		character1->GetBoneMgr()->SetAniLoop(false);
-		character1->SetAnimation( sIngameInfo->bResult == true ? 
-			"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
-		character2->GetBoneMgr()->SetAniLoop(false);
-		character2->SetAnimation( sIngameInfo->bResult == false ? 
-			"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
+		m_image->Create("../media/image/result_victory.tga");
+		m_image->SetPos( Vector3(340.f, 40.f ,0.f) );
 	}
-	else if( m_user == 2 )
+	else if( m_user != sIngameInfo->sWinner )
 	{
-		m_camDirOriginal = character2->GetCamera()->GetDirection();
-		character2->GetBoneMgr()->SetAniLoop(false);
-		character2->SetAnimation( sIngameInfo->bResult == true ? 
-			"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
-		character1->GetBoneMgr()->SetAniLoop(false);
-		character1->SetAnimation( sIngameInfo->bResult == false ? 
-			"..\\media\\ani\\valle\\valle1_win.ani" : "..\\media\\ani\\valle\\valle1_lose.ani" );
+		m_image->Create("../media/image/result_defeat.tga");
+		m_image->SetPos( Vector3(400.f, 34.f ,0.f) );
 	}
 }
 
@@ -57,11 +60,14 @@ void cStage_IngameEnd::Release()
 	SAFE_DELETE(m_shader);
 	SAFE_DELETE(m_terrainShader);
 	SAFE_DELETE(m_terrain);
+	SAFE_DELETE(m_image);
 	m_sprite->Release();
 	m_pShadowTex->Release();
 	m_pShadowSurf->Release();
 	m_pShadowTexZ->Release();
 	SAFE_DELETE(m_skybox);
+
+	cStageMgr::Get()->FindStage( cStageMgr::INGAME )->Release();
 }
 
 void cStage_IngameEnd::Input(const float elapseTime)
@@ -75,12 +81,34 @@ void cStage_IngameEnd::Update(const float elapseTime)
 //	if( m_camDirOriginal.DotProduct(pMe->GetCamera()->GetDirection()) < 1 )
 //		pMe->GetCamera()-
 
-	if( character1->Move(elapseTime) == false && character2->Move(elapseTime) == false )
+	if( m_nextStage )
 	{
+		m_tick += elapseTime;
+
+		if( m_tick >= 5.f )
+		{
+			m_tick = 0.f;
+			GetStageMgr()->SetStage( GetStageMgr()->ENDING );
+			GetStageMgr()->GetStage()->Init();
+		}
+	}
+
+	bool bAniState1 = character1->Move(elapseTime);
+	bool bAniState2 = character2->Move(elapseTime);
+
+	if( bAniState1 == false && bAniState2 == false )
+	{
+		m_nextStage = true;
+
 		character1->GetBoneMgr()->SetAniLoop(true);
 		character1->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
 		character2->GetBoneMgr()->SetAniLoop(true);
 		character2->SetAnimation( "..\\media\\ani\\valle\\valle1_normal.ani" );
+
+		Matrix44 matR;
+		matR.SetRotationY( MATH_PI );
+		character1->SetTM( matR * character1->GetTM() );
+		character2->SetTM( matR * character2->GetTM() );
 	}
 }
 
@@ -169,6 +197,7 @@ void cStage_IngameEnd::Render(const float elapseTime)
 		m_terrainShader->SetRenderPass(2);
 		m_terrain->RenderShader( *m_terrainShader , pMe->GetCamera() );
 
-
+	//결과 이미지 출력
+		m_image->Render( Matrix44() );
 }
 		

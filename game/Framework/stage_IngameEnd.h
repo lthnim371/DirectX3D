@@ -15,6 +15,8 @@ namespace framework
 		virtual void Render(const float elapseTime) override;
 		
 	private:
+		bool m_nextStage;
+		float m_tick;
 		short m_user;
 		Vector3 m_camDirOriginal;
 
@@ -28,8 +30,7 @@ namespace framework
 		graphic::cShader* m_terrainShader;
 
 		LPD3DXSPRITE m_sprite;
-		graphic::cSprite* m_hpImage;
-		graphic::cSprite* m_spImage;
+		graphic::cSprite* m_image;
 
 		LPDIRECT3DTEXTURE9 m_pShadowTex;
 		LPDIRECT3DSURFACE9 m_pShadowSurf;

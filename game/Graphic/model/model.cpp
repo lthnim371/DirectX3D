@@ -294,5 +294,5 @@ void cModel::CreateCube(const float fScale)
 	m_cube.SetCube( mm.Min * fScale, mm.Max * fScale);
 	m_cube.SetTransform( GetTM() );
 
-	m_isRenderBoundingBox = true;
+	m_isRenderBoundingBox = false;
 }

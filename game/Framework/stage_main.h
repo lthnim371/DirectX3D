@@ -26,5 +26,6 @@ namespace framework
 		cButton* m_button1;
 
 		u_short usCount;  //메인화면 애니메이션을 위한 count
+		bool m_restart;
 	};
 }

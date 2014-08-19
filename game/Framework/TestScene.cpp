@@ -59,3 +59,10 @@ void cTestScene::Button_NS_2Click(framework::cEvent &event)
 	GetStageMgr()->SetStage( GetStageMgr()->NETWORK_LOADING );
 	GetStageMgr()->GetStage()->Init(2);
 }
+
+void cTestScene::Button_ED_1Click(framework::cEvent &event)
+{
+//	GetStageMgr()->GetStage()->Release();
+	cStageMgr::Get()->FindStage( cStageMgr::INGAMEEND )->Release();
+	GetStageMgr()->SetStage( GetStageMgr()->MAIN );
+}

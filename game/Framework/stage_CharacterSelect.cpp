@@ -5,6 +5,7 @@ using namespace framework;
 
 cStage_CharacterSelect::cStage_CharacterSelect()
 {
+	m_restart = false;
 	usCount = 7;
 }
 cStage_CharacterSelect::~cStage_CharacterSelect()
@@ -15,6 +16,10 @@ cStage_CharacterSelect::~cStage_CharacterSelect()
 //void cStage_NetworkSelect::Init()
 void cStage_CharacterSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	if( m_restart )
+		return;
+	m_restart = true;
+
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");

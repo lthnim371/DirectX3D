@@ -6,6 +6,7 @@ using namespace framework;
 cStage_Main::cStage_Main()
 {
 	usCount = 7;
+	m_restart = false;
 }
 
 cStage_Main::~cStage_Main()
@@ -16,6 +17,10 @@ cStage_Main::~cStage_Main()
 //void cStage_Main::Init()
 void cStage_Main::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	if( m_restart )
+		return;
+	m_restart = true;
+
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");

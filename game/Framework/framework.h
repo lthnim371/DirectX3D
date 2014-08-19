@@ -33,7 +33,9 @@
 
 //Ãß°¡
 #include "keyManager.h"
+#include "Sound.h"
 #define InputMgr framework::keyManager::Get()
+#define SndDepot framework::SoundManager::Get()
 
 #include "TestScene.h"
 #include "stage.h"
@@ -43,4 +45,5 @@
 #include "stage_NetworkLoading.h"
 #include "stage_ingame.h"
 #include "stage_IngameEnd.h"
+#include "stage_Ending.h"
 #include "stagemanager.h"

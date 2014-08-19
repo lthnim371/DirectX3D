@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-//#include <windows.h>
+#include <windows.h>
 #include <tchar.h>
 
 // 동적 할당한 포인터를 해제할 때 사용.

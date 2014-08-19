@@ -88,6 +88,8 @@
     <ClInclude Include="math\vector4.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="utility\Manager.hpp" />
+    <ClInclude Include="utility\Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="etc\dbg.cpp" />

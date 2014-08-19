@@ -19,6 +19,8 @@ cStageMgr::cStageMgr()
 	m_list.insert( std::make_pair(INGAME, pIn) );
 	cStage_IngameEnd* pInEnd = new cStage_IngameEnd;
 	m_list.insert( std::make_pair(INGAMEEND, pInEnd) );
+	cStage_Ending* pEnding = new cStage_Ending;
+	m_list.insert( std::make_pair(ENDING, pEnding) );
 
 	m_stage = pMain;
 	m_currentStage = MAIN;
@@ -34,6 +36,7 @@ cStageMgr::cStageMgr()
 		return;
 
 	string buff1, buff2, buff3;
+	::getline( fsIn, buff1 );
 	::getline( fsIn, buff1 );
 	fsIn >> buff1;
 	fsIn >> buff2;

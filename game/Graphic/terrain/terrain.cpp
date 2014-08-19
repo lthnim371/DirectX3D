@@ -359,3 +359,12 @@ bool cTerrain::RemoveRigidModel(const int id, const bool destruct) //destruct=tr
 	RETV(!model, false);
 	return RemoveRigidModel(model, destruct);
 }
+
+//test
+void cTerrain::SetDrawCube(const bool bCubeDraw)
+{
+	BOOST_FOREACH (auto model, m_rigids)
+	{
+		model->SetRenderBoundingBox( bCubeDraw );
+	}
+}

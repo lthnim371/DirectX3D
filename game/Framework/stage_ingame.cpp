@@ -8,13 +8,6 @@ static const UINT MAP_SIZE = 256;
 
 cStage_Ingame::cStage_Ingame()
 {
-	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
-	ZeroMemory(&m_info1, sizeof(m_info1));
-	ZeroMemory(&m_info2, sizeof(m_info2));
-//	m_access = false;
-	fTick1 = 0.f;
-	fTick2 = 0.f;
-	m_font = NULL;
 }
 cStage_Ingame::~cStage_Ingame()
 {
@@ -40,6 +33,15 @@ void cStage_Ingame::Release()
 //void cStage_Ingame::Init()
 void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	ZeroMemory(&m_infoSend, sizeof(m_infoSend));
+	ZeroMemory(&m_info1, sizeof(m_info1));
+	ZeroMemory(&m_info2, sizeof(m_info2));
+	fTick1 = 0.f;
+	fTick2 = 0.f;
+	m_font = NULL;
+	m_end = false;
+	m_cubeDraw = false;
+
 //스카이박스 생성
 	m_skybox = new graphic::cModel(7777);
 	m_skybox->Create( "../media/mesh/map/skybox.dat", graphic::MODEL_TYPE::RIGID );
@@ -68,7 +70,7 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 	m_hpImage = new graphic::cSprite( m_sprite, 0, "HP_Back" );
 	m_hpImage->Create("../media/image/HP_back.png");
-	m_hpImage->SetPos( Vector3(10.f, 600.f, 0.f) );
+	m_hpImage->SetPos( Vector3(10.f, 650.f, 0.f) );
 	graphic::cSprite* pHpImage2 = new graphic::cSprite( m_sprite, 1, "HP_Front" );
 	pHpImage2->Create("../media/image/HP_front.png");
 	pHpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
@@ -76,7 +78,7 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 
 	m_spImage = new graphic::cSprite( m_sprite, 0, "SP_Back" );
 	m_spImage->Create("../media/image/SP_back.png");
-	m_spImage->SetPos( Vector3(1000.f, 600.f, 0.f) );
+	m_spImage->SetPos( Vector3(1000.f, 650.f, 0.f) );
 	graphic::cSprite* pSpImage2 = new graphic::cSprite( m_sprite, 1, "SP_Front" );
 	pSpImage2->Create("../media/image/SP_front.png");
 	pSpImage2->SetPos( Vector3(0.f, 0.f, 0.f) );
@@ -171,12 +173,15 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 //void cStage_Ingame::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Input(const float elapseTime)
 {	
+	if( m_end )
+		return;
+
 //패킷 전송에 필요한 변수들 생성 및 초기화
 	POINT ptMouse;
 	ptMouse.x = 0;
 	ptMouse.y = 0;
-	network::PROTOCOL::TYPE nState1 = network::PROTOCOL::NONE;
-	network::PROTOCOL::TYPE nState2 = network::PROTOCOL::NONE;
+	network::PROTOCOL::STATE nState1 = network::PROTOCOL::NONE;
+	network::PROTOCOL::STATE nState2 = network::PROTOCOL::NONE;
 
 //회전 확인
 	m_prevMouse = m_currMouse;
@@ -196,20 +201,18 @@ void cStage_Ingame::Input(const float elapseTime)
 			nState1 = network::PROTOCOL::LEFTROTATION;
 	}
 	
-	//카메라 높이 조절(프로그램 테스트)
-//	else if( InputMgr->isOnceKeyDown('1') )
-
-	if( InputMgr->isOnceKeyDown('1') )
+//test
+	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+	if( InputMgr->isOnceKeyDown('4') )  //바로 죽기
 	{
-		character1->GetCamera()->SetHeight(-10.f);
+		pMe->SetHp( 0 );
 	}
-	else if( InputMgr->isOnceKeyDown('2') )
+	else if( InputMgr->isOnceKeyDown(VK_TAB) )  //바운딩박스 그리기
 	{
-		character1->GetCamera()->SetHeight(10.f);
-	}
-	else if( InputMgr->isOnceKeyDown('4') )
-	{
-		character1->SetHp( 0 );
+		m_cubeDraw = !m_cubeDraw;
+		character1->SetDrawCube( m_cubeDraw );
+		character2->SetDrawCube( m_cubeDraw );
+		m_terrain->SetDrawCube( m_cubeDraw );
 	}
 
 
@@ -294,9 +297,14 @@ void cStage_Ingame::Input(const float elapseTime)
 	}
 
 //이전 전송된 패킷과 다를 경우에만 전송
-	if( nState2 != m_infoSend.header2.protocol || nState1 != m_infoSend.header1.protocol )
+	if( nState2 != m_infoSend.state2 || nState1 != m_infoSend.state1 )
 	{
-		PacketSend(nState1, nState2, ptMouse);
+		network::InfoProtocol send;
+		ZeroMemory(&send, sizeof(send));
+		send.state1 = nState1;
+		send.state2 = nState2;
+		send.ptMouse = ptMouse;
+		PacketSend(send);
 	}
 }
 
@@ -338,10 +346,10 @@ void cStage_Ingame::Update(const float elapseTime)
 				}  //if( packetRecv.nId == 1 )
 		
 			//받아온 패킷정보로 해당 캐릭터를 새롭게 갱신하고 다른 캐릭터는 이전 패킷정보 그대로 다시 적용
-				character1->Update( elapseTime, m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-				character1->Update( elapseTime, m_info1.header2.protocol );
-				character2->Update( elapseTime, m_info2.header1.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-				character2->Update( elapseTime, m_info2.header2.protocol );
+				character1->Update( elapseTime, m_info1.state1, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+				character1->Update( elapseTime, m_info1.state2 );
+				character2->Update( elapseTime, m_info2.state1, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( elapseTime, m_info2.state2 );
 	/*
 				if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
 					pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
@@ -354,13 +362,13 @@ void cStage_Ingame::Update(const float elapseTime)
 		//1번, 2번 캐릭터 각각 공격모드인 경우에만 다시 업데이트하고 그 외의 상태일 경우 무시
 			if( character1->GetMode() < character1->LATTACK )
 			{
-				character1->Update( elapseTime, m_info1.header1.protocol, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-				character1->Update( elapseTime, m_info1.header2.protocol );
+				character1->Update( elapseTime, m_info1.state1, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+				character1->Update( elapseTime, m_info1.state2 );
 			}
 			if( character2->GetMode() < character2->LATTACK )
 			{
-				character2->Update( elapseTime, m_info2.header2.protocol, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-				character2->Update( elapseTime, m_info2.header2.protocol );
+				character2->Update( elapseTime, m_info2.state1, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+				character2->Update( elapseTime, m_info2.state2 );
 			}
 		}  //if( PacketReceive(packetRecv) )
 
@@ -404,6 +412,8 @@ void cStage_Ingame::Update(const float elapseTime)
 			if( true == character1->CollisionCheck2( *(character2->GetCharacterCube()), character2->GetCamera()->GetLook(), character2->GetCamera()->GetDirection() ) )
 				character1->UpdateBeHit( bAniState1, character2->GetCamera()->GetDirection(), character2->GetAniPosGap() );
 		}  //if( character1->GetMode() == character1->BEHIT )
+
+		MatchResult(packetRecv.sWinner, packetRecv.bResult);
 }
 
 //void cStage_Ingame::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
@@ -450,7 +460,7 @@ void cStage_Ingame::Render(const float elapseTime)
 			, 0x00000000, 1.0f, 0L);
 
 //		Vector3 pos = pMe->GetCamera()->GetLook();
-		Vector3 light = Vector3(1111,1111,0);
+		Vector3 light = Vector3(0,1000,0);
 
 		Matrix44 matView;// 뷰 행렬
 //		matView.SetView2( light, pos, Vector3(0,1,0));
@@ -459,7 +469,7 @@ void cStage_Ingame::Render(const float elapseTime)
 
 		Matrix44 matProj;// 투영 행렬
 	//	matProj.SetProjection( D3DX_PI/2.5f, 1, 0.1f, 10000);
-		matProj.SetProjection( D3DX_PI * 0.37f, 1, 0.1f, 7777);
+		matProj.SetProjection( D3DX_PI * 0.3f, 1, 0.1f, 7000);
 
 		m_shader->SetMatrix( "mVP", matView * matProj);
 		m_shader->SetVector( "vLightDir", Vector3(0,-1,0) );
@@ -561,8 +571,6 @@ void cStage_Ingame::Render(const float elapseTime)
 		pImg = dynamic_cast<graphic::cSprite*>(m_spImage->GetChildren()[0]);
 		pImg->SetRect( sRect( 0, 0, (int)( (pMe->GetSP() * 0.01f) * 256 ), 64 ) );
 		m_spImage->Render( Matrix44() );
-
-		MatchResult();
 /*
 		if( m_font )
 		{
@@ -598,19 +606,21 @@ void cStage_Ingame::Render(const float elapseTime)
 */
 }
 
-bool cStage_Ingame::PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse)
+bool cStage_Ingame::PacketSend(IN network::InfoProtocol& packetInfo)
 //bool cStage_Ingame::PacketSend(const int nState1, const int nState2, const POINT ptMouse)
 //bool cStage_Ingame::PacketSend(const network::InfoProtocol packetInfo)
 {
 	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
 
-	m_infoSend.header1.protocol = nState1;
-	m_infoSend.header2.protocol = nState2;
+	m_infoSend.state1 = packetInfo.state1;
+	m_infoSend.state2 = packetInfo.state2;
 //	m_infoSend.nId = m_id;
-	m_infoSend.ptMouse = ptMouse;
+	m_infoSend.ptMouse = packetInfo.ptMouse;
 	m_infoSend.camLook = pMe->GetCamera()->GetLook();
 	m_infoSend.camPos = pMe->GetCamera()->GetPosition();
 	m_infoSend.character = pMe->GetTM();
+	m_infoSend.bResult = packetInfo.bResult;
+	m_infoSend.sWinner = packetInfo.sWinner;
 
 	char buff[ 128];  //배열 크기는 미리 정해진 약속이어야 한다. 즉, 채우려는 데이터가 적어도 배열크기로 다 채워야한다.
 	ZeroMemory(buff, sizeof(buff));
@@ -648,16 +658,17 @@ bool cStage_Ingame::PacketReceive(OUT network::InfoProtocol& packetInfo)
 		else
 		{
 		//	ParsePacket(buff);  //패킷이 왔다면 호출
-
 			const network::InfoProtocol* protocol = (network::InfoProtocol*)buff;
 			packetInfo.nId = protocol->nId;
-			packetInfo.header1 = protocol->header1;
-			packetInfo.header2 = protocol->header2;
+			packetInfo.state1 = protocol->state1;
+			packetInfo.state2 = protocol->state2;
 			packetInfo.ptMouse.x = protocol->ptMouse.x;
 			packetInfo.ptMouse.y = protocol->ptMouse.y;
 			packetInfo.camLook = protocol->camLook;
 			packetInfo.camPos = protocol->camPos;
 			packetInfo.character = protocol->character;
+			packetInfo.bResult = protocol->bResult;
+			packetInfo.sWinner = protocol->sWinner;
 
 			return true;
 		}
@@ -1053,9 +1064,9 @@ void cStage_Ingame::CharacterCollisionCheck(const float elapseTime)
 	}  //if( bIsMove2 )
 }
 
-void cStage_Ingame::MatchResult()
+void cStage_Ingame::MatchResult(const short sWinner, const bool bResult)
 {
-	if( character1->GetHP() <= 0.f || character2->GetHP() <= 0.f )
+	if( bResult )
 	{
 		GetStageMgr()->Release();
 
@@ -1070,13 +1081,26 @@ void cStage_Ingame::MatchResult()
 		sIngameInfo.pShadowSurf = m_pShadowSurf;
 		sIngameInfo.pShadowTexZ = m_pShadowTexZ;
 		sIngameInfo.pSkybox = m_skybox;
-		if( m_infoSend.nId == 1 )
-			sIngameInfo.bResult = character1->GetHP() <= 0.f ? false : true;
-		else if( m_infoSend.nId == 2 )
-			sIngameInfo.bResult = character2->GetHP() <= 0.f ? false : true;
+		sIngameInfo.sWinner = sWinner;
+
+	/*	if( character1->GetHP() <= 0.f )
+			sIngameInfo.sWinner = 2;
+		if( character2->GetHP() <= 0.f )
+			sIngameInfo.sWinner = 1;	*/
 
 		GetStageMgr()->SetStage( GetStageMgr()->INGAMEEND );
 		GetStageMgr()->GetStage()->Init(m_infoSend.nId, &sIngameInfo);
+
+		Release();
+	}
+	else if( character1->GetHP() <= 0.f || character2->GetHP() <= 0.f )
+	{
+		m_end = true;
+		network::InfoProtocol send;
+		ZeroMemory( &send, sizeof(send) );
+		send.bResult = true;
+		send.sWinner = character1->GetHP() <= 0.f ? 2 : 1;
+		PacketSend(send);
 	}
 }
 

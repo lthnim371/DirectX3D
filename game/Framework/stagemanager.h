@@ -9,7 +9,7 @@ namespace framework
 		enum STAGE  //스테이지 명칭
 		{
 			MAIN, CHARACTER_SELECT, NETWORK_SELECT, NETWORK_LOADING,
-			INGAME, INGAMEEND,
+			INGAME, INGAMEEND, ENDING, 
 		};
 
 		cStageMgr();  //모든 스테이지 생성 및 현재 스테이지를 처음 메인 스테이지로

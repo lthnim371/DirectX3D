@@ -6,6 +6,7 @@ using namespace framework;
 cStage_NetworkSelect::cStage_NetworkSelect()
 {
 //	usCount = 7;
+	m_restart = false;
 }
 cStage_NetworkSelect::~cStage_NetworkSelect()
 {
@@ -15,6 +16,10 @@ cStage_NetworkSelect::~cStage_NetworkSelect()
 //void cStage_NetworkSelect::Init()
 void cStage_NetworkSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
+	if( m_restart )
+		return;
+	m_restart = true;
+
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
 	m_scene = new cTestScene(m_sprite, 0, "MainScene");

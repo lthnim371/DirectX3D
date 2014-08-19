@@ -13,10 +13,10 @@ namespace framework
 	//	virtual void Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 	//	virtual void Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2) override;
 		virtual void Init(const int nId, tagIngameInfo* sIngameInfo) override;
+		virtual void Release() override;
 		virtual void Input(const float elapseTime) override;
 		virtual void Update(const float elapseTime) override;
 		virtual void Render(const float elapseTime) override;
-		virtual void Release() override;
 
 		bool MessageProc( UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -30,8 +30,11 @@ namespace framework
 		cButton* m_button2;
 
 		network::AccessProtocol m_acceseInfo;
-		float fTick;
+		float fTick1;
+		float fTick2;
 
 //		u_short usCount;
+		bool m_restart;
+		bool m_access;
 	};
 }

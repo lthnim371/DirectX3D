@@ -26,5 +26,6 @@ namespace framework
 		cButton* m_button1;
 
 		u_short usCount;
+		bool m_restart;
 	};
 }

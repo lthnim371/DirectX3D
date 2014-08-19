@@ -5,9 +5,10 @@ using namespace framework;
 
 cStage_NetworkLoading::cStage_NetworkLoading()
 {
-	ZeroMemory(&m_acceseInfo, sizeof(m_acceseInfo));
-	fTick = 0.f;
+	fTick1 = 0.f;
+	fTick2 = 0.f;
 //	usCount = 7;
+	m_restart = false;
 }
 cStage_NetworkLoading::~cStage_NetworkLoading()
 {
@@ -21,8 +22,10 @@ void cStage_NetworkLoading::Init(const int nId, tagIngameInfo* sIngameInfo)
 //	GetStageMgr()->SetStage( GetStageMgr()->INGAME );
 //	GetStageMgr()->GetStage()->Init(nId);
 //
+	ZeroMemory(&m_acceseInfo, sizeof(m_acceseInfo));
 	m_acceseInfo.nId = nId;
 	m_acceseInfo.bAccess = true;
+	m_access = false;
 
 /*
 	if( PacketReceive(100000) )
@@ -33,6 +36,13 @@ void cStage_NetworkLoading::Init(const int nId, tagIngameInfo* sIngameInfo)
 		GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
 	}
 */
+	if( m_restart )
+	{
+		m_button1->Create( (m_acceseInfo.nId == 1 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
+		m_button2->Create( (m_acceseInfo.nId == 2 ? "../media/image/Connecting_2.tga" : "../media/image/Connecting_2_Gray.tga") );
+		return;
+	}
+	m_restart = true;
 
 	D3DXCreateSprite(graphic::GetDevice(), &m_sprite);
 
@@ -62,45 +72,59 @@ void cStage_NetworkLoading::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_scene->InsertChild( m_button2 );
 }
 
+void cStage_NetworkLoading::Release()
+{
+	SAFE_DELETE(m_scene);
+	m_sprite->Release();
+}
+
 //void cStage_Select::Input(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkLoading::Input(const float elapseTime)
 {
-	fTick += elapseTime;
-	if( fTick >= 0.1f )
-	{
-		fTick = 0.f;
-
-		PacketSend();
-	}
 }
 
 //void cStage_Select::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkLoading::Update(const float elapseTime)
 {
-	network::AccessProtocol packetInfo;
+	fTick1 += elapseTime;
+	if( fTick1 >= 0.05f )
+	{
+		fTick1 = 0.f;
+		PacketSend();
+	}
 
+	network::AccessProtocol packetInfo;
 	if( PacketReceive(packetInfo, 10) )
 	{
-		PacketSend();
+	//	PacketSend();
 
-		if( m_acceseInfo.nId == 1 && packetInfo.nId == 2 )
+		if( !m_access )
 		{
-			cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[1]);
-			pBtn->Create( "../media/image/Connecting_2.tga" );
+			if( m_acceseInfo.nId == 1 && packetInfo.nId == 2 )
+			{
+				m_access = packetInfo.bAccess;
+				cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[1]);
+				pBtn->Create( "../media/image/Connecting_2.tga" );
+			}
+			else if( m_acceseInfo.nId == 2 && packetInfo.nId == 1 )
+			{
+				m_access = packetInfo.bAccess;
+				cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[0]);
+				pBtn->Create( "../media/image/Connecting_2.tga" );
+			}
 		}
-		else if( m_acceseInfo.nId == 2 && packetInfo.nId == 1 )
+	}
+
+	if( m_access )
+	{
+		fTick2 += elapseTime;
+
+		if( fTick2 > 3.f )
 		{
-			cButton* pBtn = dynamic_cast<cButton*>(m_scene->GetChildren()[0]);
-			pBtn->Create( "../media/image/Connecting_2.tga" );
+			fTick2 = 0.f;
+			GetStageMgr()->SetStage( GetStageMgr()->INGAME );
+			GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
 		}
-
-	//	m_scene->Render( Matrix44() );
-
-	//	Release();
-		GetStageMgr()->SetStage( GetStageMgr()->INGAME );
-		GetStageMgr()->GetStage()->Init(m_acceseInfo.nId);
-
-		m_scene->Render( Matrix44() );
 	}
 }
 
@@ -121,14 +145,6 @@ void cStage_NetworkLoading::Render(const float elapseTime)
 	m_scene->Create( str1 + str2 );
 */
 	m_scene->Render( Matrix44() );
-}
-
-void cStage_NetworkLoading::Release()
-{
-	SAFE_DELETE(m_button1);
-	SAFE_DELETE(m_button2);
-	SAFE_DELETE(m_scene);
-	m_sprite->Release();
 }
 
 bool cStage_NetworkLoading::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)

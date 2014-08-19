@@ -33,6 +33,7 @@ namespace graphic
 		void RenderShader(cShader &shader, cCamera* pCam);
 		void RenderShadowRigidModels(cShader &shader, const Vector3& light, const Matrix44& proj);
 		void RenderShaderRigidModels(cShader &shader);
+		void SetDrawCube(const bool bCubeDraw);
 
 		int GetRowCellCount() const;
 		int GetColCellCount() const;

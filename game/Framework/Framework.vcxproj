@@ -70,9 +70,11 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="gamemain\GameMain.h" />
     <ClInclude Include="keyManager.h" />
+    <ClInclude Include="Sound.h" />
     <ClInclude Include="stage.h" />
     <ClInclude Include="stagemanager.h" />
     <ClInclude Include="stage_CharacterSelect.h" />
+    <ClInclude Include="stage_Ending.h" />
     <ClInclude Include="stage_ingame.h" />
     <ClInclude Include="stage_IngameEnd.h" />
     <ClInclude Include="stage_NetworkLoading.h" />
@@ -91,8 +93,10 @@
   <ItemGroup>
     <ClCompile Include="gamemain\GameMain.cpp" />
     <ClCompile Include="keyManager.cpp" />
+    <ClCompile Include="Sound.cpp" />
     <ClCompile Include="stagemanager.cpp" />
     <ClCompile Include="stage_CharacterSelect.cpp" />
+    <ClCompile Include="stage_Ending.cpp" />
     <ClCompile Include="stage_ingame.cpp" />
     <ClCompile Include="stage_IngameEnd.cpp" />
     <ClCompile Include="stage_NetworkLoading.cpp" />

@@ -23,14 +23,14 @@ namespace framework
 		virtual void Render(const float elapseTime) override;
 
 	protected:
-		bool PacketSend(const network::PROTOCOL::TYPE nState1, const network::PROTOCOL::TYPE nState2, const POINT ptMouse);
+		bool PacketSend(IN network::InfoProtocol& packetInfo);
 	//	bool PacketSend(const int nState1, const int nState2, const POINT ptMouse);
 	//	bool PacketSend(const network::InfoProtocol packetInfo);
 		bool PacketReceive(OUT network::InfoProtocol& packetInfo);
 		void LoadMapObject(const string& fileName);
 		void ObjectCollisionCheck(const float elapseTime);  //맵오브젝트들과 충돌 확인
 		void CharacterCollisionCheck(const float elapseTime);
-		void MatchResult();  //게임이 끝났는지 확인
+		void MatchResult(const short sWinner, const bool bResult);  //게임이 끝났는지 확인
 
 	private:
 		POINT m_currMouse;
@@ -38,6 +38,7 @@ namespace framework
 //		bool m_bMouse;
 		float fTick1;
 		float fTick2;
+		bool m_end;
 
 		graphic::cCharacter* character1;
 		graphic::cCharacter* character2;
@@ -63,5 +64,8 @@ namespace framework
 		LPDIRECT3DSURFACE9 m_pShadowTexZ;
 
 		graphic::cModel* m_skybox;
+
+	//test
+		bool m_cubeDraw;
 	};
 }

@@ -45,6 +45,7 @@ namespace graphic
 	//debug
 		void SetMode( const int stage );
 		void SetHp( const float hp );
+		void SetDrawCube(const bool bCubeDraw);
 
 	protected:
 		bool UpdateAttack(const bool bAniState);

@@ -23,7 +23,7 @@ namespace framework
 
 			graphic::cModel* pSkybox;
 
-			bool bResult;
+			short sWinner;
 		};
 
 	//	virtual void Init() = 0;

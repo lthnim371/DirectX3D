@@ -180,10 +180,13 @@ void cCharacter::Render()
 //		m_weaponCube->Render( Matrix44() );
 
 //test
-	if(m_characterCube)
-		m_characterCube->Render( Matrix44() );
-	if(m_weaponCube)
-		m_weaponCube->Render( Matrix44() );
+	if( m_isRenderBoundingBox )
+	{
+		if(m_characterCube)
+			m_characterCube->Render( Matrix44() );
+		if(m_weaponCube)
+			m_weaponCube->Render( Matrix44() );
+	}
 /*
 	if( m_font )
 	{
@@ -214,10 +217,13 @@ void cCharacter::RenderShader(cShader &shader)
 		m_weapon->RenderShader(shader);
 
 //test
-	if(m_characterCube)
-		m_characterCube->Render( Matrix44() );
-	if(m_weaponCube)
-		m_weaponCube->Render( Matrix44() );
+	if( m_isRenderBoundingBox )
+	{
+		if(m_characterCube)
+			m_characterCube->Render( Matrix44() );
+		if(m_weaponCube)
+			m_weaponCube->Render( Matrix44() );
+	}
 }
 
 void cCharacter::RenderShadow(cShader &shader)
@@ -956,4 +962,11 @@ void cCharacter::MoveControl(const bool bCtl, const bool bOnlyJump)
 	}
 
 	m_bone->MoveControl(bCtl);
+}
+
+//test
+void cCharacter::SetDrawCube(const bool bCubeDraw)
+{
+	SetRenderBoundingBox( bCubeDraw );
+	m_weapon->SetRenderBoundingBox( bCubeDraw );
 }
