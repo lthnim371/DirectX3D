@@ -18,7 +18,7 @@ cTerrain::cTerrain() :
 {
 	m_rigids.reserve(32);
 
-	m_modelShader = cResourceManager::Get()->LoadShader(  "hlsl_rigid.fx" );
+	m_modelShader = cResourceManager::Get()->LoadShader(  "../media/shader/hlsl_rigid.fx" );
 
 }
 
