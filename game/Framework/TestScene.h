@@ -18,6 +18,9 @@ namespace framework
 		void Button_NS_1Click(framework::cEvent &event);
 		void Button_NS_2Click(framework::cEvent &event);
 
+		void Button_NS_1Hover(framework::cEvent &event);
+		void Button_NS_2Hover(framework::cEvent &event);
+
 	//ending
 		void Button_ED_1Click(framework::cEvent &event);
 

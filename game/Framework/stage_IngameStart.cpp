@@ -148,7 +148,7 @@ void cStage_IngameStart::Init(const int nId, tagIngameInfo* sIngameInfo)
 			characterPos = Vector3( character2->GetTM().GetPosition() );
 			character2->GetCamera()->Init( characterPos , characterPos + Vector3(0, 300.f, 300.f) );
 //		}
-
+	//	if( ::GetForegroundWindow() == ::GetFocus() )  //이미지가 뜨지 않기 때문에 차라리 소리를 나오게 함
 			SndDepot->get( "Ready" )->Play();
 }
 
@@ -233,8 +233,9 @@ void cStage_IngameStart::Update(const float elapseTime)
 	if( SndDepot->get( "Ready" )->IsPlaying() == false && m_start == false )
 	{
 		m_start = true;
-		SndDepot->get( "Start" )->Play();
 		m_image->Create("../media/image/start02.tga");
+	//	if( ::GetForegroundWindow() == ::GetFocus() )
+			SndDepot->get( "Start" )->Play();
 	}
 	else if( m_start == true && SndDepot->get( "Start" )->IsPlaying() == false )
 	{

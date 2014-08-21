@@ -1057,7 +1057,9 @@ bool importer::ReadMaterialV15(std::ifstream &fin, const string &fileName, OUT s
 	common::trim(texFilePath);
 	if (!texFilePath.empty())
 	{
-		string  textureFileName = common::GetFilePathExceptFileName(fileName) + "\\" + texFilePath;
+		//string  textureFileName = common::GetFilePathExceptFileName(fileName) + "\\" + texFilePath;
+		//string  textureFileName = common::GetFilePathExceptFileName(fileName) + texFilePath;
+		string  textureFileName = texFilePath;
 		mtrl.texture = textureFileName;
 	}
 
@@ -1070,7 +1072,8 @@ bool importer::ReadMaterialV15(std::ifstream &fin, const string &fileName, OUT s
 	common::trim(specularFilePath);
 	if (!specularFilePath.empty())
 	{
-		string specularFileName = common::GetFilePathExceptFileName(fileName) + "\\" + specularFilePath;
+		//string specularFileName = common::GetFilePathExceptFileName(fileName) + "\\" + specularFilePath;
+		string specularFileName = specularFilePath;
 		mtrl.specularMap = specularFileName;
 	}
 
@@ -1083,7 +1086,8 @@ bool importer::ReadMaterialV15(std::ifstream &fin, const string &fileName, OUT s
 	common::trim(bumpFilePath);
 	if (!bumpFilePath.empty())
 	{
-		string  bumpFileName = common::GetFilePathExceptFileName(fileName) + "\\" + bumpFilePath;
+		//string  bumpFileName = common::GetFilePathExceptFileName(fileName) + "\\" + bumpFilePath;
+		string  bumpFileName = bumpFilePath;
 		mtrl.bumpMap = bumpFileName;
 		replaceAll(mtrl.bumpMap, ":Normal Bump", "");
 	}

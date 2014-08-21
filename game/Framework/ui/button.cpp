@@ -27,7 +27,13 @@ bool cButton::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			Vector2 pos(LOWORD(lParam), HIWORD(lParam));
 			if (IsContain(pos))
 			{
+				DispatchEvent(cEvent(EVENT::BUTTON_HOVER, GetId(), 0));
 				return true;
+			}
+			else
+			{
+				GetStageMgr()->SetButtonChange(1, false);
+				GetStageMgr()->SetButtonChange(2, false);
 			}
 		}
 		break;
@@ -38,7 +44,7 @@ bool cButton::MessageProc( UINT message, WPARAM wParam, LPARAM lParam)
 			if (IsContain(pos))
 			{
 				DispatchEvent(cEvent(EVENT::BUTTON_CLICK, GetId(), 0));
-				dbg::Print( "button left button down id = %d", GetId());
+				//dbg::Print( "button left button down id = %d", GetId());
 				return true;
 			}
 		}

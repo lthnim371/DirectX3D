@@ -39,15 +39,17 @@ void cStage_NetworkSelect::Init(const int nId, tagIngameInfo* sIngameInfo)
 	pBtn2->EventConnect(pBtn2, EVENT::BUTTON_CLICK, 4, (EventFunction)&cTestScene::Button_NS_2Click);
 */
 	m_button1 = new cButton(m_sprite, 1, "Button1");
-	m_button1->Create( "../media/image/Connecting_1.tga" );
+	m_button1->Create( "../media/image/Connecting_1_Gray.tga" );
 	m_button1->SetPos( Vector3(150.f, 300.f, 0.f ) );
 	m_scene->InsertChild( m_button1 );
+	m_button1->EventConnect(m_button1, EVENT::BUTTON_HOVER, 1, (EventFunction)&cTestScene::Button_NS_1Hover);
 	m_button1->EventConnect(m_button1, EVENT::BUTTON_CLICK, 1, (EventFunction)&cTestScene::Button_NS_1Click);
 
 	m_button2 = new cButton(m_sprite, 2, "Button2");
-	m_button2->Create( "../media/image/Connecting_1.tga" );
+	m_button2->Create( "../media/image/Connecting_1_Gray.tga" );
 	m_button2->SetPos( Vector3(300.f, 300.f, 0.f ) );
 	m_scene->InsertChild( m_button2 );
+	m_button2->EventConnect(m_button2, EVENT::BUTTON_HOVER, 2, (EventFunction)&cTestScene::Button_NS_2Hover);
 	m_button2->EventConnect(m_button2, EVENT::BUTTON_CLICK, 2, (EventFunction)&cTestScene::Button_NS_2Click);
 }
 
@@ -59,6 +61,10 @@ void cStage_NetworkSelect::Input(const float elapseTime)
 //void cStage_NetworkSelect::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_NetworkSelect::Update(const float elapseTime)
 {
+	m_button1->Create( GetStageMgr()->GetButtonChange(1) == true ?
+		"../media/image/Connecting_1.tga" : "../media/image/Connecting_1_Gray.tga" );
+	m_button2->Create( GetStageMgr()->GetButtonChange(2) == true ?
+		"../media/image/Connecting_1.tga" : "../media/image/Connecting_1_Gray.tga" );
 }
 
 //void cStage_NetworkSelect::Render(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)

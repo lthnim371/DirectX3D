@@ -30,6 +30,12 @@ void cStage_IngameEnd::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_pShadowTexZ = sIngameInfo->pShadowTexZ;
 	m_skybox = sIngameInfo->pSkybox;
 
+	character1->SetMode( character1->NONE );
+	character2->SetMode( character2->NONE );
+
+	character1->UpdatePosition();
+	character2->UpdatePosition();
+
 	m_camDirOriginal = m_user == 1 ? character1->GetCamera()->GetDirection() :
 		character2->GetCamera()->GetDirection();
 

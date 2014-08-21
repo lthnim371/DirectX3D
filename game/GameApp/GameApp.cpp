@@ -164,7 +164,10 @@ void cGameApp::OnRender(const float elapseT)
 		::GetCursorPos( &ptCurrMouse );
 		::ScreenToClient( m_hWnd, &ptCurrMouse );
 		m_mouseCursor->SetPos( Vector3( (float)ptCurrMouse.x, (float)ptCurrMouse.y, 0.f) );
-		m_mouseCursor->Render( Matrix44() );
+		if( framework::GetStageMgr()->GetCurrentStage() < framework::GetStageMgr()->INGAMESTART ||
+			framework::GetStageMgr()->GetCurrentStage() > framework::GetStageMgr()->INGAMEEND )
+			m_mouseCursor->Render( Matrix44() );
+		
 
 		//랜더링 끝
 		graphic::GetDevice()->EndScene();

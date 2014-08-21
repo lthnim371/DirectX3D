@@ -11,7 +11,7 @@ namespace graphic
 			FORWARD, BACKWARD, LEFTWARD, RIGHTWARD,
 			DASH, GUARD, GUARD_BE_HIT,
 			JUMP, FRONTJUMP, BACKJUMP, LEFTJUMP, RIGHTJUMP,
-			LATTACK, RATTACK, BEHIT,
+			LATTACK, RATTACK, BEHIT, 
 		};
 
 		cCharacter(const int id);
@@ -89,6 +89,8 @@ namespace graphic
 		float m_sp;
 		bool m_moveControl;
 		float m_tick;
+		float m_tick2;
+		float m_tick3;
 		float m_damage;
 
 		cCamera* m_camera;

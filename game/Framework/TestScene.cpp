@@ -66,6 +66,16 @@ void cTestScene::Button_NS_2Click(framework::cEvent &event)
 	GetStageMgr()->GetStage()->Init(2);
 }
 
+void cTestScene::Button_NS_1Hover(framework::cEvent &event)
+{
+	GetStageMgr()->SetButtonChange(1, true);
+}
+
+void cTestScene::Button_NS_2Hover(framework::cEvent &event)
+{
+	GetStageMgr()->SetButtonChange(2, true);
+}
+
 void cTestScene::Button_ED_1Click(framework::cEvent &event)
 {
 	SndDepot->get( "Button" )->Play();

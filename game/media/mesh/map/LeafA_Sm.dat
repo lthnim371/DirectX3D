@@ -18,7 +18,7 @@ SPECULAR 0.9 0.9 0.9 1
 EMISSIVE 0.588 0.588 0.588 0
 POWER 0.0
 TEXTURE_DIR_PATH texture/map
-TEXTURE C:\Users\Lee\Desktop\ABresource\map\TDM_UnderSiege_Deco\Texture2D\LeafA_T.tga
+TEXTURE ../media/texture/map/LeafA_T.tga
 SPECULAR_TEXTURE  
 BUMP_TEXTURE  
 GEOMOBJECT_COUNT = 1

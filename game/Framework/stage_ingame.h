@@ -69,5 +69,7 @@ namespace framework
 	//test
 		bool m_cubeDraw;
 		bool m_attackSound;
+		bool m_guardLoop;
+		bool m_attackLoop;
 	};
 }

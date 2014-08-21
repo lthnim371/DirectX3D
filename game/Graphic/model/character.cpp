@@ -10,7 +10,7 @@
 
 using namespace graphic;
 
-#define JUMPSPEED 10
+#define JUMPSPEED 30
 
 cCharacter::cCharacter(const int id) :
 	cModel(id)
@@ -47,6 +47,8 @@ cCharacter::cCharacter(const int id) :
 	m_moveControl = false;
 	m_tick = 0.f;
 	m_damage = 0.f;
+	m_tick2 = 0.f;
+	m_tick3 = 0.f;
 }
 
 cCharacter::~cCharacter()
@@ -242,6 +244,7 @@ void cCharacter::RenderShadow(cShader &shader)
 void cCharacter::Update(const float elapseTime, const short state, const float x, const float y)  //x = 0, y = 0
 {
 	m_tick += elapseTime;
+	m_tick2 += elapseTime;
 	if( m_tick > 1 )
 	{
 		m_tick = 0.f;
@@ -297,9 +300,13 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 				m_mode = FORWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
-			MultiplyTM( mat );  //현재 위치에 더해주기
-			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+			if( m_tick2 * 30.f > 1.f )
+			{
+				m_tick2 = 0.f;
+				mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (25.f) );  //카메라가 바라보는 방향으로
+				MultiplyTM( mat );  //현재 위치에 더해주기
+				GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+			}
 		break;
 		
 		case BACKWARD:  //뒤로 이동
@@ -309,9 +316,13 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 				m_mode = BACKWARD;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_backward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (-5.f - elapseTime) );
-			MultiplyTM( mat );
-			GetCamera()->SetPosition( GetTM() );
+			if( m_tick2 * 30.f > 1.f )
+			{
+				m_tick2 = 0.f;
+				mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (-25.f) );
+				MultiplyTM( mat );
+				GetCamera()->SetPosition( GetTM() );
+			}
 		break;
 
 		case LEFTWARD:  //왼쪽 이동
@@ -322,9 +333,13 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //카메라의 좌우방향으로
-			MultiplyTM( mat );
-			GetCamera()->SetPosition( GetTM() );
+			if( m_tick2 * 30.f > 1.f )
+			{
+				m_tick2 = 0.f;
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-25.f) );  //카메라의 좌우방향으로
+				MultiplyTM( mat );
+				GetCamera()->SetPosition( GetTM() );
+			}
 		break;
 
 		case RIGHTWARD:  //오른쪽 이동
@@ -335,9 +350,13 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 
 			}
-			mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
-			MultiplyTM( mat );
-			GetCamera()->SetPosition( GetTM() );
+			if( m_tick2 * 30.f > 1.f )
+			{
+				m_tick2 = 0.f;
+				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (25.f) );
+				MultiplyTM( mat );
+				GetCamera()->SetPosition( GetTM() );
+			}
 		break;
 
 		case DASH:
@@ -349,9 +368,13 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 					m_mode = FORWARD;
 				//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 				}
-				mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
-				MultiplyTM( mat );  //현재 위치에 더해주기
-				GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+				if( m_tick2 * 30.f > 1.f )
+				{
+					m_tick2 = 0.f;
+					mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (25.f) );  //카메라가 바라보는 방향으로
+					MultiplyTM( mat );  //현재 위치에 더해주기
+					GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+				}
 				break;
 			}
 			else if( m_mode != DASH )  //입력키가 처음 눌러졌다면..
@@ -360,10 +383,14 @@ void cCharacter::Update(const float elapseTime, const short state, const float x
 				m_mode = DASH;
 			//	m_weapon->SetAnimation("..\\media\\valle\\valle_forward.ani");
 			}
-			mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
-			MultiplyTM( mat );  //현재 위치에 더해주기
-			GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
-			m_sp -= ( 0.05f + elapseTime );
+			if( m_tick2 * 30.f > 1.f )
+			{
+				m_tick2 = 0.f;
+				mat.SetTranslate( Vector3( camDirN.x, 0.f, camDirN.z ) * (50.f) );  //카메라가 바라보는 방향으로
+				MultiplyTM( mat );  //현재 위치에 더해주기
+				GetCamera()->SetPosition( GetTM() );  //카메라 위치도 갱신
+				m_sp -= ( 0.5f + elapseTime );
+			}
 		break;
 				
 		case LATTACK:  //마우스 왼클릭
@@ -691,6 +718,8 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 {
+	m_tick3 += elapseTime;
+
 	Vector3 camDir( GetCamera()->GetDirection().Normal() );
 	Vector3 camRight( GetCamera()->GetRight() );
 	Matrix44 mat;
@@ -737,6 +766,8 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 	}
 	else if(y < 0.f)
 	{
+		m_tick3 = 0.f;
+
 		mat = GetTM();
 		mat._42 = 0.f;
 		SetTM(mat);
@@ -789,31 +820,44 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			break;	*/
 		}
 	}
-	m_jumpSpeed -= (0.07f - elapseTime);
-	mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
-	MultiplyTM( mat );
-	GetCamera()->SetPosition( GetTM() );
+
+	if( m_tick2 * 30.f > 1.f )
+	{
+		m_tick2 = 0.f;
+		m_jumpSpeed -= (1.5f);
+		mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
+		MultiplyTM( mat );
+		GetCamera()->SetPosition( GetTM() );
+	}
 
 	if( m_mode != JUMP && m_moveControl == false )
 	{
-		switch(m_mode)
-		{
-			case FRONTJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );
-				MultiplyTM( mat );
-			break;
-			case BACKJUMP:
-				mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (-5.f - elapseTime) );
-				MultiplyTM( mat );
-			break;
-			case LEFTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );
-				MultiplyTM( mat );
-			break;
-			case RIGHTJUMP:
-				mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
-				MultiplyTM( mat );
-			break;
+	//	if( m_tick2 * 30.f > 1.f )
+	//	{
+		//	m_tick2 = 0.f;
+			switch(m_mode)
+			{
+				case FRONTJUMP:
+				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );
+					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * 10.f) );
+					MultiplyTM( mat );
+				break;
+				case BACKJUMP:
+				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (-5.f - elapseTime) );
+					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * -10.f) );
+					MultiplyTM( mat );
+				break;
+				case LEFTJUMP:
+				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );
+					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * -10.f) );
+					MultiplyTM( mat );
+				break;
+				case RIGHTJUMP:
+				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
+					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * 10.f) );
+					MultiplyTM( mat );
+				break;
+	//		}
 		}
 	}
 
@@ -964,12 +1008,12 @@ bool cCharacter::CollisionCheck1( cCube& sourCube, const Vector3& sourPos, const
 			{
 				SetAnimation( "..\\media\\ani\\valle\\valle1_hit_back1.ani" );
 			}
-			if( ::GetForegroundWindow() == ::GetFocus() )
+			/*if( ::GetForegroundWindow() == ::GetFocus() )
 			{
 				char cNumber[8];
 				::_itoa_s( (rand() % 4) + 10, cNumber, sizeof(cNumber) ,10);
 				framework::SoundManager::Get()->get( string(cNumber) )->Play();
-			}
+			}*/
 
 		return true;
 	}  //if( destBox.Collision( sourBox ) )
@@ -1023,9 +1067,12 @@ void cCharacter::SetDrawCube(const bool bCubeDraw)
 
 void cCharacter::UpdatePosition()
 {
+
 	Matrix44 mat;
 	mat.SetTranslate( GetCamera()->GetLook() - GetTM().GetPosition() );
 	MultiplyTM( mat );
 	m_characterCube->SetTransform( GetTM() );
 	UpdateWeapon();
+
+//	GetCamera()->SetPosition( GetTM() );
 }

@@ -46,6 +46,9 @@ cStageMgr::cStageMgr()
 	m_ip = buff3;
 
 	InitSound();
+
+	m_buttonChange1 = false;
+	m_buttonChange2 = false;
 }
 
 cStageMgr::~cStageMgr()
@@ -90,6 +93,34 @@ bool cStageMgr::SetSocket()
 		return false;
 
 	return true;
+}
+
+void cStageMgr::SetButtonChange(const short sBtnNumber, const bool bChange)
+{
+	switch(sBtnNumber)
+	{
+	case 1:
+		m_buttonChange1 = bChange;
+		break;
+	case 2:
+		m_buttonChange2 = bChange;
+		break;
+	}
+}
+
+bool cStageMgr::GetButtonChange(const short sBtnNumber) const
+{
+	switch(sBtnNumber)
+	{
+	case 1:
+		return m_buttonChange1;
+		break;
+	case 2:
+		return m_buttonChange2;
+		break;
+	}
+
+	return false;
 }
 
 void cStageMgr::InitSound()

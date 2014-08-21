@@ -50,6 +50,8 @@ void cStage_Ingame::Init(const int nId, tagIngameInfo* sIngameInfo)
 	m_end = false;
 	m_cubeDraw = false;
 	m_attackSound = false;
+	m_guardLoop = false;
+	m_attackLoop = false;
 
 	m_infoSend.nId = nId;  //사용자 식별
 //	m_info2.nId = ( nId == 0 ? 1 : 0 );
@@ -228,21 +230,6 @@ void cStage_Ingame::Input(const float elapseTime)
 		else if( ptMouse.x < 0 )
 			nState1 = network::PROTOCOL::LEFTROTATION;
 	}
-	
-//test
-	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
-	if( InputMgr->isOnceKeyDown('4') )  //바로 죽기
-	{
-		pMe->SetHp( 10 );
-	}
-	else if( InputMgr->isOnceKeyDown(VK_TAB) )  //바운딩박스 그리기
-	{
-		m_cubeDraw = !m_cubeDraw;
-		character1->SetDrawCube( m_cubeDraw );
-		character2->SetDrawCube( m_cubeDraw );
-		m_terrain->SetDrawCube( m_cubeDraw );
-	}
-
 
 	if( InputMgr->isOnceKeyDown( VK_LBUTTON ) )
 	{
@@ -324,6 +311,28 @@ void cStage_Ingame::Input(const float elapseTime)
 	//	character1->Update( character1->NORMAL );
 	}
 
+//test
+	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+	if( InputMgr->isOnceKeyDown('4') )  //바로 죽기
+		pMe->SetHp( 10 );
+	else if( InputMgr->isOnceKeyDown(VK_TAB) )  //바운딩박스 그리기
+	{
+		m_cubeDraw = !m_cubeDraw;
+		character1->SetDrawCube( m_cubeDraw );
+		character2->SetDrawCube( m_cubeDraw );
+		m_terrain->SetDrawCube( m_cubeDraw );
+	}
+	else if( InputMgr->isOnceKeyDown('1') )  //방어모드 유지
+		m_guardLoop = !m_guardLoop;
+	else if( InputMgr->isOnceKeyDown('2') )  //공격모드 유지
+		m_attackLoop = !m_attackLoop;
+
+	if( m_guardLoop )
+		nState2 = network::PROTOCOL::GUARD;
+	else if( m_attackLoop )
+		nState2 = network::PROTOCOL::LATTACK;
+
+
 //이전 전송된 패킷과 다를 경우에만 전송
 	if( nState2 != m_infoSend.state2 || nState1 != m_infoSend.state1 )
 	{
@@ -339,12 +348,8 @@ void cStage_Ingame::Input(const float elapseTime)
 //void cStage_Ingame::Update(const float elapseTime, graphic::cCharacter* character1, graphic::cCharacter* character2)
 void cStage_Ingame::Update(const float elapseTime)
 {
-//	graphic::GetRenderer()->Update( elapseTime );
-//	fTick2 += elapseTime;
-
-//	if(fTick2 >= 0.2f)
-//	{
-//		fTick2 = 0.f;
+	graphic::cCharacter* pMe = ( m_infoSend.nId == 1 ? character1 : character2 );
+	
 	//서버로부터 패킷 받아오기
 		network::InfoProtocol packetRecv;
 		ZeroMemory(&packetRecv, sizeof(packetRecv));
@@ -372,12 +377,12 @@ void cStage_Ingame::Update(const float elapseTime)
 						character2->SetTM( m_info2.character );
 					}
 				}  //if( packetRecv.nId == 1 )
-		
+				
 			//받아온 패킷정보로 해당 캐릭터를 새롭게 갱신하고 다른 캐릭터는 이전 패킷정보 그대로 다시 적용
-				character1->Update( elapseTime, m_info1.state1, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
-				character1->Update( elapseTime, m_info1.state2 );
-				character2->Update( elapseTime, m_info2.state1, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
-				character2->Update( elapseTime, m_info2.state2 );
+					character1->Update( elapseTime, m_info1.state1, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
+					character1->Update( elapseTime, m_info1.state2 );
+					character2->Update( elapseTime, m_info2.state1, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
+					character2->Update( elapseTime, m_info2.state2 );			
 	/*
 				if( packetRecv.header1.protocol == network::PROTOCOL::ROTATION )
 					pMe->Update( pMe->ROTATION, (float)packetRecv.ptMouse.x, (float)packetRecv.ptMouse.y );
@@ -388,19 +393,16 @@ void cStage_Ingame::Update(const float elapseTime)
 		else  //받아올 패킷이 없었다면..
 		{			
 		//1번, 2번 캐릭터 각각 공격모드인 경우에만 다시 업데이트하고 그 외의 상태일 경우 무시
-			if( character1->GetMode() < character1->LATTACK )
-			{
 				character1->Update( elapseTime, m_info1.state1, (float)m_info1.ptMouse.x, (float)m_info1.ptMouse.y );
 				character1->Update( elapseTime, m_info1.state2 );
-			}
-			if( character2->GetMode() < character2->LATTACK )
-			{
 				character2->Update( elapseTime, m_info2.state1, (float)m_info2.ptMouse.x, (float)m_info2.ptMouse.y );
 				character2->Update( elapseTime, m_info2.state2 );
-			}
 		}  //if( PacketReceive(packetRecv) )
 
-//	}
+	//if( m_guardLoop )
+	//	pMe->Update( elapseTime, pMe->GUARD );
+	//else if( m_attackLoop )
+	//	pMe->Update( elapseTime, pMe->LATTACK );
 
 	ObjectCollisionCheck(elapseTime);
 	CharacterCollisionCheck(elapseTime);
@@ -427,6 +429,14 @@ void cStage_Ingame::Update(const float elapseTime)
 			if( true == character2->CollisionCheck1( *(character1->GetWeaponCube()), character1->GetCamera()->GetLook(), character1->GetDamage() ) )
 			{
 				character1->SetAttackSuccess();  //상대방이 맞았다면 상태 셋팅
+				if( ::GetForegroundWindow() == ::GetFocus() &&
+					character2->GetMode() == character2->BEHIT &&
+					m_infoSend.nId == 2)
+				{
+					char cNumber[8];
+					::_itoa_s( (rand() % 4) + 10, cNumber, sizeof(cNumber) ,10);
+					framework::SoundManager::Get()->get( string(cNumber) )->Play();
+				}
 			}
 		}
 		else if( character2->GetCubeCheck() == true )
@@ -445,6 +455,14 @@ void cStage_Ingame::Update(const float elapseTime)
 			if ( true == character1->CollisionCheck1( *(character2->GetWeaponCube()), character2->GetCamera()->GetLook(), character2->GetDamage() ) )
 			{
 				character2->SetAttackSuccess();
+				if( ::GetForegroundWindow() == ::GetFocus() &&
+					character2->GetMode() == character2->BEHIT &&
+					m_infoSend.nId == 1)
+				{
+					char cNumber[8];
+					::_itoa_s( (rand() % 4) + 10, cNumber, sizeof(cNumber) ,10);
+					framework::SoundManager::Get()->get( string(cNumber) )->Play();
+				}
 			}
 		}  //if( character1->GetCubeCheck() == true )
 		else
@@ -819,18 +837,18 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			case character1->FORWARD:
 			case character1->DASH:
 				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) *
-					( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
+					(character1->GetMode() == character1->FORWARD ? -25.f : -50.f);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
 				if( (*it).Pick( cam1_newLook, cam1_newDir, &fT ) )  //해당 오브젝트에 현재 캐릭터 위치를 이용하여 픽킹레이 확인
 				{
 				//	if( 0 <= fT && fT <= 10.f) {}
-					if( fT < 0.f )  //오브젝트 안에서 빠져나오지 못하는 문제를 방지
+					if( fT < -1.f )  //오브젝트 안에서 빠져나오지 못하는 문제를 방지
 						break;
 					else if( fT < 37.f )
 					{
 					//충돌 확인이 되었으면 캐릭터 위치를 되돌리기
 						Matrix44 matT;
 						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f,	cam1_newDir.z ) *
-							( (character1->GetMode() == character1->FORWARD ? -5.f : -10.f) - elapseTime) );  //카메라가 바라보는 방향으로
+							( character1->GetMode() == character1->FORWARD ? -25.f : -50.f) );  //카메라가 바라보는 방향으로
 						character1->MultiplyTM( matT );  //현재 위치에 더해주기
 						character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 					}
@@ -838,15 +856,15 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character1->BACKWARD:
-				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * (5.f + elapseTime);
+				cam1_newLook += Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * 25.f;
 				if( (*it).Pick( cam1_newLook, -cam1_newDir, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam1_newDir.x, 0.f, cam1_newDir.z ) * 25.f );  //카메라가 바라보는 방향으로
 						character1->MultiplyTM( matT );  //현재 위치에 더해주기
 						character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 					}
@@ -854,15 +872,15 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character1->LEFTWARD:
-				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (5.f + elapseTime);
+				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * 25.f;
 				if( (*it).Pick( cam1_newLook, -cam1_newRight, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * 25.f );  //카메라가 바라보는 방향으로
 						character1->MultiplyTM( matT );  //현재 위치에 더해주기
 						character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 					}
@@ -870,15 +888,15 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character1->RIGHTWARD:
-				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (-5.f - elapseTime);
+				cam1_newLook += Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * -25.f;
 				if( (*it).Pick( cam1_newLook, cam1_newRight, &fT ) )
 				{
-					if( fT < 0.f )
+					if( fT < -1.f )
 						break;
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * (-5.f - elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam1_newRight.x, 0.f, cam1_newRight.z ) * -25.f );  //카메라가 바라보는 방향으로
 						character1->MultiplyTM( matT );  //현재 위치에 더해주기
 						character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 					}
@@ -954,8 +972,8 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 			{
 			case character2->FORWARD:
 			case character2->DASH:
-			//	cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
-			//		( (character2->GetMode() == character2->FORWARD ? -5.f : -10.f) - elapseTime);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
+				cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) *
+					( character2->GetMode() == character2->FORWARD ? -25.f : -50.f);  //Update에서 이미 이동하였기때문에 다시 이전값으로 돌려서 검사해야 함
 				if( (*it).Pick( cam2_newLook, cam2_newDir, &fT ) )  //해당 오브젝트에 현재 캐릭터 위치를 이용하여 픽킹레이 확인
 				{
 				//	if( 0 <= fT && fT <= 10.f) {}
@@ -966,7 +984,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 					//충돌 확인이 되었으면 캐릭터 위치를 되돌리기
 						Matrix44 matT;
 						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f,	cam2_newDir.z ) *
-							( (character2->GetMode() == character2->FORWARD ? -10.f : -20.f) - elapseTime) );  //카메라가 바라보는 방향으로
+							( character2->GetMode() == character2->FORWARD ? -25.f : -50.f) );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -974,7 +992,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->BACKWARD:
-			//	cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (5.f + elapseTime);
+				cam2_newLook += Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * 25.f;
 				if( (*it).Pick( cam2_newLook, -cam2_newDir, &fT ) )
 				{
 					if( fT < -1.f )
@@ -982,7 +1000,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newDir.x, 0.f, cam2_newDir.z ) * 25.f );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -990,7 +1008,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->LEFTWARD:
-			//	cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (5.f + elapseTime);
+				cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * 25.f;
 				if( (*it).Pick( cam2_newLook, -cam2_newRight, &fT ) )
 				{
 					if( fT < -1.f )
@@ -998,7 +1016,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (10.f + elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * 25.f );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -1006,7 +1024,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 				break;
 
 			case character2->RIGHTWARD:
-			//	cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-5.f - elapseTime);
+				cam2_newLook += Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * -25.f;
 				if( (*it).Pick( cam2_newLook, cam2_newRight, &fT ) )
 				{
 					if( fT < -1.f )
@@ -1014,7 +1032,7 @@ void cStage_Ingame::ObjectCollisionCheck(const float elapseTime)
 					else if( fT < 37.f )
 					{
 						Matrix44 matT;
-						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * (-10.f - elapseTime) );  //카메라가 바라보는 방향으로
+						matT.SetTranslate( Vector3( cam2_newRight.x, 0.f, cam2_newRight.z ) * -25.f );  //카메라가 바라보는 방향으로
 						character2->MultiplyTM( matT );  //현재 위치에 더해주기
 						character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 					}
@@ -1123,25 +1141,25 @@ void cStage_Ingame::CharacterCollisionCheck(const float elapseTime)
 			case character1->FORWARD:
 			case character1->DASH:
 					matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) *
-						( (nChar1_mode == character1->FORWARD ? -5.f : -11.f) - elapseTime) );  //카메라가 바라보는 방향으로
+						( nChar1_mode == character1->FORWARD ? -25.f : -50.f ) );  //카메라가 바라보는 방향으로
 					character1->MultiplyTM( matT );  //현재 위치에 더해주기
 					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character1->BACKWARD:
-					matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+					matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 25.f );  //카메라가 바라보는 방향으로
 					character1->MultiplyTM( matT );  //현재 위치에 더해주기
 					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character1->LEFTWARD:
-					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 25.f );  //카메라가 바라보는 방향으로
 					character1->MultiplyTM( matT );  //현재 위치에 더해주기
 					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character1->RIGHTWARD:
-					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //카메라가 바라보는 방향으로
+					matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -25.f  );  //카메라가 바라보는 방향으로
 					character1->MultiplyTM( matT );  //현재 위치에 더해주기
 					character1->GetCamera()->SetPosition( character1->GetTM() );  //카메라 위치도 갱신
 				break;
@@ -1159,25 +1177,25 @@ void cStage_Ingame::CharacterCollisionCheck(const float elapseTime)
 			case character2->FORWARD:
 			case character2->DASH:
 				matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) *
-					( (nChar2_mode == character2->FORWARD ? -5.f : -10.f) - elapseTime) );  //카메라가 바라보는 방향으로
+					(nChar2_mode == character2->FORWARD ? -25.f : -50.f) );  //카메라가 바라보는 방향으로
 				character2->MultiplyTM( matT );  //현재 위치에 더해주기
 				character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character2->BACKWARD:
-				matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+				matT.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 25.f );  //카메라가 바라보는 방향으로
 				character2->MultiplyTM( matT );  //현재 위치에 더해주기
 				character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character2->LEFTWARD:
-				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );  //카메라가 바라보는 방향으로
+				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 25.f );  //카메라가 바라보는 방향으로
 				character2->MultiplyTM( matT );  //현재 위치에 더해주기
 				character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 				break;
 
 			case character2->RIGHTWARD:
-				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );  //카메라가 바라보는 방향으로
+				matT.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -25.f );  //카메라가 바라보는 방향으로
 				character2->MultiplyTM( matT );  //현재 위치에 더해주기
 				character2->GetCamera()->SetPosition( character2->GetTM() );  //카메라 위치도 갱신
 				break;
@@ -1191,8 +1209,8 @@ void cStage_Ingame::MatchResult(const short sWinner, const bool bResult)
 	{
 		GetStageMgr()->Release();
 
-		character1->UpdatePosition();
-		character2->UpdatePosition();
+	//	character1->UpdatePosition();
+	//	character2->UpdatePosition();
 
 		tagIngameInfo sIngameInfo;
 		sIngameInfo.pCharacter1 = character1;

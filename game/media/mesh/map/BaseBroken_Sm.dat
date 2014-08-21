@@ -20,7 +20,7 @@ POWER 0.0
 TEXTURE_DIR_PATH texture/map
 TEXTURE  
 SPECULAR_TEXTURE  
-BUMP_TEXTURE C:\Users\Lee\Desktop\ABresource\map\TDM_UnderSiege_Deco\Texture2D\\Base_broken2_T_NRM.tga:Normal Bump
+BUMP_TEXTURE ../media/texture/map/Base_broken2_T_NRM.tga:Normal Bump
 MATERIAL 2
 DIFFUSE 0.588 0.588 0.588 1
 AMBIENT 0.588 0.588 0.588 1
@@ -28,9 +28,9 @@ SPECULAR 0.9 0.9 0.9 1
 EMISSIVE 0.588 0.588 0.588 0
 POWER 0.0
 TEXTURE_DIR_PATH texture/map
-TEXTURE C:\Users\Lee\Desktop\ABresource\map\TDM_UnderSiege_Deco\Texture2D\Base_broken_T.tga
+TEXTURE ../media/texture/map/Base_broken_T.tga
 SPECULAR_TEXTURE  
-BUMP_TEXTURE C:\Users\Lee\Desktop\ABresource\map\TDM_UnderSiege_Deco\Texture2D\\Base_broken_T_NRM.tga:Normal Bump
+BUMP_TEXTURE ../media/texture/map/Base_broken_T_NRM.tga:Normal Bump
 GEOMOBJECT_COUNT = 1
 MESH_NAME = BaseBroken_Sm
 MATERIAL_COUNT = 2

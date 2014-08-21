@@ -22,6 +22,7 @@ namespace framework
 		void SetWindowHandle(const HWND& hWnd);  //gameapp으로부터 윈도우핸들을 받아올때 사용
 		bool SetSocket();  //네트워크 클라이언트로 접속
 		void SetSoundName(const string& strName);
+		void SetButtonChange(const short sBtnNumber, const bool bChange);
 		
 		cStage* GetStage() const;
 		int GetCurrentStage() const;
@@ -31,6 +32,7 @@ namespace framework
 		string& GetIpAddress();
 	//	DWORD GetIpAddress();
 		const string& GetSoundName() const;
+		bool GetButtonChange(const short sBtnNumber) const;
 
 	protected:
 		void InitSound();
@@ -45,6 +47,8 @@ namespace framework
 		string m_ip;  //네트워크 접속을 위한 ip주소
 		int m_port;  //네트워크 접속을 위한 포트
 		string m_soundName;
+		bool m_buttonChange1;
+		bool m_buttonChange2;
 	};
 	
 	inline cStageMgr* GetStageMgr() { return cStageMgr::Get(); }
