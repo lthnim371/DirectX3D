@@ -19,8 +19,8 @@ cStage_NetworkLoading::~cStage_NetworkLoading()
 void cStage_NetworkLoading::Init(const int nId, tagIngameInfo* sIngameInfo)
 {
 //debug
-	GetStageMgr()->SetStage( GetStageMgr()->INGAMESTART );
-	GetStageMgr()->GetStage()->Init(nId);
+//	GetStageMgr()->SetStage( GetStageMgr()->INGAMESTART );
+//	GetStageMgr()->GetStage()->Init(nId);
 //
 	ZeroMemory(&m_acceseInfo, sizeof(m_acceseInfo));
 	m_acceseInfo.nId = nId;
