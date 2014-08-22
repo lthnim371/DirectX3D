@@ -90,7 +90,6 @@ namespace graphic
 		bool m_moveControl;
 		float m_tick;
 		float m_tick2;
-		float m_tick3;
 		float m_damage;
 
 		cCamera* m_camera;

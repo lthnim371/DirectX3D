@@ -48,7 +48,6 @@ cCharacter::cCharacter(const int id) :
 	m_tick = 0.f;
 	m_damage = 0.f;
 	m_tick2 = 0.f;
-	m_tick3 = 0.f;
 }
 
 cCharacter::~cCharacter()
@@ -718,7 +717,6 @@ bool cCharacter::UpdateAttack(const bool bAniState)
 
 void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 {
-	m_tick3 += elapseTime;
 
 	Vector3 camDir( GetCamera()->GetDirection().Normal() );
 	Vector3 camRight( GetCamera()->GetRight() );
@@ -766,7 +764,6 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 	}
 	else if(y < 0.f)
 	{
-		m_tick3 = 0.f;
 
 		mat = GetTM();
 		mat._42 = 0.f;
@@ -795,6 +792,11 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 */
 		return;
 	}
+
+	if( m_tick2 * 30.f < 1.f )
+		return;
+
+	m_tick2 = 0.f;
 	
 	m_jumpSpeed = y >= 350.f ? -MATH_EPSILON : m_jumpSpeed;
 
@@ -820,15 +822,10 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			break;	*/
 		}
 	}
-
-	if( m_tick2 * 30.f > 1.f )
-	{
-		m_tick2 = 0.f;
 		m_jumpSpeed -= (1.5f);
 		mat.SetTranslate( Vector3( 0.f, 1.f, 0.f ) * m_jumpSpeed );
 		MultiplyTM( mat );
 		GetCamera()->SetPosition( GetTM() );
-	}
 
 	if( m_mode != JUMP && m_moveControl == false )
 	{
@@ -838,23 +835,23 @@ void cCharacter::UpdateJump(const bool bAniState, const float elapseTime)
 			switch(m_mode)
 			{
 				case FRONTJUMP:
-				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (5.f + elapseTime) );
-					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * 10.f) );
+					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * 20.f );
+				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * 10.f) );
 					MultiplyTM( mat );
 				break;
 				case BACKJUMP:
-				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * (-5.f - elapseTime) );
-					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * -10.f) );
+					mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * -20.f );
+				//	mat.SetTranslate( Vector3( camDir.x, 0.f, camDir.z ) * ( (100 * elapseTime) * -10.f) );
 					MultiplyTM( mat );
 				break;
 				case LEFTJUMP:
-				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (-5.f - elapseTime) );
-					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * -10.f) );
+					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * -20.f );
+				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * -10.f) );
 					MultiplyTM( mat );
 				break;
 				case RIGHTJUMP:
-				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * (5.f + elapseTime) );
-					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * 10.f) );
+					mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * 20.f );
+				//	mat.SetTranslate( Vector3( camRight.x, 0.f, camRight.z ) * ( (100 * elapseTime) * 10.f) );
 					MultiplyTM( mat );
 				break;
 	//		}
